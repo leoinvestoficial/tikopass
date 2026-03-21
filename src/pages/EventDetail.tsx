@@ -294,12 +294,16 @@ export default function EventDetail() {
                   >
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                       {/* Seller info */}
-                      <div className="flex items-center gap-3 min-w-0">
+                      <Link
+                        to={`/seller/${ticket.seller_id}`}
+                        className="flex items-center gap-3 min-w-0 hover:opacity-80 transition-opacity"
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                           <User className="w-5 h-5 text-primary" />
                         </div>
                         <div className="min-w-0">
-                          <span className="font-medium text-foreground text-sm block truncate">
+                          <span className="font-medium text-foreground text-sm block truncate hover:text-primary transition-colors">
                             {sellerName}
                           </span>
                           {renderStars(
@@ -307,7 +311,7 @@ export default function EventDetail() {
                             ticket.seller_rating_count
                           )}
                         </div>
-                      </div>
+                      </Link>
 
                       {/* Ticket details */}
                       <div className="flex items-center gap-3 flex-wrap">
