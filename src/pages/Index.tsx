@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Search, Ticket, ArrowRight, Sparkles, TrendingUp, Shield, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,7 +8,7 @@ import CategoryGrid from "@/components/CategoryGrid";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import HowItWorks from "@/components/HowItWorks";
-import PopularEvents from "@/components/PopularEvents";
+import PopularEvents, { type PopularEventItem } from "@/components/PopularEvents";
 import TrustBanner from "@/components/TrustBanner";
 import { fetchTickets, type Ticket as TicketType } from "@/lib/api";
 import { useScrollReveal } from "@/hooks/use-scroll-reveal";
@@ -50,11 +50,42 @@ export default function Index() {
     loadTickets();
   };
 
+  const popularEvents = useMemo<PopularEventItem[]>(() => {
+    const eventMap = new Map<string, PopularEventItem>();
+
+    tickets.forEach((ticket: any) => {
+      const event = ticket.events || ticket.event;
+      if (!event?.id) return;
+
+      const existing = eventMap.get(event.id);
+      if (existing) {
+        existing.ticketCount += 1;
+        return;
+      }
+
+      eventMap.set(event.id, {
+        id: event.id,
+        name: event.name,
+        venue: event.venue,
+        city: event.city,
+        date: event.date,
+        category: event.category,
+        ticketCount: 1,
+      });
+    });
+
+    return Array.from(eventMap.values())
+      .sort((a, b) => {
+        if (b.ticketCount !== a.ticketCount) return b.ticketCount - a.ticketCount;
+        return new Date(a.date).getTime() - new Date(b.date).getTime();
+      })
+      .slice(0, 6);
+  }, [tickets]);
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
 
-      {/* Hero */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/3" />
         <div
@@ -91,7 +122,6 @@ export default function Index() {
               </Button>
             </div>
 
-            {/* Trust indicators inline */}
             <div className="flex flex-wrap gap-x-6 gap-y-2 pt-2 text-sm text-muted-foreground">
               <span className="flex items-center gap-1.5">
                 <Shield className="w-4 h-4 text-success" />
@@ -110,7 +140,6 @@ export default function Index() {
         </div>
       </section>
 
-      {/* Categories */}
       <section className="border-y border-border bg-card/50">
         <div
           ref={filtersReveal.ref}
@@ -133,10 +162,8 @@ export default function Index() {
         </div>
       </section>
 
-      {/* Popular Events */}
-      <PopularEvents />
+      <PopularEvents events={popularEvents} />
 
-      {/* Tickets grid */}
       <section className="flex-1 border-t border-border">
         <div
           ref={ticketsReveal.ref}
@@ -202,13 +229,9 @@ export default function Index() {
         </div>
       </section>
 
-      {/* How it works */}
       <HowItWorks />
-
-      {/* Trust / Why us */}
       <TrustBanner />
 
-      {/* CTA sell */}
       <section className="border-t border-border">
         <div
           ref={ctaReveal.ref}
