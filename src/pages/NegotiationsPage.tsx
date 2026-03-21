@@ -11,10 +11,7 @@ import { fetchUserNegotiations, fetchMessages, sendMessage, updateNegotiationSta
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/hooks/use-auth";
-import { fetchUserNegotiations, fetchMessages, sendMessage, updateNegotiationStatus } from "@/lib/api";
-import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
+
 
 const statusConfig: Record<string, { label: string; icon: any; className: string }> = {
   pending: { label: "Pendente", icon: Clock, className: "bg-warning/10 text-warning border-warning/20" },
