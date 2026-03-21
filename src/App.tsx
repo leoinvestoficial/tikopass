@@ -9,6 +9,11 @@ import EventDetail from "./pages/EventDetail.tsx";
 import SellPage from "./pages/SellPage.tsx";
 import NegotiationsPage from "./pages/NegotiationsPage.tsx";
 import AuthPage from "./pages/AuthPage.tsx";
+import PaymentSuccess from "./pages/PaymentSuccess.tsx";
+import NotFound from "./pages/NotFound.tsx";
+import SellPage from "./pages/SellPage.tsx";
+import NegotiationsPage from "./pages/NegotiationsPage.tsx";
+import AuthPage from "./pages/AuthPage.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
