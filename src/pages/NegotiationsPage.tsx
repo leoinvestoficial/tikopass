@@ -148,12 +148,38 @@ export default function NegotiationsPage() {
                           <h3 className="font-display font-semibold text-sm">{activeNeg.tickets?.events?.name}</h3>
                           <p className="text-xs text-muted-foreground">{activeNeg.tickets?.sector} · Oferta: R$ {activeNeg.offer_price?.toLocaleString("pt-BR")}</p>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
                           {activeNeg.status === "pending" && activeNeg.seller_id === user?.id && (
                             <>
                               <Button size="sm" variant="success" onClick={() => handleStatusUpdate(activeNeg.id, "accepted")} className="rounded-lg text-xs">Aceitar</Button>
                               <Button size="sm" variant="destructive" onClick={() => handleStatusUpdate(activeNeg.id, "rejected")} className="rounded-lg text-xs">Recusar</Button>
                             </>
+                          )}
+                          {activeNeg.status === "accepted" && activeNeg.buyer_id === user?.id && activeNeg.payment_status !== "paid" && (
+                            <Button 
+                              size="sm" 
+                              className="rounded-lg text-xs gap-1"
+                              onClick={async () => {
+                                try {
+                                  const { data, error } = await supabase.functions.invoke("create-checkout", {
+                                    body: { negotiation_id: activeNeg.id },
+                                  });
+                                  if (error) throw error;
+                                  if (data?.url) window.open(data.url, "_blank");
+                                } catch (err: any) {
+                                  toast.error(err.message || "Erro ao criar checkout");
+                                }
+                              }}
+                            >
+                              <CreditCard className="w-3 h-3" />
+                              Pagar R$ {((activeNeg.offer_price || 0) * 1.1).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                            </Button>
+                          )}
+                          {activeNeg.payment_status === "paid" && (
+                            <Badge className="bg-success/10 text-success border-success/20 text-xs gap-1">
+                              <ShieldCheck className="w-3 h-3" />
+                              Pago
+                            </Badge>
                           )}
                           <Badge className={`${(statusConfig[activeNeg.status] || statusConfig.pending).className} text-xs gap-1`}>
                             {(() => { const S = (statusConfig[activeNeg.status] || statusConfig.pending).icon; return <S className="w-3 h-3" />; })()}
