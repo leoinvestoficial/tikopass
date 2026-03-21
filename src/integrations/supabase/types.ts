@@ -14,7 +14,210 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      events: {
+        Row: {
+          category: string
+          city: string
+          created_at: string
+          date: string
+          external_id: string | null
+          id: string
+          image_url: string | null
+          name: string
+          source: string | null
+          time: string
+          updated_at: string
+          venue: string
+        }
+        Insert: {
+          category: string
+          city: string
+          created_at?: string
+          date: string
+          external_id?: string | null
+          id?: string
+          image_url?: string | null
+          name: string
+          source?: string | null
+          time: string
+          updated_at?: string
+          venue: string
+        }
+        Update: {
+          category?: string
+          city?: string
+          created_at?: string
+          date?: string
+          external_id?: string | null
+          id?: string
+          image_url?: string | null
+          name?: string
+          source?: string | null
+          time?: string
+          updated_at?: string
+          venue?: string
+        }
+        Relationships: []
+      }
+      negotiation_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          negotiation_id: string
+          sender_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          negotiation_id: string
+          sender_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          negotiation_id?: string
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "negotiation_messages_negotiation_id_fkey"
+            columns: ["negotiation_id"]
+            isOneToOne: false
+            referencedRelation: "negotiations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      negotiations: {
+        Row: {
+          buyer_id: string
+          created_at: string
+          id: string
+          offer_price: number
+          seller_id: string
+          status: string
+          ticket_id: string
+          updated_at: string
+        }
+        Insert: {
+          buyer_id: string
+          created_at?: string
+          id?: string
+          offer_price: number
+          seller_id: string
+          status?: string
+          ticket_id: string
+          updated_at?: string
+        }
+        Update: {
+          buyer_id?: string
+          created_at?: string
+          id?: string
+          offer_price?: number
+          seller_id?: string
+          status?: string
+          ticket_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "negotiations_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          city: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          phone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          city?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          phone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          city?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          phone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      tickets: {
+        Row: {
+          created_at: string
+          event_id: string
+          id: string
+          original_price: number | null
+          price: number
+          row: string | null
+          seat: string | null
+          sector: string
+          seller_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          id?: string
+          original_price?: number | null
+          price: number
+          row?: string | null
+          seat?: string | null
+          sector: string
+          seller_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          id?: string
+          original_price?: number | null
+          price?: number
+          row?: string | null
+          seat?: string | null
+          sector?: string
+          seller_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tickets_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
