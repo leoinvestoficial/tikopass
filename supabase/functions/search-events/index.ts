@@ -119,13 +119,14 @@ async function structureWithGemini(
   const today = new Date().toISOString().split("T")[0];
 
   const systemPrompt = `Você é um assistente que estrutura dados de eventos reais na Bahia, Brasil.
-Hoje é ${today}.
+Hoje é ${today}. O ano atual é ${today.slice(0, 4)}.
 Com base nos dados de busca web e scraping de ticketeiras fornecidos, extraia eventos reais.
 REGRAS:
 - Use APENAS informações encontradas nos dados fornecidos. NÃO invente eventos.
 - Se um evento aparece em múltiplas fontes, combine as informações mais precisas.
-- Inclua eventos futuros E recentes/passados (com datas reais).
-- Para eventos passados, inclua o ano no nome (ex: "Retronejo Salvador 2024").
+- ATENÇÃO COM DATAS: Muitos eventos são recorrentes (acontecem todo ano). Se os dados mencionam um evento que acontece anualmente e os dados são de edições passadas, ajuste o ano para ${today.slice(0, 4)} ou ${parseInt(today.slice(0, 4)) + 1} quando fizer sentido. Exemplo: se "Santa Maré" aconteceu em abril de 2025, a edição de 2026 provavelmente será em abril de ${today.slice(0, 4)}.
+- Se a data exata não for clara, use a data mais provável baseada no padrão do evento, mas NUNCA use anos passados para eventos recorrentes que ainda vão acontecer.
+- Para eventos que já aconteceram e não são recorrentes, mantenha a data original e inclua o ano no nome.
 - Categorias permitidas: Shows, Esportes, Teatro, Festivais, Stand-up, Conferências.
 - Locais conhecidos de Salvador: Arena Fonte Nova, Concha Acústica do TCA, WET Salvador, Casa Pia, Groove Bar, Bahia Café Hall, Arena Parque, Largo do Pelourinho, Mali (casa de eventos).
 - Se não houver dados suficientes para um campo, faça sua melhor estimativa baseada no contexto.`;
