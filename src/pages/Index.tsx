@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Search, Ticket, ArrowRight, Sparkles, TrendingUp } from "lucide-react";
+import { Search, Ticket, ArrowRight, Sparkles, TrendingUp, Shield, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import TicketCard from "@/components/TicketCard";
@@ -7,6 +7,9 @@ import CityFilter from "@/components/CityFilter";
 import CategoryGrid from "@/components/CategoryGrid";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import HowItWorks from "@/components/HowItWorks";
+import PopularEvents from "@/components/PopularEvents";
+import TrustBanner from "@/components/TrustBanner";
 import { fetchTickets, type Ticket as TicketType } from "@/lib/api";
 import { useScrollReveal } from "@/hooks/use-scroll-reveal";
 import { Link } from "react-router-dom";
@@ -47,12 +50,6 @@ export default function Index() {
     loadTickets();
   };
 
-  const stats = [
-    { value: "12.4k+", label: "Ingressos vendidos" },
-    { value: "850+", label: "Eventos ativos" },
-    { value: "98%", label: "Avaliações positivas" },
-  ];
-
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
@@ -75,7 +72,7 @@ export default function Index() {
             </h1>
 
             <p className="text-lg text-muted-foreground max-w-lg leading-relaxed">
-              Encontre ingressos para os melhores eventos do Brasil. Negocie diretamente com outros fãs, sem intermediários.
+              Encontre ingressos para os melhores eventos de Salvador e Bahia. Negocie diretamente com outros fãs, com pagamento protegido.
             </p>
 
             <div className="flex gap-2 max-w-md">
@@ -94,19 +91,26 @@ export default function Index() {
               </Button>
             </div>
 
-            <div className="flex gap-8 pt-4">
-              {stats.map((stat) => (
-                <div key={stat.label}>
-                  <div className="font-display font-bold text-2xl text-foreground">{stat.value}</div>
-                  <div className="text-xs text-muted-foreground">{stat.label}</div>
-                </div>
-              ))}
+            {/* Trust indicators inline */}
+            <div className="flex flex-wrap gap-x-6 gap-y-2 pt-2 text-sm text-muted-foreground">
+              <span className="flex items-center gap-1.5">
+                <Shield className="w-4 h-4 text-success" />
+                Pagamento protegido
+              </span>
+              <span className="flex items-center gap-1.5">
+                <Zap className="w-4 h-4 text-primary" />
+                Cadastro com IA
+              </span>
+              <span className="flex items-center gap-1.5">
+                <TrendingUp className="w-4 h-4 text-accent" />
+                Sem taxas escondidas
+              </span>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Categories - GetNinjas style */}
+      {/* Categories */}
       <section className="border-y border-border bg-card/50">
         <div
           ref={filtersReveal.ref}
@@ -129,8 +133,11 @@ export default function Index() {
         </div>
       </section>
 
+      {/* Popular Events */}
+      <PopularEvents />
+
       {/* Tickets grid */}
-      <section className="flex-1">
+      <section className="flex-1 border-t border-border">
         <div
           ref={ticketsReveal.ref}
           className={`container py-12 ${ticketsReveal.isVisible ? "animate-reveal-up" : "opacity-0"}`}
@@ -194,6 +201,12 @@ export default function Index() {
           )}
         </div>
       </section>
+
+      {/* How it works */}
+      <HowItWorks />
+
+      {/* Trust / Why us */}
+      <TrustBanner />
 
       {/* CTA sell */}
       <section className="border-t border-border">
