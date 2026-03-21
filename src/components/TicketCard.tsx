@@ -36,6 +36,7 @@ export default function TicketCard({ ticket, index = 0 }: TicketCardProps) {
   const origPrice = ticket.original_price ?? ticket.originalPrice;
   const isBelow = origPrice && ticket.price < origPrice;
   const discount = origPrice ? Math.round(((origPrice - ticket.price) / origPrice) * 100) : 0;
+  const isPast = event ? new Date(event.date) < new Date(new Date().toISOString().split("T")[0]) : false;
 
   if (!event) return null;
 
