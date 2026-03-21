@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search, Ticket, ArrowRight, Sparkles, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,7 +6,7 @@ import TicketCard from "@/components/TicketCard";
 import CityFilter from "@/components/CityFilter";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { MOCK_TICKETS } from "@/data/mock-data";
+import { fetchTickets, type Ticket as TicketType } from "@/lib/api";
 import { useScrollReveal } from "@/hooks/use-scroll-reveal";
 import { Link } from "react-router-dom";
 
@@ -14,21 +14,37 @@ export default function Index() {
   const [search, setSearch] = useState("");
   const [selectedCity, setSelectedCity] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
+  const [tickets, setTickets] = useState<TicketType[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const heroReveal = useScrollReveal<HTMLDivElement>();
   const filtersReveal = useScrollReveal<HTMLDivElement>();
   const ticketsReveal = useScrollReveal<HTMLDivElement>();
   const ctaReveal = useScrollReveal<HTMLDivElement>();
 
-  const filteredTickets = MOCK_TICKETS.filter((t) => {
-    const matchCity = !selectedCity || t.event.city === selectedCity;
-    const matchCategory = !selectedCategory || t.event.category === selectedCategory;
-    const matchSearch =
-      !search ||
-      t.event.name.toLowerCase().includes(search.toLowerCase()) ||
-      t.event.venue.toLowerCase().includes(search.toLowerCase());
-    return matchCity && matchCategory && matchSearch;
-  });
+  useEffect(() => {
+    loadTickets();
+  }, [selectedCity, selectedCategory]);
+
+  const loadTickets = async () => {
+    setLoading(true);
+    try {
+      const data = await fetchTickets({
+        city: selectedCity || undefined,
+        category: selectedCategory || undefined,
+        search: search || undefined,
+      });
+      setTickets(data as any);
+    } catch (err) {
+      console.error("Error loading tickets:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSearch = () => {
+    loadTickets();
+  };
 
   const stats = [
     { value: "12.4k+", label: "Ingressos vendidos" },
@@ -61,7 +77,6 @@ export default function Index() {
               Encontre ingressos para os melhores eventos do Brasil. Negocie diretamente com outros fãs, sem intermediários.
             </p>
 
-            {/* Search bar */}
             <div className="flex gap-2 max-w-md">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -69,15 +84,15 @@ export default function Index() {
                   placeholder="Buscar evento ou local..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                   className="pl-10 h-12 rounded-xl bg-card border-border"
                 />
               </div>
-              <Button variant="hero" size="lg" className="rounded-xl shrink-0">
+              <Button variant="hero" size="lg" className="rounded-xl shrink-0" onClick={handleSearch}>
                 Buscar
               </Button>
             </div>
 
-            {/* Stats */}
             <div className="flex gap-8 pt-4">
               {stats.map((stat) => (
                 <div key={stat.label}>
@@ -119,7 +134,7 @@ export default function Index() {
                 Ingressos disponíveis
               </h2>
               <p className="text-sm text-muted-foreground mt-1">
-                {filteredTickets.length} ingresso{filteredTickets.length !== 1 ? "s" : ""} encontrado{filteredTickets.length !== 1 ? "s" : ""}
+                {loading ? "Carregando..." : `${tickets.length} ingresso${tickets.length !== 1 ? "s" : ""} encontrado${tickets.length !== 1 ? "s" : ""}`}
               </p>
             </div>
             <div className="hidden sm:flex items-center gap-2 text-sm text-muted-foreground">
@@ -128,10 +143,30 @@ export default function Index() {
             </div>
           </div>
 
-          {filteredTickets.length > 0 ? (
+          {loading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {filteredTickets.map((ticket, i) => (
-                <TicketCard key={ticket.id} ticket={ticket} index={i} />
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="bg-card rounded-xl border border-border p-5 animate-pulse">
+                  <div className="h-1.5 bg-muted rounded mb-4" />
+                  <div className="h-5 bg-muted rounded w-3/4 mb-3" />
+                  <div className="h-4 bg-muted rounded w-1/2 mb-2" />
+                  <div className="h-4 bg-muted rounded w-2/3 mb-4" />
+                  <div className="h-6 bg-muted rounded w-1/3" />
+                </div>
+              ))}
+            </div>
+          ) : tickets.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {tickets.map((ticket: any, i) => (
+                <TicketCard
+                  key={ticket.id}
+                  ticket={{
+                    ...ticket,
+                    event: ticket.events,
+                    sellerName: ticket.profiles?.display_name || "Vendedor",
+                  }}
+                  index={i}
+                />
               ))}
             </div>
           ) : (
@@ -139,8 +174,14 @@ export default function Index() {
               <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mx-auto">
                 <Ticket className="w-8 h-8 text-muted-foreground" />
               </div>
-              <h3 className="font-display font-semibold text-lg">Nenhum ingresso encontrado</h3>
-              <p className="text-sm text-muted-foreground">Tente alterar os filtros ou buscar outro evento.</p>
+              <h3 className="font-display font-semibold text-lg">Nenhum ingresso disponível</h3>
+              <p className="text-sm text-muted-foreground">Seja o primeiro a vender ingressos na plataforma!</p>
+              <Link to="/sell">
+                <Button className="rounded-xl gap-2 mt-2">
+                  Vender ingresso
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
+              </Link>
             </div>
           )}
         </div>
