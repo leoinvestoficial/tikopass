@@ -2,14 +2,14 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 
 export type Event = Tables<"events">;
-export type Ticket = Tables<"tickets"> & { events?: Event; profiles?: Tables<"profiles"> };
+export type Ticket = Tables<"tickets"> & { events?: Event; seller_profile?: Tables<"profiles"> };
 export type Negotiation = Tables<"negotiations"> & {
   tickets?: Ticket & { events?: Event };
   buyer_profile?: Tables<"profiles">;
   seller_profile?: Tables<"profiles">;
 };
 export type NegotiationMessage = Tables<"negotiation_messages"> & {
-  profiles?: Tables<"profiles">;
+  sender_profile?: Tables<"profiles">;
 };
 
 // Events
