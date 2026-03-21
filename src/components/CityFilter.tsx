@@ -1,13 +1,13 @@
 const CITIES = [
-  "São Paulo",
-  "Rio de Janeiro",
-  "Belo Horizonte",
-  "Curitiba",
-  "Porto Alegre",
   "Salvador",
-  "Brasília",
-  "Recife",
-  "Fortaleza",
+  "Lauro de Freitas",
+  "Camaçari",
+  "Feira de Santana",
+  "Porto Seguro",
+  "Ilhéus",
+  "Itaparica",
+  "Santo Amaro",
+  "Praia do Forte",
 ];
 
 interface CityFilterProps {

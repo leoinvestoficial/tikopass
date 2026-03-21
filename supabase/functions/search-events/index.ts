@@ -21,16 +21,22 @@ serve(async (req) => {
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
     const today = new Date().toISOString().split("T")[0];
-    const cityFilter = city ? ` na cidade de ${city}` : " no Brasil";
+    const cityFilter = city || "Salvador";
+    const regionContext = `em ${cityFilter} e região metropolitana da Bahia (incluindo Salvador, Lauro de Freitas, Camaçari, Feira de Santana, Porto Seguro, Ilhéus, Santo Amaro, Praia do Forte e litoral baiano)`;
 
-    const systemPrompt = `Você é um assistente especializado em encontrar eventos reais e atuais no Brasil. 
-Sempre retorne eventos REAIS que estejam acontecendo ou programados para acontecer. 
+    const systemPrompt = `Você é um assistente especializado em encontrar eventos reais e atuais na Bahia, Brasil, especialmente em Salvador e região metropolitana.
+Você conhece profundamente a cena cultural, musical e esportiva da Bahia.
 Hoje é ${today}. Retorne apenas eventos com data futura ou muito recente.
-Seja preciso com datas, locais e nomes dos eventos.`;
+Seja preciso com datas, locais e nomes dos eventos.
+IMPORTANTE: Inclua eventos de todos os portes - desde grandes festivais até festas, shows em bares e casas de show, eventos esportivos locais, peças de teatro, stand-up comedy, etc.
+Considere eventos em locais conhecidos de Salvador como: Arena Fonte Nova, Concha Acústica do TCA, Teatro Castro Alves, Wet'n Wild, Arena Parque, Largo do Pelourinho, casas de show como Groove Bar, WET, Bahia Café Hall, e similares.
+Inclua também eventos sazonais como réveillons, carnaval, festas juninas, micaretas, lavagens e festas populares baianas.`;
 
-    const userPrompt = `Busque eventos reais${cityFilter} relacionados a: "${query}". 
-Retorne até 5 eventos reais que estejam programados para acontecer.
-Para cada evento, inclua: nome exato, data (formato YYYY-MM-DD), horário, local/venue, cidade e categoria (uma de: Shows, Esportes, Teatro, Festivais, Stand-up, Conferências).`;
+    const userPrompt = `Busque eventos reais ${regionContext} relacionados a: "${query}".
+Retorne até 8 eventos reais que estejam programados para acontecer.
+Pense em eventos como: Retronejo, Réveillon Destino, Festival de Verão, Fest Verão Paraíso, shows no TCA, jogos do Bahia e Vitória, micaretas, e outros eventos da região.
+Para cada evento, inclua: nome exato, data (formato YYYY-MM-DD), horário, local/venue, cidade e categoria (uma de: Shows, Esportes, Teatro, Festivais, Stand-up, Conferências).
+Se não souber a data exata, use a data mais provável baseada em edições anteriores.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -39,7 +45,7 @@ Para cada evento, inclua: nome exato, data (formato YYYY-MM-DD), horário, local
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: "google/gemini-2.5-flash",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },
