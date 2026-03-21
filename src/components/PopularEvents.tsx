@@ -119,7 +119,7 @@ export default function PopularEvents() {
                   Ver ingressos disponíveis →
                 </span>
               </div>
-            </Link>
+            </button>
           ))}
         </div>
 
