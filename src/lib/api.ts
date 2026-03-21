@@ -41,7 +41,7 @@ export async function createEvent(event: {
 export async function fetchTickets(filters?: { city?: string; category?: string; search?: string }) {
   let query = supabase
     .from("tickets")
-    .select("*, events(*), profiles!tickets_seller_id_fkey(*)")
+    .select("*, events(*)")
     .eq("status", "available")
     .order("created_at", { ascending: false });
 
