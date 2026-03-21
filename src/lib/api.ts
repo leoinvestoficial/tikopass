@@ -146,6 +146,16 @@ export async function createTicket(ticket: {
   return data;
 }
 
+export async function updateTicket(id: string, updates: { sector?: string; row?: string; seat?: string; price?: number; original_price?: number; status?: string }) {
+  const { error } = await supabase.from("tickets").update(updates).eq("id", id);
+  if (error) throw error;
+}
+
+export async function deleteTicket(id: string) {
+  const { error } = await supabase.from("tickets").delete().eq("id", id);
+  if (error) throw error;
+}
+
 // Negotiations
 export async function fetchUserNegotiations(userId: string) {
   const { data, error } = await supabase
