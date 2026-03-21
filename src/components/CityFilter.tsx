@@ -10,78 +10,37 @@ const CITIES = [
   "Fortaleza",
 ];
 
-const CATEGORIES = [
-  "Shows",
-  "Esportes",
-  "Teatro",
-  "Festivais",
-  "Stand-up",
-  "Conferências",
-];
-
 interface CityFilterProps {
   selectedCity: string;
   onCityChange: (city: string) => void;
-  selectedCategory: string;
-  onCategoryChange: (category: string) => void;
+  selectedCategory?: string;
+  onCategoryChange?: (category: string) => void;
 }
 
-export default function CityFilter({
-  selectedCity,
-  onCityChange,
-  selectedCategory,
-  onCategoryChange,
-}: CityFilterProps) {
+export default function CityFilter({ selectedCity, onCityChange }: CityFilterProps) {
   return (
-    <div className="space-y-4">
-      <div>
-        <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Cidade</h3>
-        <div className="flex flex-wrap gap-2">
+    <div>
+      <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Cidade</h3>
+      <div className="flex flex-wrap gap-2">
+        <button
+          onClick={() => onCityChange("")}
+          className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200 active:scale-95 ${
+            selectedCity === "" ? "bg-primary text-primary-foreground shadow-md" : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+          }`}
+        >
+          Todas
+        </button>
+        {CITIES.map((city) => (
           <button
-            onClick={() => onCityChange("")}
+            key={city}
+            onClick={() => onCityChange(city)}
             className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200 active:scale-95 ${
-              selectedCity === "" ? "bg-primary text-primary-foreground shadow-md" : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+              selectedCity === city ? "bg-primary text-primary-foreground shadow-md" : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
             }`}
           >
-            Todas
+            {city}
           </button>
-          {CITIES.map((city) => (
-            <button
-              key={city}
-              onClick={() => onCityChange(city)}
-              className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200 active:scale-95 ${
-                selectedCity === city ? "bg-primary text-primary-foreground shadow-md" : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
-              }`}
-            >
-              {city}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div>
-        <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Categoria</h3>
-        <div className="flex flex-wrap gap-2">
-          <button
-            onClick={() => onCategoryChange("")}
-            className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200 active:scale-95 ${
-              selectedCategory === "" ? "bg-primary text-primary-foreground shadow-md" : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
-            }`}
-          >
-            Todas
-          </button>
-          {CATEGORIES.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => onCategoryChange(cat)}
-              className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200 active:scale-95 ${
-                selectedCategory === cat ? "bg-primary text-primary-foreground shadow-md" : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
+        ))}
       </div>
     </div>
   );
