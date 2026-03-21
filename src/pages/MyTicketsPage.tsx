@@ -134,7 +134,7 @@ export default function MyTicketsPage() {
                 return (
                   <Link
                     key={ticket.id}
-                    to={`/event/${event.id}`}
+                    to={`/ticket/${ticket.id}`}
                     className="block group"
                   >
                     <div

@@ -111,15 +111,15 @@ export default function EventDetail() {
 
     setSubmitting(true);
     try {
-      await createNegotiation({
+      const created = await createNegotiation({
         ticket_id: ticket.id,
         buyer_id: user.id,
         seller_id: ticket.seller_id,
         offer_price: parseFloat(offerPrice),
       });
-      toast.success("Oferta enviada! Acompanhe em Negociações.");
+      toast.success("Oferta enviada! Abrindo o chat da negociação.");
       setNegotiating(null);
-      navigate("/negotiations");
+      navigate(`/negotiations?negotiation=${created.id}`);
     } catch (err: any) {
       if (err.message?.includes("row-level security")) {
         toast.error("Sessão expirada. Faça login novamente.");

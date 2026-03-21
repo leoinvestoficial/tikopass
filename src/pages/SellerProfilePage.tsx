@@ -199,7 +199,7 @@ export default function SellerProfilePage() {
                   {activeTickets.map((ticket: any) => (
                     <Link
                       key={ticket.id}
-                      to={`/event/${ticket.events?.id || ticket.event_id}`}
+                      to={`/ticket/${ticket.id}`}
                       className="block group"
                     >
                       <div className="bg-card rounded-xl border border-border p-4 hover:shadow-md transition-all duration-300 flex items-center justify-between gap-4">
