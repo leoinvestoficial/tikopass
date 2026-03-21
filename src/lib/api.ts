@@ -63,6 +63,34 @@ export async function fetchTicketsByEvent(eventId: string) {
     .eq("status", "available")
     .order("price", { ascending: true });
   if (error) throw error;
+
+  // Fetch seller profiles and ratings
+  if (data && data.length > 0) {
+    const sellerIds = [...new Set(data.map(t => t.seller_id))];
+    const [profilesRes, ratingsRes] = await Promise.all([
+      supabase.from("profiles").select("*").in("user_id", sellerIds),
+      supabase.from("seller_ratings" as any).select("seller_id, rating").in("seller_id", sellerIds),
+    ]);
+    const profileMap = new Map((profilesRes.data || []).map((p: any) => [p.user_id, p]));
+    
+    // Calculate average ratings per seller
+    const ratingMap = new Map<string, { total: number; count: number }>();
+    for (const r of (ratingsRes.data || []) as any[]) {
+      const existing = ratingMap.get(r.seller_id) || { total: 0, count: 0 };
+      existing.total += r.rating;
+      existing.count += 1;
+      ratingMap.set(r.seller_id, existing);
+    }
+
+    return data.map(t => ({
+      ...t,
+      seller_profile: profileMap.get(t.seller_id) || null,
+      seller_avg_rating: ratingMap.has(t.seller_id)
+        ? ratingMap.get(t.seller_id)!.total / ratingMap.get(t.seller_id)!.count
+        : null,
+      seller_rating_count: ratingMap.get(t.seller_id)?.count || 0,
+    }));
+  }
   return data;
 }
 
