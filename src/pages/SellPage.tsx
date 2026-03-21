@@ -56,13 +56,14 @@ export default function SellPage() {
   };
 
   const handleConfirmEvent = async () => {
-    if (!selectedEvent || !user) return;
+    if (!editedEvent || !user) return;
     try {
       const created = await createEvent({
-        ...selectedEvent,
+        ...editedEvent,
         source: "ai_search",
       });
       setSavedEventId(created.id);
+      setSelectedEvent(editedEvent);
       setStep("details");
     } catch (err: any) {
       toast.error("Erro ao salvar evento: " + (err.message || ""));
