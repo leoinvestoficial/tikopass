@@ -58,7 +58,7 @@ export async function fetchTickets(filters?: { city?: string; category?: string;
 export async function fetchTicketsByEvent(eventId: string) {
   const { data, error } = await supabase
     .from("tickets")
-    .select("*, events(*), profiles!tickets_seller_id_fkey(*)")
+    .select("*, events(*)")
     .eq("event_id", eventId)
     .eq("status", "available")
     .order("price", { ascending: true });
