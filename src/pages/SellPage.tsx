@@ -136,7 +136,7 @@ export default function SellPage() {
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
-                    placeholder="Nome do evento (ex: Rock in Rio, Flamengo...)"
+                    placeholder="Nome do evento (ex: Retronejo, Réveillon Destino...)"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && handleAISearch()}
