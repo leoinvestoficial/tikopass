@@ -10,14 +10,20 @@ import Footer from "@/components/Footer";
 import HowItWorks from "@/components/HowItWorks";
 import PopularEvents, { type PopularEventItem } from "@/components/PopularEvents";
 import TrustBanner from "@/components/TrustBanner";
+import SafetyBanner from "@/components/SafetyBanner";
+import SocialProof from "@/components/SocialProof";
+import QuickDateFilters, { getDateRange } from "@/components/QuickDateFilters";
 import { fetchTickets, type Ticket as TicketType } from "@/lib/api";
 import { useScrollReveal } from "@/hooks/use-scroll-reveal";
 import { Link } from "react-router-dom";
+
+type DateFilter = "" | "today" | "tomorrow" | "weekend";
 
 export default function Index() {
   const [search, setSearch] = useState("");
   const [selectedCity, setSelectedCity] = useState("Salvador");
   const [selectedCategory, setSelectedCategory] = useState("");
+  const [dateFilter, setDateFilter] = useState<DateFilter>("");
   const [tickets, setTickets] = useState<TicketType[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -32,10 +38,13 @@ export default function Index() {
   const loadTickets = async () => {
     setLoading(true);
     try {
+      const dateRange = getDateRange(dateFilter);
       const data = await fetchTickets({
         city: selectedCity || undefined,
         category: selectedCategory || undefined,
         search: normalizedSearch || undefined,
+        dateFrom: dateRange.from,
+        dateTo: dateRange.to,
       });
       setTickets(data as any);
     } catch (err) {
@@ -50,9 +59,8 @@ export default function Index() {
     const timer = window.setTimeout(() => {
       loadTickets();
     }, delay);
-
     return () => window.clearTimeout(timer);
-  }, [selectedCity, selectedCategory, normalizedSearch]);
+  }, [selectedCity, selectedCategory, normalizedSearch, dateFilter]);
 
   const handleSearch = () => {
     loadTickets();
@@ -60,17 +68,14 @@ export default function Index() {
 
   const popularEvents = useMemo<PopularEventItem[]>(() => {
     const eventMap = new Map<string, PopularEventItem>();
-
     tickets.forEach((ticket: any) => {
       const event = ticket.events || ticket.event;
       if (!event?.id) return;
-
       const existing = eventMap.get(event.id);
       if (existing) {
         existing.ticketCount += 1;
         return;
       }
-
       eventMap.set(event.id, {
         id: event.id,
         name: event.name,
@@ -81,7 +86,6 @@ export default function Index() {
         ticketCount: 1,
       });
     });
-
     return Array.from(eventMap.values())
       .sort((a, b) => {
         if (b.ticketCount !== a.ticketCount) return b.ticketCount - a.ticketCount;
@@ -92,8 +96,10 @@ export default function Index() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <SafetyBanner />
       <Navbar />
 
+      {/* Hero */}
       <section className="relative overflow-hidden border-b border-border">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/3" />
         <div
@@ -109,30 +115,26 @@ export default function Index() {
             <div className={`${hasActiveSearch ? "flex flex-col lg:flex-row lg:items-end lg:justify-between gap-5" : "space-y-6"}`}>
               <div className="space-y-3">
                 <h1 className={`${hasActiveSearch ? "text-3xl md:text-4xl" : "text-4xl md:text-5xl lg:text-6xl"} font-display font-bold text-foreground leading-[1.1]`}>
-                  {hasActiveSearch ? `Resultados para “${normalizedSearch}”` : "Compre e venda ingressos com segurança"}
+                  {hasActiveSearch ? `Resultados para "${normalizedSearch}"` : "Compre e venda ingressos com segurança"}
                 </h1>
-
                 <p className="text-lg text-muted-foreground max-w-2xl leading-relaxed">
                   {hasActiveSearch
-                    ? "Agora você está em modo de busca: mostramos os ingressos encontrados com foco total nos resultados."
+                    ? "Mostrando os ingressos encontrados. Clique para ver detalhes e negociar."
                     : "Encontre ingressos para os melhores eventos de Salvador e Bahia. Negocie diretamente com outros fãs, com pagamento protegido."}
                 </p>
               </div>
 
               {hasActiveSearch && (
                 <div className="flex flex-wrap gap-2 text-sm text-muted-foreground">
-                  <span className="rounded-full border border-border bg-card px-3 py-1.5">
-                    Cidade: {selectedCity}
-                  </span>
+                  <span className="rounded-full border border-border bg-card px-3 py-1.5">Cidade: {selectedCity}</span>
                   {selectedCategory && (
-                    <span className="rounded-full border border-border bg-card px-3 py-1.5">
-                      Categoria: {selectedCategory}
-                    </span>
+                    <span className="rounded-full border border-border bg-card px-3 py-1.5">Categoria: {selectedCategory}</span>
                   )}
                 </div>
               )}
             </div>
 
+            {/* Search bar */}
             <div className="flex flex-col sm:flex-row gap-2 max-w-3xl">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -149,14 +151,8 @@ export default function Index() {
                   Buscar
                 </Button>
                 {hasActiveSearch && (
-                  <Button
-                    variant="outline"
-                    size="lg"
-                    className="rounded-xl gap-2"
-                    onClick={() => setSearch("")}
-                  >
-                    <X className="w-4 h-4" />
-                    Limpar
+                  <Button variant="outline" size="lg" className="rounded-xl gap-2" onClick={() => setSearch("")}>
+                    <X className="w-4 h-4" /> Limpar
                   </Button>
                 )}
               </div>
@@ -164,24 +160,16 @@ export default function Index() {
 
             {!hasActiveSearch && (
               <div className="flex flex-wrap gap-x-6 gap-y-2 pt-2 text-sm text-muted-foreground">
-                <span className="flex items-center gap-1.5">
-                  <Shield className="w-4 h-4 text-success" />
-                  Pagamento protegido
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <Zap className="w-4 h-4 text-primary" />
-                  Cadastro com IA
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <TrendingUp className="w-4 h-4 text-accent" />
-                  Sem taxas escondidas
-                </span>
+                <span className="flex items-center gap-1.5"><Shield className="w-4 h-4 text-success" />Pagamento protegido</span>
+                <span className="flex items-center gap-1.5"><Zap className="w-4 h-4 text-primary" />Cadastro com IA</span>
+                <span className="flex items-center gap-1.5"><TrendingUp className="w-4 h-4 text-accent" />Sem taxas escondidas</span>
               </div>
             )}
           </div>
         </div>
       </section>
 
+      {/* Quick date filters — always visible */}
       {!hasActiveSearch && (
         <section className="border-b border-border bg-card/50">
           <div
@@ -189,25 +177,26 @@ export default function Index() {
             className={`container py-8 space-y-6 ${filtersReveal.isVisible ? "animate-reveal-up" : "opacity-0"}`}
             style={{ animationDelay: "100ms" }}
           >
+            {/* Quick date filters */}
+            <div>
+              <h2 className="text-lg font-display font-semibold text-foreground mb-4">Encontre seu próximo evento</h2>
+              <QuickDateFilters selected={dateFilter} onChange={setDateFilter} />
+            </div>
+
+            {/* Categories */}
             <div>
               <h2 className="text-lg font-display font-semibold text-foreground mb-4">O que você procura?</h2>
-              <CategoryGrid
-                selectedCategory={selectedCategory}
-                onCategoryChange={setSelectedCategory}
-              />
+              <CategoryGrid selectedCategory={selectedCategory} onCategoryChange={setSelectedCategory} />
             </div>
-            <CityFilter
-              selectedCity={selectedCity}
-              onCityChange={setSelectedCity}
-              selectedCategory={selectedCategory}
-              onCategoryChange={setSelectedCategory}
-            />
+
+            <CityFilter selectedCity={selectedCity} onCityChange={setSelectedCity} selectedCategory={selectedCategory} onCategoryChange={setSelectedCategory} />
           </div>
         </section>
       )}
 
       {!hasActiveSearch && <PopularEvents events={popularEvents} />}
 
+      {/* Tickets grid */}
       <section className={`flex-1 ${hasActiveSearch ? "bg-muted/20" : "border-t border-border"}`}>
         <div
           ref={ticketsReveal.ref}
@@ -223,7 +212,7 @@ export default function Index() {
                 {loading
                   ? "Carregando..."
                   : hasActiveSearch
-                    ? `${tickets.length} resultado${tickets.length !== 1 ? "s" : ""} para “${normalizedSearch}”`
+                    ? `${tickets.length} resultado${tickets.length !== 1 ? "s" : ""} para "${normalizedSearch}"`
                     : `${tickets.length} ingresso${tickets.length !== 1 ? "s" : ""} encontrado${tickets.length !== 1 ? "s" : ""}`}
               </p>
             </div>
@@ -250,11 +239,7 @@ export default function Index() {
               {tickets.map((ticket: any, i) => (
                 <TicketCard
                   key={ticket.id}
-                  ticket={{
-                    ...ticket,
-                    event: ticket.events,
-                    sellerName: ticket.profiles?.display_name || "Vendedor",
-                  }}
+                  ticket={{ ...ticket, event: ticket.events, sellerName: ticket.profiles?.display_name || "Vendedor" }}
                   index={i}
                 />
               ))}
@@ -265,24 +250,26 @@ export default function Index() {
                 <Ticket className="w-8 h-8 text-muted-foreground" />
               </div>
               <h3 className="font-display font-semibold text-lg">
-                {hasActiveSearch ? "Nenhum resultado encontrado" : "Nenhum ingresso disponível"}
+                {hasActiveSearch ? "Nenhum resultado encontrado" : dateFilter ? "Nenhum evento nesse período" : "Nenhum ingresso disponível"}
               </h3>
               <p className="text-sm text-muted-foreground">
                 {hasActiveSearch
-                  ? "Tente outro nome de evento ou limpe a busca para voltar à navegação principal."
-                  : "Seja o primeiro a vender ingressos na plataforma!"}
+                  ? "Tente outro nome de evento ou limpe a busca."
+                  : dateFilter
+                    ? "Tente outra data ou confira todos os eventos disponíveis."
+                    : "Seja o primeiro a vender ingressos na plataforma!"}
               </p>
               {hasActiveSearch ? (
                 <Button variant="outline" className="rounded-xl gap-2 mt-2" onClick={() => setSearch("")}>
-                  <X className="w-4 h-4" />
-                  Limpar busca
+                  <X className="w-4 h-4" /> Limpar busca
+                </Button>
+              ) : dateFilter ? (
+                <Button variant="outline" className="rounded-xl gap-2 mt-2" onClick={() => setDateFilter("")}>
+                  Conferir tudo
                 </Button>
               ) : (
                 <Link to="/sell">
-                  <Button className="rounded-xl gap-2 mt-2">
-                    Vender ingresso
-                    <ArrowRight className="w-4 h-4" />
-                  </Button>
+                  <Button className="rounded-xl gap-2 mt-2">Vender ingresso <ArrowRight className="w-4 h-4" /></Button>
                 </Link>
               )}
             </div>
@@ -290,9 +277,11 @@ export default function Index() {
         </div>
       </section>
 
+      {!hasActiveSearch && <SocialProof />}
       {!hasActiveSearch && <HowItWorks />}
       {!hasActiveSearch && <TrustBanner />}
 
+      {/* CTA */}
       {!hasActiveSearch && (
         <section className="border-t border-border">
           <div
@@ -302,17 +291,14 @@ export default function Index() {
           >
             <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent rounded-2xl p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-6">
               <div className="space-y-2">
-                <h2 className="text-2xl md:text-3xl font-display font-bold text-foreground">
-                  Tem ingressos sobrando?
-                </h2>
+                <h2 className="text-2xl md:text-3xl font-display font-bold text-foreground">Tem ingressos sobrando?</h2>
                 <p className="text-muted-foreground max-w-md">
                   Venda seus ingressos de forma rápida e segura. Nossa IA ajuda a cadastrar o evento corretamente.
                 </p>
               </div>
               <Link to="/sell">
                 <Button variant="hero" size="xl" className="gap-2 rounded-xl animate-pulse-glow">
-                  Vender ingresso
-                  <ArrowRight className="w-5 h-5" />
+                  Vender ingresso <ArrowRight className="w-5 h-5" />
                 </Button>
               </Link>
             </div>
