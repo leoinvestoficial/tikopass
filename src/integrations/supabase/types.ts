@@ -180,6 +180,44 @@ export type Database = {
         }
         Relationships: []
       }
+      seller_ratings: {
+        Row: {
+          buyer_id: string
+          comment: string | null
+          created_at: string
+          id: string
+          negotiation_id: string
+          rating: number
+          seller_id: string
+        }
+        Insert: {
+          buyer_id: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          negotiation_id: string
+          rating: number
+          seller_id: string
+        }
+        Update: {
+          buyer_id?: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          negotiation_id?: string
+          rating?: number
+          seller_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seller_ratings_negotiation_id_fkey"
+            columns: ["negotiation_id"]
+            isOneToOne: false
+            referencedRelation: "negotiations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tickets: {
         Row: {
           created_at: string
