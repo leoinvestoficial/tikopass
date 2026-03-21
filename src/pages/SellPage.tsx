@@ -57,6 +57,15 @@ export default function SellPage() {
 
   const handleConfirmEvent = async () => {
     if (!editedEvent || !user) return;
+    
+    // Verify session is still valid
+    const { data: { session } } = await (await import("@/integrations/supabase/client")).supabase.auth.getSession();
+    if (!session) {
+      toast.error("Sua sessão expirou. Faça login novamente.");
+      navigate("/auth");
+      return;
+    }
+    
     try {
       const created = await createEvent({
         ...editedEvent,
@@ -66,7 +75,12 @@ export default function SellPage() {
       setSelectedEvent(editedEvent);
       setStep("details");
     } catch (err: any) {
-      toast.error("Erro ao salvar evento: " + (err.message || ""));
+      if (err.message?.includes("row-level security")) {
+        toast.error("Sessão expirada. Faça login novamente.");
+        navigate("/auth");
+      } else {
+        toast.error("Erro ao salvar evento: " + (err.message || ""));
+      }
     }
   };
 
