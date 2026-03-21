@@ -51,6 +51,7 @@ export default function SellPage() {
 
   const handleSelectEvent = (event: AIEvent) => {
     setSelectedEvent(event);
+    setEditedEvent({ ...event });
     setStep("confirm");
   };
 
