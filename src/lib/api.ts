@@ -78,15 +78,22 @@ export async function createTicket(ticket: {
 export async function fetchUserNegotiations(userId: string) {
   const { data, error } = await supabase
     .from("negotiations")
-    .select(`
-      *,
-      tickets(*, events(*)),
-      buyer_profile:profiles!negotiations_buyer_id_fkey(*),
-      seller_profile:profiles!negotiations_seller_id_fkey(*)
-    `)
+    .select(`*, tickets(*, events(*))`)
     .or(`buyer_id.eq.${userId},seller_id.eq.${userId}`)
     .order("updated_at", { ascending: false });
   if (error) throw error;
+  
+  // Fetch profiles for buyer/seller
+  if (data && data.length > 0) {
+    const userIds = [...new Set(data.flatMap(n => [n.buyer_id, n.seller_id]))];
+    const { data: profiles } = await supabase.from("profiles").select("*").in("user_id", userIds);
+    const profileMap = new Map((profiles || []).map(p => [p.user_id, p]));
+    return data.map(n => ({
+      ...n,
+      buyer_profile: profileMap.get(n.buyer_id) || null,
+      seller_profile: profileMap.get(n.seller_id) || null,
+    }));
+  }
   return data;
 }
 
