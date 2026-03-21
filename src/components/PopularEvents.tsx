@@ -85,10 +85,14 @@ export default function PopularEvents() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {popularEvents.map((event, i) => (
-            <Link
+            <button
               key={event.name}
-              to={`/?search=${encodeURIComponent(event.name)}`}
-              className="group relative bg-card border border-border rounded-xl p-5 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5 active:scale-[0.98]"
+              onClick={() => {
+                const params = new URLSearchParams(window.location.search);
+                params.set("search", event.name);
+                window.location.href = `/?search=${encodeURIComponent(event.name)}`;
+              }}
+              className="group relative text-left bg-card border border-border rounded-xl p-5 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5 active:scale-[0.98]"
               style={{ animationDelay: `${i * 60}ms` }}
             >
               {event.hot && (
@@ -115,7 +119,7 @@ export default function PopularEvents() {
                   Ver ingressos disponíveis →
                 </span>
               </div>
-            </Link>
+            </button>
           ))}
         </div>
 
