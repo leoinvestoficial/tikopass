@@ -34,7 +34,7 @@ export default function Index() {
         category: selectedCategory || undefined,
         search: search || undefined,
       });
-      setTickets(data as TicketType[]);
+      setTickets(data as any);
     } catch (err) {
       console.error("Error loading tickets:", err);
     } finally {
