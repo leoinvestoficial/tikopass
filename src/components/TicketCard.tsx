@@ -32,7 +32,6 @@ interface TicketCardProps {
 
 export default function TicketCard({ ticket, index = 0 }: TicketCardProps) {
   const event = ticket.event || ticket.events;
-  const eventId = ticket.event_id || ticket.eventId || event?.id;
   const origPrice = ticket.original_price ?? ticket.originalPrice;
   const isBelow = origPrice && ticket.price < origPrice;
   const discount = origPrice ? Math.round(((origPrice - ticket.price) / origPrice) * 100) : 0;
@@ -42,7 +41,7 @@ export default function TicketCard({ ticket, index = 0 }: TicketCardProps) {
 
   return (
     <Link
-      to={`/event/${eventId}`}
+      to={`/ticket/${ticket.id}`}
       className="group block"
       style={{ animationDelay: `${index * 80}ms` }}
     >

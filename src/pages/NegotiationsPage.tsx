@@ -10,7 +10,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { fetchUserNegotiations, fetchMessages, sendMessage, updateNegotiationStatus } from "@/lib/api";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 
 const statusConfig: Record<string, { label: string; icon: any; className: string }> = {
@@ -27,11 +27,13 @@ export default function NegotiationsPage() {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const headerReveal = useScrollReveal<HTMLDivElement>();
   const contentReveal = useScrollReveal<HTMLDivElement>();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const requestedNegotiationId = searchParams.get("negotiation");
 
   useEffect(() => {
     if (!user) { navigate("/auth"); return; }
@@ -42,18 +44,42 @@ export default function NegotiationsPage() {
     if (selectedNeg) loadMessages(selectedNeg);
   }, [selectedNeg]);
 
+  useEffect(() => {
+    if (negotiations.length === 0) {
+      setSelectedNeg(null);
+      return;
+    }
+
+    if (requestedNegotiationId && negotiations.some((neg: any) => neg.id === requestedNegotiationId)) {
+      setSelectedNeg(requestedNegotiationId);
+      return;
+    }
+
+    if (!selectedNeg || !negotiations.some((neg: any) => neg.id === selectedNeg)) {
+      const fallbackId = negotiations[0].id;
+      setSelectedNeg(fallbackId);
+      if (!requestedNegotiationId) {
+        setSearchParams({ negotiation: fallbackId }, { replace: true });
+      }
+    }
+  }, [negotiations, requestedNegotiationId, selectedNeg, setSearchParams]);
+
   const loadNegotiations = async () => {
     if (!user) return;
     setLoading(true);
     try {
       const data = await fetchUserNegotiations(user.id);
       setNegotiations(data || []);
-      if (data && data.length > 0 && !selectedNeg) setSelectedNeg(data[0].id);
     } catch (err) {
       console.error(err);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSelectNegotiation = (negotiationId: string) => {
+    setSelectedNeg(negotiationId);
+    setSearchParams({ negotiation: negotiationId }, { replace: true });
   };
 
   const loadMessages = async (negId: string) => {
@@ -120,7 +146,7 @@ export default function NegotiationsPage() {
                   return (
                     <button
                       key={neg.id}
-                      onClick={() => setSelectedNeg(neg.id)}
+                      onClick={() => handleSelectNegotiation(neg.id)}
                       className={`w-full text-left p-4 rounded-xl border transition-all duration-200 active:scale-[0.98] ${selectedNeg === neg.id ? "border-primary bg-primary/5 shadow-sm" : "border-border bg-card hover:shadow-sm"}`}
                     >
                       <div className="flex items-start justify-between gap-2 mb-2">
