@@ -47,7 +47,7 @@ export default function TicketCard({ ticket, index = 0 }: TicketCardProps) {
       style={{ animationDelay: `${index * 80}ms` }}
     >
       <div className="bg-card rounded-xl border border-border overflow-hidden transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-1 active:scale-[0.98]">
-        <div className="h-1.5 bg-gradient-to-r from-primary to-primary/60" />
+        <div className={`h-1.5 ${isPast ? "bg-muted" : "bg-gradient-to-r from-primary to-primary/60"}`} />
         <div className="p-5 space-y-4">
           <div className="space-y-2">
             <div className="flex items-start justify-between gap-2">
