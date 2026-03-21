@@ -27,6 +27,7 @@ const App = () => (
             <Route path="/event/:eventId" element={<EventDetail />} />
             <Route path="/sell" element={<SellPage />} />
             <Route path="/negotiations" element={<NegotiationsPage />} />
+            <Route path="/my-tickets" element={<MyTicketsPage />} />
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/payment-success" element={<PaymentSuccess />} />
             <Route path="*" element={<NotFound />} />

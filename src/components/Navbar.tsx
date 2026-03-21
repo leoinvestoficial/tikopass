@@ -14,6 +14,7 @@ export default function Navbar() {
   const navLinks = [
     { to: "/", label: "Início" },
     { to: "/sell", label: "Vender" },
+    { to: "/my-tickets", label: "Meus Ingressos" },
     { to: "/negotiations", label: "Negociações" },
   ];
 
