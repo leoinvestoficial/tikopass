@@ -27,6 +27,7 @@ export default function SellPage() {
   const [searching, setSearching] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [ticketForm, setTicketForm] = useState({ sector: "", row: "", seat: "", price: "" });
+  const [editedEvent, setEditedEvent] = useState<AIEvent | null>(null);
 
   const heroReveal = useScrollReveal<HTMLDivElement>();
   const { user } = useAuth();
@@ -50,17 +51,19 @@ export default function SellPage() {
 
   const handleSelectEvent = (event: AIEvent) => {
     setSelectedEvent(event);
+    setEditedEvent({ ...event });
     setStep("confirm");
   };
 
   const handleConfirmEvent = async () => {
-    if (!selectedEvent || !user) return;
+    if (!editedEvent || !user) return;
     try {
       const created = await createEvent({
-        ...selectedEvent,
+        ...editedEvent,
         source: "ai_search",
       });
       setSavedEventId(created.id);
+      setSelectedEvent(editedEvent);
       setStep("details");
     } catch (err: any) {
       toast.error("Erro ao salvar evento: " + (err.message || ""));
@@ -189,20 +192,40 @@ export default function SellPage() {
           )}
 
           {/* Step: Confirm */}
-          {step === "confirm" && selectedEvent && (
+          {step === "confirm" && editedEvent && (
             <div className="space-y-6 animate-reveal-up">
               <div className="space-y-2">
                 <h1 className="text-3xl font-display font-bold">Confirme o evento</h1>
-                <p className="text-muted-foreground">Verifique se os dados encontrados pela IA estão corretos.</p>
+                <p className="text-muted-foreground">Corrija os dados se necessário. Datas da IA podem estar erradas.</p>
               </div>
               <div className="bg-card border border-border rounded-xl p-6 space-y-4">
-                <h2 className="font-display font-bold text-xl">{selectedEvent.name}</h2>
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div><span className="text-muted-foreground block">Data</span><span className="font-medium">{selectedEvent.date}</span></div>
-                  <div><span className="text-muted-foreground block">Horário</span><span className="font-medium">{selectedEvent.time}</span></div>
-                  <div><span className="text-muted-foreground block">Local</span><span className="font-medium">{selectedEvent.venue}</span></div>
-                  <div><span className="text-muted-foreground block">Cidade</span><span className="font-medium">{selectedEvent.city}</span></div>
-                  <div><span className="text-muted-foreground block">Categoria</span><span className="font-medium">{selectedEvent.category}</span></div>
+                <div className="space-y-2">
+                  <Label htmlFor="ev-name">Nome do evento</Label>
+                  <Input id="ev-name" value={editedEvent.name} onChange={(e) => setEditedEvent({ ...editedEvent, name: e.target.value })} className="rounded-xl" />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="ev-date">Data</Label>
+                    <Input id="ev-date" type="date" value={editedEvent.date} onChange={(e) => setEditedEvent({ ...editedEvent, date: e.target.value })} className="rounded-xl" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="ev-time">Horário</Label>
+                    <Input id="ev-time" type="time" value={editedEvent.time !== "N/A" ? editedEvent.time : ""} onChange={(e) => setEditedEvent({ ...editedEvent, time: e.target.value })} className="rounded-xl" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="ev-venue">Local</Label>
+                    <Input id="ev-venue" value={editedEvent.venue} onChange={(e) => setEditedEvent({ ...editedEvent, venue: e.target.value })} className="rounded-xl" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="ev-city">Cidade</Label>
+                    <Input id="ev-city" value={editedEvent.city} onChange={(e) => setEditedEvent({ ...editedEvent, city: e.target.value })} className="rounded-xl" />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="ev-category">Categoria</Label>
+                  <Input id="ev-category" value={editedEvent.category} onChange={(e) => setEditedEvent({ ...editedEvent, category: e.target.value })} className="rounded-xl" />
                 </div>
               </div>
               <div className="flex gap-3">
