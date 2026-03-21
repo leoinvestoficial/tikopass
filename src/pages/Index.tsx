@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import TicketCard from "@/components/TicketCard";
 import CityFilter from "@/components/CityFilter";
+import CategoryGrid from "@/components/CategoryGrid";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { fetchTickets, type Ticket as TicketType } from "@/lib/api";
