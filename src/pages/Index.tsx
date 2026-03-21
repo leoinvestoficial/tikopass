@@ -30,6 +30,15 @@ export default function Index() {
     loadTickets();
   }, [selectedCity, selectedCategory]);
 
+  // Debounced search as user types
+  useEffect(() => {
+    if (search === "") return; // skip empty — already loaded by city/category effect
+    const timer = setTimeout(() => {
+      loadTickets();
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [search]);
+
   const loadTickets = async () => {
     setLoading(true);
     try {
