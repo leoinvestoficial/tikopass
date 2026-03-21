@@ -38,15 +38,16 @@ export async function createEvent(event: {
 }
 
 // Tickets
-export async function fetchTickets(filters?: { city?: string; category?: string; search?: string }) {
+export async function fetchTickets(filters?: { city?: string; category?: string; search?: string; dateFrom?: string; dateTo?: string }) {
   const today = new Date().toISOString().split("T")[0];
   let query = supabase
     .from("tickets")
     .select("*, events(*)")
     .eq("status", "available")
-    .gte("events.date", today)
+    .gte("events.date", filters?.dateFrom || today)
     .order("created_at", { ascending: false });
 
+  if (filters?.dateTo) query = query.lte("events.date", filters.dateTo);
   if (filters?.city) query = query.eq("events.city", filters.city);
   if (filters?.category) query = query.eq("events.category", filters.category);
   if (filters?.search) query = query.ilike("events.name", `%${filters.search}%`);
