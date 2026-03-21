@@ -136,7 +136,7 @@ export default function SellPage() {
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
-                    placeholder="Nome do evento (ex: Rock in Rio, Flamengo...)"
+                    placeholder="Nome do evento (ex: Retronejo, Réveillon Destino...)"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && handleAISearch()}
@@ -163,20 +163,26 @@ export default function SellPage() {
                     <Sparkles className="w-3.5 h-3.5 text-primary" />
                     {aiResults.length} evento(s) encontrado(s) pela IA
                   </p>
-                  {aiResults.map((event, i) => (
-                    <button
-                      key={i}
-                      onClick={() => handleSelectEvent(event)}
-                      className="w-full text-left bg-card border border-border rounded-xl p-4 hover:shadow-md hover:border-primary/30 transition-all duration-200 active:scale-[0.98] space-y-2"
-                    >
-                      <div className="font-display font-semibold text-foreground">{event.name}</div>
-                      <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
-                        <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5" />{event.date} · {event.time}</span>
-                        <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5" />{event.venue} · {event.city}</span>
-                        <span className="flex items-center gap-1"><Tag className="w-3.5 h-3.5" />{event.category}</span>
-                      </div>
-                    </button>
-                  ))}
+                  {aiResults.map((event, i) => {
+                    const isPast = new Date(event.date) < new Date(new Date().toISOString().split("T")[0]);
+                    return (
+                      <button
+                        key={i}
+                        onClick={() => handleSelectEvent(event)}
+                        className={`w-full text-left bg-card border border-border rounded-xl p-4 hover:shadow-md hover:border-primary/30 transition-all duration-200 active:scale-[0.98] space-y-2 ${isPast ? "opacity-75" : ""}`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="font-display font-semibold text-foreground">{event.name}</span>
+                          {isPast && <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground font-medium">Encerrado</span>}
+                        </div>
+                        <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
+                          <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5" />{event.date} · {event.time}</span>
+                          <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5" />{event.venue} · {event.city}</span>
+                          <span className="flex items-center gap-1"><Tag className="w-3.5 h-3.5" />{event.category}</span>
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
               )}
             </div>

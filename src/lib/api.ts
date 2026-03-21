@@ -14,7 +14,7 @@ export type NegotiationMessage = Tables<"negotiation_messages"> & {
 
 // Events
 export async function fetchEvents(city?: string, category?: string, search?: string) {
-  let query = supabase.from("events").select("*").gte("date", new Date().toISOString().split("T")[0]).order("date", { ascending: true });
+  let query = supabase.from("events").select("*").order("date", { ascending: false });
   if (city) query = query.eq("city", city);
   if (category) query = query.eq("category", category);
   if (search) query = query.ilike("name", `%${search}%`);

@@ -36,6 +36,7 @@ export default function TicketCard({ ticket, index = 0 }: TicketCardProps) {
   const origPrice = ticket.original_price ?? ticket.originalPrice;
   const isBelow = origPrice && ticket.price < origPrice;
   const discount = origPrice ? Math.round(((origPrice - ticket.price) / origPrice) * 100) : 0;
+  const isPast = event ? new Date(event.date) < new Date(new Date().toISOString().split("T")[0]) : false;
 
   if (!event) return null;
 
@@ -46,7 +47,7 @@ export default function TicketCard({ ticket, index = 0 }: TicketCardProps) {
       style={{ animationDelay: `${index * 80}ms` }}
     >
       <div className="bg-card rounded-xl border border-border overflow-hidden transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-1 active:scale-[0.98]">
-        <div className="h-1.5 bg-gradient-to-r from-primary to-primary/60" />
+        <div className={`h-1.5 ${isPast ? "bg-muted" : "bg-gradient-to-r from-primary to-primary/60"}`} />
         <div className="p-5 space-y-4">
           <div className="space-y-2">
             <div className="flex items-start justify-between gap-2">
@@ -60,9 +61,15 @@ export default function TicketCard({ ticket, index = 0 }: TicketCardProps) {
                 </Badge>
               )}
             </div>
-            <Badge variant="secondary" className="text-xs font-medium">
-              {event.category}
-            </Badge>
+            {isPast ? (
+              <Badge variant="outline" className="text-xs font-medium text-muted-foreground border-muted">
+                Encerrado
+              </Badge>
+            ) : (
+              <Badge variant="secondary" className="text-xs font-medium">
+                {event.category}
+              </Badge>
+            )}
           </div>
 
           <div className="space-y-1.5 text-sm text-muted-foreground">

@@ -24,19 +24,22 @@ serve(async (req) => {
     const cityFilter = city || "Salvador";
     const regionContext = `em ${cityFilter} e região metropolitana da Bahia (incluindo Salvador, Lauro de Freitas, Camaçari, Feira de Santana, Porto Seguro, Ilhéus, Santo Amaro, Praia do Forte e litoral baiano)`;
 
-    const systemPrompt = `Você é um assistente especializado em encontrar eventos reais e atuais na Bahia, Brasil, especialmente em Salvador e região metropolitana.
+    const systemPrompt = `Você é um assistente especializado em encontrar eventos reais na Bahia, Brasil, especialmente em Salvador e região metropolitana.
 Você conhece profundamente a cena cultural, musical e esportiva da Bahia.
-Hoje é ${today}. Retorne apenas eventos com data futura ou muito recente.
+Hoje é ${today}.
+IMPORTANTE: Retorne TANTO eventos futuros QUANTO eventos recentes que já aconteceram (últimos 6 meses).
+Para eventos passados, mantenha a data real em que ocorreram.
 Seja preciso com datas, locais e nomes dos eventos.
-IMPORTANTE: Inclua eventos de todos os portes - desde grandes festivais até festas, shows em bares e casas de show, eventos esportivos locais, peças de teatro, stand-up comedy, etc.
-Considere eventos em locais conhecidos de Salvador como: Arena Fonte Nova, Concha Acústica do TCA, Teatro Castro Alves, Wet'n Wild, Arena Parque, Largo do Pelourinho, casas de show como Groove Bar, WET, Bahia Café Hall, e similares.
-Inclua também eventos sazonais como réveillons, carnaval, festas juninas, micaretas, lavagens e festas populares baianas.`;
+Inclua eventos de todos os portes - grandes festivais, festas, shows em bares e casas de show, eventos esportivos, peças de teatro, stand-up, etc.
+Considere locais conhecidos como: Arena Fonte Nova, Concha Acústica do TCA, Teatro Castro Alves, Wet'n Wild, Arena Parque, Largo do Pelourinho, Casa Pia, Groove Bar, WET, Bahia Café Hall, e similares.
+Inclua eventos sazonais como réveillons (ex: Réveillon Destino na Praia do Forte), carnaval, festas juninas, micaretas, lavagens, festas populares baianas, e eventos sertanejos como Retronejo.`;
 
     const userPrompt = `Busque eventos reais ${regionContext} relacionados a: "${query}".
-Retorne até 8 eventos reais que estejam programados para acontecer.
-Pense em eventos como: Retronejo, Réveillon Destino, Festival de Verão, Fest Verão Paraíso, shows no TCA, jogos do Bahia e Vitória, micaretas, e outros eventos da região.
-Para cada evento, inclua: nome exato, data (formato YYYY-MM-DD), horário, local/venue, cidade e categoria (uma de: Shows, Esportes, Teatro, Festivais, Stand-up, Conferências).
-Se não souber a data exata, use a data mais provável baseada em edições anteriores.`;
+Retorne até 8 eventos reais, incluindo eventos futuros E eventos que já aconteceram recentemente.
+Para eventos passados que são recorrentes (como Réveillon Destino, Retronejo, Festival de Verão), inclua a edição mais recente mesmo que já tenha ocorrido.
+Para cada evento, inclua: nome exato do evento (com ano se aplicável), data (formato YYYY-MM-DD), horário, local/venue exato, cidade e categoria (uma de: Shows, Esportes, Teatro, Festivais, Stand-up, Conferências).
+Se não souber a data exata, use a data mais provável baseada em edições anteriores.
+Exemplos de eventos da região: Retronejo Salvador (Casa Pia), Réveillon Destino (Praia do Forte), Festival de Verão Salvador, Fest Verão Paraíso, jogos do Bahia e Vitória na Fonte Nova.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
