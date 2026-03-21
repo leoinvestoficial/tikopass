@@ -11,10 +11,6 @@ import NegotiationsPage from "./pages/NegotiationsPage.tsx";
 import AuthPage from "./pages/AuthPage.tsx";
 import PaymentSuccess from "./pages/PaymentSuccess.tsx";
 import NotFound from "./pages/NotFound.tsx";
-import SellPage from "./pages/SellPage.tsx";
-import NegotiationsPage from "./pages/NegotiationsPage.tsx";
-import AuthPage from "./pages/AuthPage.tsx";
-import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
 
@@ -31,6 +27,7 @@ const App = () => (
             <Route path="/sell" element={<SellPage />} />
             <Route path="/negotiations" element={<NegotiationsPage />} />
             <Route path="/auth" element={<AuthPage />} />
+            <Route path="/payment-success" element={<PaymentSuccess />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
