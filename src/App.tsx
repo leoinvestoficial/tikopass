@@ -9,6 +9,7 @@ import EventDetail from "./pages/EventDetail.tsx";
 import SellPage from "./pages/SellPage.tsx";
 import NegotiationsPage from "./pages/NegotiationsPage.tsx";
 import MyTicketsPage from "./pages/MyTicketsPage.tsx";
+import SellerProfilePage from "./pages/SellerProfilePage.tsx";
 import AuthPage from "./pages/AuthPage.tsx";
 import PaymentSuccess from "./pages/PaymentSuccess.tsx";
 import NotFound from "./pages/NotFound.tsx";
