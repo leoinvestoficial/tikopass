@@ -39,10 +39,12 @@ export async function createEvent(event: {
 
 // Tickets
 export async function fetchTickets(filters?: { city?: string; category?: string; search?: string }) {
+  const today = new Date().toISOString().split("T")[0];
   let query = supabase
     .from("tickets")
     .select("*, events(*)")
     .eq("status", "available")
+    .gte("events.date", today)
     .order("created_at", { ascending: false });
 
   if (filters?.city) query = query.eq("events.city", filters.city);
@@ -51,8 +53,18 @@ export async function fetchTickets(filters?: { city?: string; category?: string;
 
   const { data, error } = await query;
   if (error) throw error;
-  // Filter out tickets where event was filtered out by inner join conditions
   return (data || []).filter((t: any) => t.events !== null);
+}
+
+// Fetch seller's own tickets (including past events)
+export async function fetchMyTickets(sellerId: string) {
+  const { data, error } = await supabase
+    .from("tickets")
+    .select("*, events(*)")
+    .eq("seller_id", sellerId)
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return data || [];
 }
 
 export async function fetchTicketsByEvent(eventId: string) {
