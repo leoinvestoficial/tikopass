@@ -13,7 +13,7 @@ import { Link } from "react-router-dom";
 
 export default function Index() {
   const [search, setSearch] = useState("");
-  const [selectedCity, setSelectedCity] = useState("");
+  const [selectedCity, setSelectedCity] = useState("Salvador");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [tickets, setTickets] = useState<TicketType[]>([]);
   const [loading, setLoading] = useState(true);
