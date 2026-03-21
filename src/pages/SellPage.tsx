@@ -27,6 +27,7 @@ export default function SellPage() {
   const [searching, setSearching] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [ticketForm, setTicketForm] = useState({ sector: "", row: "", seat: "", price: "" });
+  const [editedEvent, setEditedEvent] = useState<AIEvent | null>(null);
 
   const heroReveal = useScrollReveal<HTMLDivElement>();
   const { user } = useAuth();
