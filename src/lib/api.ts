@@ -106,6 +106,38 @@ export async function fetchTicketsByEvent(eventId: string) {
   return data;
 }
 
+// Public seller profile
+export async function fetchSellerProfile(userId: string) {
+  const [profileRes, ratingsRes, ticketsRes] = await Promise.all([
+    supabase.from("profiles").select("*").eq("user_id", userId).single(),
+    supabase.from("seller_ratings" as any).select("rating, comment, created_at, buyer_id").eq("seller_id", userId).order("created_at", { ascending: false }),
+    supabase.from("tickets").select("id, price, status, created_at, event_id, events(id, name, date, city)").eq("seller_id", userId).order("created_at", { ascending: false }),
+  ]);
+  if (profileRes.error) throw profileRes.error;
+
+  const ratings = (ratingsRes.data || []) as any[];
+  const avgRating = ratings.length > 0
+    ? ratings.reduce((sum: number, r: any) => sum + r.rating, 0) / ratings.length
+    : null;
+
+  let reviewsWithNames = ratings;
+  if (ratings.length > 0) {
+    const buyerIds = [...new Set(ratings.map((r: any) => r.buyer_id))];
+    const { data: buyerProfiles } = await supabase.from("profiles").select("user_id, display_name").in("user_id", buyerIds);
+    const nameMap = new Map((buyerProfiles || []).map((p) => [p.user_id, p.display_name]));
+    reviewsWithNames = ratings.map((r: any) => ({ ...r, buyer_name: nameMap.get(r.buyer_id) || "Comprador" }));
+  }
+
+  return {
+    profile: profileRes.data,
+    ratings: reviewsWithNames,
+    avgRating,
+    ratingCount: ratings.length,
+    tickets: ticketsRes.data || [],
+    totalSales: (ticketsRes.data || []).filter((t: any) => t.status === "sold").length,
+  };
+}
+
 export async function createTicket(ticket: {
   event_id: string; seller_id: string; sector: string; row?: string; seat?: string; price: number; original_price?: number;
 }) {

@@ -9,6 +9,7 @@ import EventDetail from "./pages/EventDetail.tsx";
 import SellPage from "./pages/SellPage.tsx";
 import NegotiationsPage from "./pages/NegotiationsPage.tsx";
 import MyTicketsPage from "./pages/MyTicketsPage.tsx";
+import SellerProfilePage from "./pages/SellerProfilePage.tsx";
 import AuthPage from "./pages/AuthPage.tsx";
 import PaymentSuccess from "./pages/PaymentSuccess.tsx";
 import NotFound from "./pages/NotFound.tsx";
@@ -28,6 +29,7 @@ const App = () => (
             <Route path="/sell" element={<SellPage />} />
             <Route path="/negotiations" element={<NegotiationsPage />} />
             <Route path="/my-tickets" element={<MyTicketsPage />} />
+            <Route path="/seller/:userId" element={<SellerProfilePage />} />
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/payment-success" element={<PaymentSuccess />} />
             <Route path="*" element={<NotFound />} />
