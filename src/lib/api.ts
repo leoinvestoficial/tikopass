@@ -114,10 +114,17 @@ export async function updateNegotiationStatus(id: string, status: string) {
 export async function fetchMessages(negotiationId: string) {
   const { data, error } = await supabase
     .from("negotiation_messages")
-    .select("*, profiles!negotiation_messages_sender_id_fkey(*)")
+    .select("*")
     .eq("negotiation_id", negotiationId)
     .order("created_at", { ascending: true });
   if (error) throw error;
+
+  if (data && data.length > 0) {
+    const senderIds = [...new Set(data.map(m => m.sender_id))];
+    const { data: profiles } = await supabase.from("profiles").select("*").in("user_id", senderIds);
+    const profileMap = new Map((profiles || []).map(p => [p.user_id, p]));
+    return data.map(m => ({ ...m, sender_profile: profileMap.get(m.sender_id) || null }));
+  }
   return data;
 }
 
