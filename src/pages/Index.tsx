@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import TicketCard from "@/components/TicketCard";
 import CityFilter from "@/components/CityFilter";
+import CategoryGrid from "@/components/CategoryGrid";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { fetchTickets, type Ticket as TicketType } from "@/lib/api";
@@ -105,13 +106,20 @@ export default function Index() {
         </div>
       </section>
 
-      {/* Filters */}
+      {/* Categories - GetNinjas style */}
       <section className="border-y border-border bg-card/50">
         <div
           ref={filtersReveal.ref}
-          className={`container py-6 ${filtersReveal.isVisible ? "animate-reveal-up" : "opacity-0"}`}
+          className={`container py-8 space-y-6 ${filtersReveal.isVisible ? "animate-reveal-up" : "opacity-0"}`}
           style={{ animationDelay: "100ms" }}
         >
+          <div>
+            <h2 className="text-lg font-display font-semibold text-foreground mb-4">O que você procura?</h2>
+            <CategoryGrid
+              selectedCategory={selectedCategory}
+              onCategoryChange={setSelectedCategory}
+            />
+          </div>
           <CityFilter
             selectedCity={selectedCity}
             onCityChange={setSelectedCity}

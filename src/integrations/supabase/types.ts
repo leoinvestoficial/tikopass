@@ -94,9 +94,13 @@ export type Database = {
       negotiations: {
         Row: {
           buyer_id: string
+          checkout_session_id: string | null
           created_at: string
           id: string
           offer_price: number
+          payment_intent_id: string | null
+          payment_status: string | null
+          platform_fee: number | null
           seller_id: string
           status: string
           ticket_id: string
@@ -104,9 +108,13 @@ export type Database = {
         }
         Insert: {
           buyer_id: string
+          checkout_session_id?: string | null
           created_at?: string
           id?: string
           offer_price: number
+          payment_intent_id?: string | null
+          payment_status?: string | null
+          platform_fee?: number | null
           seller_id: string
           status?: string
           ticket_id: string
@@ -114,9 +122,13 @@ export type Database = {
         }
         Update: {
           buyer_id?: string
+          checkout_session_id?: string | null
           created_at?: string
           id?: string
           offer_price?: number
+          payment_intent_id?: string | null
+          payment_status?: string | null
+          platform_fee?: number | null
           seller_id?: string
           status?: string
           ticket_id?: string
