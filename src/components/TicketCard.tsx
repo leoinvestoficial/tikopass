@@ -61,9 +61,15 @@ export default function TicketCard({ ticket, index = 0 }: TicketCardProps) {
                 </Badge>
               )}
             </div>
-            <Badge variant="secondary" className="text-xs font-medium">
-              {event.category}
-            </Badge>
+            {isPast ? (
+              <Badge variant="outline" className="text-xs font-medium text-muted-foreground border-muted">
+                Encerrado
+              </Badge>
+            ) : (
+              <Badge variant="secondary" className="text-xs font-medium">
+                {event.category}
+              </Badge>
+            )}
           </div>
 
           <div className="space-y-1.5 text-sm text-muted-foreground">
