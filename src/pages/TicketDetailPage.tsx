@@ -382,7 +382,7 @@ export default function TicketDetailPage() {
             </div>
 
             <aside
-              className="rounded-[28px] border border-border bg-card p-6 shadow-lg shadow-primary/5 animate-reveal-up"
+              className="rounded-[28px] border border-border bg-card p-6 shadow-lg shadow-primary/5"
               style={{ animationDelay: "120ms" }}
             >
               <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">Preço do anúncio</p>
