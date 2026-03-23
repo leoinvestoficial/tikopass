@@ -193,8 +193,7 @@ export default function Index() {
       {/* Tickets grid */}
       <section className={`flex-1 ${hasActiveSearch ? "bg-muted/20" : "border-t border-border"}`}>
         <div
-          ref={ticketsReveal.ref}
-          className={`container py-12 ${ticketsReveal.isVisible ? "animate-reveal-up" : "opacity-0"}`}
+          className="container py-12 animate-reveal-up"
           style={{ animationDelay: "200ms" }}
         >
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
