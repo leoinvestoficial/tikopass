@@ -1,7 +1,15 @@
 import { Link, useLocation } from "react-router-dom";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Ticket, Menu, X, User, MessageSquare, LogOut } from "lucide-react";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Ticket, Menu, X, User, MessageSquare, LogOut, Settings, ShoppingBag } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 
 export default function Navbar() {
@@ -17,6 +25,13 @@ export default function Navbar() {
     { to: "/my-tickets", label: "Meus Ingressos" },
     { to: "/negotiations", label: "Negociações" },
   ];
+
+  const initials = (profile?.display_name || user?.email || "U")
+    .split(" ")
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
 
   return (
     <nav className="sticky top-0 z-50 bg-card/80 backdrop-blur-lg border-b border-border">
@@ -46,19 +61,47 @@ export default function Navbar() {
 
         <div className="hidden md:flex items-center gap-3">
           {user ? (
-            <>
-              <Link to="/negotiations">
-                <Button variant="ghost" size="icon" className="relative">
-                  <MessageSquare className="w-5 h-5" />
-                </Button>
-              </Link>
-              <span className="text-sm font-medium text-foreground">
-                {profile?.display_name || "Usuário"}
-              </span>
-              <Button variant="ghost" size="icon" onClick={signOut}>
-                <LogOut className="w-4 h-4" />
-              </Button>
-            </>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="flex items-center gap-2 rounded-full border border-border p-1 pr-3 hover:shadow-md transition-shadow cursor-pointer">
+                  <Avatar className="w-8 h-8">
+                    {profile?.avatar_url ? (
+                      <AvatarImage src={profile.avatar_url} alt={profile.display_name || "Avatar"} />
+                    ) : null}
+                    <AvatarFallback className="text-xs font-display font-bold bg-primary/10 text-primary">
+                      {initials}
+                    </AvatarFallback>
+                  </Avatar>
+                  <Menu className="w-4 h-4 text-muted-foreground" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <div className="px-3 py-2">
+                  <p className="text-sm font-medium text-foreground">{profile?.display_name || "Usuário"}</p>
+                  <p className="text-xs text-muted-foreground">{user.email}</p>
+                </div>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link to="/profile" className="flex items-center gap-2 cursor-pointer">
+                    <User className="w-4 h-4" /> Meu Perfil
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/my-tickets" className="flex items-center gap-2 cursor-pointer">
+                    <ShoppingBag className="w-4 h-4" /> Meus Ingressos
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/negotiations" className="flex items-center gap-2 cursor-pointer">
+                    <MessageSquare className="w-4 h-4" /> Negociações
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={signOut} className="flex items-center gap-2 cursor-pointer text-destructive">
+                  <LogOut className="w-4 h-4" /> Sair
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           ) : (
             <Link to="/auth">
               <Button variant="outline" size="sm" className="gap-2">
@@ -83,9 +126,15 @@ export default function Navbar() {
             </Link>
           ))}
           {user ? (
-            <Button variant="outline" className="w-full mt-2 gap-2" onClick={() => { signOut(); setMobileOpen(false); }}>
-              <LogOut className="w-4 h-4" /> Sair ({profile?.display_name})
-            </Button>
+            <>
+              <Link to="/profile" onClick={() => setMobileOpen(false)}
+                className="block px-4 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:bg-muted">
+                Meu Perfil
+              </Link>
+              <Button variant="outline" className="w-full mt-2 gap-2" onClick={() => { signOut(); setMobileOpen(false); }}>
+                <LogOut className="w-4 h-4" /> Sair
+              </Button>
+            </>
           ) : (
             <Link to="/auth" onClick={() => setMobileOpen(false)}>
               <Button variant="outline" className="w-full mt-2 gap-2"><User className="w-4 h-4" /> Entrar</Button>

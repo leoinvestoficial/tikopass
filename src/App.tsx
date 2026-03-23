@@ -12,6 +12,7 @@ import MyTicketsPage from "./pages/MyTicketsPage.tsx";
 import TicketDetailPage from "./pages/TicketDetailPage.tsx";
 import SellerProfilePage from "./pages/SellerProfilePage.tsx";
 import AuthPage from "./pages/AuthPage.tsx";
+import ProfilePage from "./pages/ProfilePage.tsx";
 import PaymentSuccess from "./pages/PaymentSuccess.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
@@ -32,6 +33,7 @@ const App = () => (
             <Route path="/negotiations" element={<NegotiationsPage />} />
             <Route path="/my-tickets" element={<MyTicketsPage />} />
             <Route path="/seller/:userId" element={<SellerProfilePage />} />
+            <Route path="/profile" element={<ProfilePage />} />
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/payment-success" element={<PaymentSuccess />} />
             <Route path="*" element={<NotFound />} />
