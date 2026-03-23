@@ -97,8 +97,8 @@ async function scrapeTicketPlatforms(query: string, city: string): Promise<strin
     console.log("Firecrawl found results:", items.length);
 
     for (const item of items) {
-      const snippet = (item.markdown || item.description || "").slice(0, 500);
-      results.push(`[${item.title || ""}] ${item.url || ""}\n${snippet}`);
+      const snippet = normalizeText((item.markdown || item.description || "").slice(0, 500));
+      results.push(`[${normalizeText(item.title || "")}] ${item.url || ""}\n${snippet}`);
     }
   } catch (e) {
     console.error("Firecrawl error:", e);
