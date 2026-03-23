@@ -14,6 +14,17 @@ type AIEvent = {
   category: string;
 };
 
+/** Normalize text: fix encoding artifacts and ensure proper Unicode */
+function normalizeText(text: string): string {
+  // NFC normalization to compose accented characters properly
+  let normalized = text.normalize("NFC");
+  // Remove null bytes and other control chars (except newline/tab)
+  normalized = normalized.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, "");
+  // Remove replacement character U+FFFD
+  normalized = normalized.replace(/\uFFFD/g, "");
+  return normalized.trim();
+}
+
 async function searchPerplexity(query: string, city: string): Promise<string> {
   const apiKey = Deno.env.get("PERPLEXITY_API_KEY");
   if (!apiKey) {
@@ -54,7 +65,7 @@ async function searchPerplexity(query: string, city: string): Promise<string> {
     const content = data.choices?.[0]?.message?.content || "";
     const citations = data.citations || [];
     console.log("Perplexity found content, citations:", citations.length);
-    return content + "\n\nFontes: " + citations.join(", ");
+    return normalizeText(content + "\n\nFontes: " + citations.join(", "));
   } catch (e) {
     console.error("Perplexity search error:", e);
     return "";
@@ -97,8 +108,8 @@ async function scrapeTicketPlatforms(query: string, city: string): Promise<strin
     console.log("Firecrawl found results:", items.length);
 
     for (const item of items) {
-      const snippet = (item.markdown || item.description || "").slice(0, 500);
-      results.push(`[${item.title || ""}] ${item.url || ""}\n${snippet}`);
+      const snippet = normalizeText((item.markdown || item.description || "").slice(0, 500));
+      results.push(`[${normalizeText(item.title || "")}] ${item.url || ""}\n${snippet}`);
     }
   } catch (e) {
     console.error("Firecrawl error:", e);
@@ -106,6 +117,7 @@ async function scrapeTicketPlatforms(query: string, city: string): Promise<strin
 
   return results.join("\n\n---\n\n");
 }
+
 
 async function structureWithGemini(
   query: string,
@@ -129,7 +141,8 @@ REGRAS:
 - Para eventos que já aconteceram e não são recorrentes, mantenha a data original e inclua o ano no nome.
 - Categorias permitidas: Shows, Esportes, Teatro, Festivais, Stand-up, Conferências.
 - Locais conhecidos de Salvador: Arena Fonte Nova, Concha Acústica do TCA, WET Salvador, Casa Pia, Groove Bar, Bahia Café Hall, Arena Parque, Largo do Pelourinho, Mali (casa de eventos).
-- Se não houver dados suficientes para um campo, faça sua melhor estimativa baseada no contexto.`;
+- Se não houver dados suficientes para um campo, faça sua melhor estimativa baseada no contexto.
+- IMPORTANTE: Use SEMPRE acentos e caracteres especiais corretos em português. Ex: "São João", "D'Ávila", "Camaçari", "João", "ção", "ã", "é", "ó". Nunca omita acentos.`;
 
   const userPrompt = `Busca: "${query}" em ${city} e região da Bahia.
 
@@ -206,7 +219,13 @@ Extraia até 8 eventos reais encontrados nos dados acima. NÃO invente eventos q
   if (!toolCall?.function?.arguments) return [];
 
   const parsed = JSON.parse(toolCall.function.arguments);
-  return parsed.events || [];
+  // Normalize all text fields to fix encoding issues
+  return (parsed.events || []).map((e: AIEvent) => ({
+    ...e,
+    name: normalizeText(e.name),
+    venue: normalizeText(e.venue),
+    city: normalizeText(e.city),
+  }));
 }
 
 serve(async (req) => {
