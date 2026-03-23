@@ -62,8 +62,7 @@ export default function TicketDetailPage() {
   const [deleting, setDeleting] = useState(false);
   const [editForm, setEditForm] = useState({ sector: "", row: "", seat: "", price: "" });
 
-  const heroReveal = useScrollReveal<HTMLDivElement>();
-  const contentReveal = useScrollReveal<HTMLDivElement>();
+  // Removed scroll reveal - content should always be visible on detail pages
 
   useEffect(() => {
     if (ticketId) {
