@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Ticket, Menu, X, User, MessageSquare, LogOut, Settings, ShoppingBag } from "lucide-react";
+import { Ticket, Menu, X, User, MessageSquare, LogOut, ShoppingBag, Wallet } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 
 export default function Navbar() {
