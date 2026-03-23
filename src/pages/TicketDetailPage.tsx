@@ -16,7 +16,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useAuth } from "@/hooks/use-auth";
-import { useScrollReveal } from "@/hooks/use-scroll-reveal";
+
 import { createNegotiation, deleteTicket, sendMessage, updateTicket } from "@/lib/api";
 import { toast } from "sonner";
 import {
