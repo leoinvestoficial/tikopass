@@ -228,7 +228,13 @@ Extraia até 8 eventos reais encontrados nos dados acima. NÃO invente eventos q
   if (!toolCall?.function?.arguments) return [];
 
   const parsed = JSON.parse(toolCall.function.arguments);
-  return parsed.events || [];
+  // Normalize all text fields to fix encoding issues
+  return (parsed.events || []).map((e: AIEvent) => ({
+    ...e,
+    name: normalizeText(e.name),
+    venue: normalizeText(e.venue),
+    city: normalizeText(e.city),
+  }));
 }
 
 serve(async (req) => {
