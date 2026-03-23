@@ -95,6 +95,7 @@ export type Database = {
         Row: {
           buyer_id: string
           checkout_session_id: string | null
+          counter_offer_price: number | null
           created_at: string
           id: string
           offer_price: number
@@ -109,6 +110,7 @@ export type Database = {
         Insert: {
           buyer_id: string
           checkout_session_id?: string | null
+          counter_offer_price?: number | null
           created_at?: string
           id?: string
           offer_price: number
@@ -123,6 +125,7 @@ export type Database = {
         Update: {
           buyer_id?: string
           checkout_session_id?: string | null
+          counter_offer_price?: number | null
           created_at?: string
           id?: string
           offer_price?: number

@@ -10,7 +10,7 @@ import {
   Calendar, MapPin, Tag, TrendingDown, MessageSquare, ArrowLeft,
   Clock, Loader2, Star, ArrowUpDown, User, ShieldCheck, Pencil, Trash2,
 } from "lucide-react";
-import { useScrollReveal } from "@/hooks/use-scroll-reveal";
+
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
@@ -37,8 +37,6 @@ export default function EventDetail() {
   const [editForm, setEditForm] = useState({ sector: "", row: "", seat: "", price: "" });
   const [deleting, setDeleting] = useState<string | null>(null);
 
-  const headerReveal = useScrollReveal<HTMLDivElement>();
-  const ticketsReveal = useScrollReveal<HTMLDivElement>();
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -229,10 +227,7 @@ export default function EventDetail() {
 
       {/* Event header */}
       <section className="border-b border-border bg-gradient-to-br from-primary/5 via-transparent to-transparent">
-        <div
-          ref={headerReveal.ref}
-          className={`container py-10 ${headerReveal.isVisible ? "animate-reveal-up" : "opacity-0"}`}
-        >
+        <div className="container py-10">
           <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6">
             <ArrowLeft className="w-4 h-4" /> Voltar
           </Link>
@@ -258,11 +253,7 @@ export default function EventDetail() {
 
       {/* Tickets section */}
       <section className="flex-1">
-        <div
-          ref={ticketsReveal.ref}
-          className={`container py-10 ${ticketsReveal.isVisible ? "animate-reveal-up" : "opacity-0"}`}
-          style={{ animationDelay: "150ms" }}
-        >
+        <div className="container py-10">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
             <div>
               <h2 className="text-xl font-display font-semibold text-foreground">
