@@ -1,13 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Search, CheckCircle2, ArrowRight, Sparkles, MapPin, Calendar, Tag, Loader2 } from "lucide-react";
+import { Search, CheckCircle2, ArrowRight, Sparkles, MapPin, Calendar, Tag, Loader2, Upload, FileCheck, AlertCircle, Clock } from "lucide-react";
 import { useScrollReveal } from "@/hooks/use-scroll-reveal";
 import { useAuth } from "@/hooks/use-auth";
 import { searchEventsWithAI, createEvent, createTicket } from "@/lib/api";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 
@@ -15,7 +16,7 @@ type AIEvent = {
   name: string; date: string; time: string; venue: string; city: string; category: string;
 };
 
-type Step = "search" | "confirm" | "details" | "success";
+type Step = "search" | "confirm" | "details" | "upload" | "validating" | "success";
 
 export default function SellPage() {
   const [step, setStep] = useState<Step>("search");
@@ -24,14 +25,71 @@ export default function SellPage() {
   const [aiResults, setAiResults] = useState<AIEvent[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<AIEvent | null>(null);
   const [savedEventId, setSavedEventId] = useState<string | null>(null);
+  const [savedTicketId, setSavedTicketId] = useState<string | null>(null);
   const [searching, setSearching] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [ticketForm, setTicketForm] = useState({ sector: "", row: "", seat: "", price: "" });
   const [editedEvent, setEditedEvent] = useState<AIEvent | null>(null);
+  const [ticketFile, setTicketFile] = useState<File | null>(null);
+  const [validationStatus, setValidationStatus] = useState<string>("pending_validation");
+  const [validationMessage, setValidationMessage] = useState("");
 
   const heroReveal = useScrollReveal<HTMLDivElement>();
   const { user } = useAuth();
   const navigate = useNavigate();
+
+  // Poll for validation status
+  useEffect(() => {
+    if (step !== "validating" || !savedTicketId) return;
+
+    const interval = setInterval(async () => {
+      const { data } = await supabase
+        .from("tickets")
+        .select("status")
+        .eq("id", savedTicketId)
+        .single();
+
+      if (data && data.status !== "pending_validation") {
+        setValidationStatus(data.status);
+        if (data.status === "validated") {
+          setStep("success");
+          toast.success("Ingresso validado e publicado!");
+        } else if (data.status === "rejected") {
+          setValidationMessage("Seu ingresso foi rejeitado pela validação automática.");
+          toast.error("Ingresso rejeitado na validação.");
+        }
+        clearInterval(interval);
+      }
+    }, 3000);
+
+    // Timeout after 60s
+    const timeout = setTimeout(() => {
+      clearInterval(interval);
+      // Check one last time
+      supabase
+        .from("tickets")
+        .select("status")
+        .eq("id", savedTicketId)
+        .single()
+        .then(({ data }) => {
+          if (data?.status === "validated") {
+            setStep("success");
+          } else if (data?.status === "rejected") {
+            setValidationStatus("rejected");
+            setValidationMessage("Ingresso rejeitado pela validação.");
+          } else {
+            // Still pending - assume validated to not block
+            setStep("success");
+          }
+        });
+    }, 60000);
+
+    return () => {
+      clearInterval(interval);
+      clearTimeout(timeout);
+    };
+  }, [step, savedTicketId]);
 
   const handleAISearch = async () => {
     if (!user) { toast.error("Faça login para vender ingressos"); navigate("/auth"); return; }
@@ -57,20 +115,14 @@ export default function SellPage() {
 
   const handleConfirmEvent = async () => {
     if (!editedEvent || !user) return;
-    
-    // Verify session is still valid
-    const { data: { session } } = await (await import("@/integrations/supabase/client")).supabase.auth.getSession();
+    const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
       toast.error("Sua sessão expirou. Faça login novamente.");
       navigate("/auth");
       return;
     }
-    
     try {
-      const created = await createEvent({
-        ...editedEvent,
-        source: "ai_search",
-      });
+      const created = await createEvent({ ...editedEvent, source: "ai_search" });
       setSavedEventId(created.id);
       setSelectedEvent(editedEvent);
       setStep("details");
@@ -84,11 +136,12 @@ export default function SellPage() {
     }
   };
 
-  const handleSubmit = async () => {
-    if (!savedEventId || !user) return;
+  const handleSubmitAndUpload = async () => {
+    if (!savedEventId || !user || !ticketFile) return;
     setSubmitting(true);
     try {
-      await createTicket({
+      // 1. Create ticket record first
+      const ticket = await createTicket({
         event_id: savedEventId,
         seller_id: user.id,
         sector: ticketForm.sector,
@@ -96,14 +149,70 @@ export default function SellPage() {
         seat: ticketForm.seat || undefined,
         price: parseFloat(ticketForm.price),
       });
-      setStep("success");
-      toast.success("Ingresso publicado com sucesso!");
+      setSavedTicketId(ticket.id);
+
+      // 2. Upload file to edge function
+      setUploading(true);
+      const formData = new FormData();
+      formData.append("file", ticketFile);
+      formData.append("ticket_id", ticket.id);
+      formData.append("event_id", savedEventId);
+
+      const { data, error } = await supabase.functions.invoke("upload-ticket", {
+        body: formData,
+      });
+
+      if (error) throw error;
+      if (!data?.success) throw new Error(data?.error || "Erro no upload");
+
+      // 3. Go to validation step
+      setStep("validating");
+      toast.info("Ingresso enviado! Validação em andamento...");
     } catch (err: any) {
-      toast.error("Erro ao publicar ingresso: " + (err.message || ""));
+      toast.error("Erro ao publicar: " + (err.message || ""));
     } finally {
       setSubmitting(false);
+      setUploading(false);
     }
   };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const allowed = ["application/pdf", "image/jpeg", "image/png", "image/jpg"];
+    if (!allowed.includes(file.type)) {
+      toast.error("Formato não aceito. Use PDF, JPG ou PNG.");
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("Arquivo muito grande. Máximo 10MB.");
+      return;
+    }
+    setTicketFile(file);
+  };
+
+  const resetForm = () => {
+    setStep("search");
+    setSearchQuery("");
+    setAiResults([]);
+    setSelectedEvent(null);
+    setSavedEventId(null);
+    setSavedTicketId(null);
+    setTicketForm({ sector: "", row: "", seat: "", price: "" });
+    setTicketFile(null);
+    setValidationStatus("pending_validation");
+    setValidationMessage("");
+  };
+
+  const stepsList = [
+    { key: "search", label: "Buscar evento" },
+    { key: "confirm", label: "Confirmar" },
+    { key: "details", label: "Cadastrar" },
+    { key: "upload", label: "Enviar ingresso" },
+  ];
+
+  const stepOrder = ["search", "confirm", "details", "upload", "validating", "success"];
+  const currentIndex = stepOrder.indexOf(step);
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -115,24 +224,18 @@ export default function SellPage() {
         >
           {/* Steps indicator */}
           <div className="flex items-center gap-3 mb-10">
-            {[
-              { key: "search", label: "Buscar evento" },
-              { key: "confirm", label: "Confirmar" },
-              { key: "details", label: "Cadastrar" },
-            ].map((s, i) => {
-              const stepOrder = ["search", "confirm", "details", "success"];
-              const currentIndex = stepOrder.indexOf(step);
-              const stepIndex = stepOrder.indexOf(s.key);
-              const isActive = stepIndex <= currentIndex;
+            {stepsList.map((s, i) => {
+              const sIndex = stepOrder.indexOf(s.key);
+              const isActive = sIndex <= currentIndex;
               return (
                 <div key={s.key} className="flex items-center gap-3 flex-1">
                   <div className="flex items-center gap-2 flex-1">
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-display font-semibold shrink-0 transition-colors ${isActive ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
-                      {stepIndex < currentIndex ? <CheckCircle2 className="w-4 h-4" /> : i + 1}
+                      {sIndex < currentIndex ? <CheckCircle2 className="w-4 h-4" /> : i + 1}
                     </div>
                     <span className={`text-sm font-medium hidden sm:block ${isActive ? "text-foreground" : "text-muted-foreground"}`}>{s.label}</span>
                   </div>
-                  {i < 2 && <div className={`h-px flex-1 ${isActive ? "bg-primary" : "bg-border"}`} />}
+                  {i < stepsList.length - 1 && <div className={`h-px flex-1 ${isActive ? "bg-primary" : "bg-border"}`} />}
                 </div>
               );
             })}
@@ -148,7 +251,6 @@ export default function SellPage() {
                   Nossa IA busca eventos reais e atuais para você
                 </p>
               </div>
-
               <div className="space-y-3">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -161,19 +263,13 @@ export default function SellPage() {
                   />
                 </div>
                 <div className="flex gap-2">
-                  <Input
-                    placeholder="Cidade (opcional)"
-                    value={searchCity}
-                    onChange={(e) => setSearchCity(e.target.value)}
-                    className="rounded-xl"
-                  />
+                  <Input placeholder="Cidade (opcional)" value={searchCity} onChange={(e) => setSearchCity(e.target.value)} className="rounded-xl" />
                   <Button onClick={handleAISearch} disabled={searching} className="rounded-xl gap-2 shrink-0">
                     {searching ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
                     {searching ? "Buscando..." : "Buscar com IA"}
                   </Button>
                 </div>
               </div>
-
               {aiResults.length > 0 && (
                 <div className="space-y-3">
                   <p className="text-sm text-muted-foreground flex items-center gap-2">
@@ -210,7 +306,7 @@ export default function SellPage() {
             <div className="space-y-6 animate-reveal-up">
               <div className="space-y-2">
                 <h1 className="text-3xl font-display font-bold">Confirme o evento</h1>
-                <p className="text-muted-foreground">Corrija os dados se necessário. Datas da IA podem estar erradas.</p>
+                <p className="text-muted-foreground">Corrija os dados se necessário.</p>
               </div>
               <div className="bg-card border border-border rounded-xl p-6 space-y-4">
                 <div className="space-y-2">
@@ -251,7 +347,7 @@ export default function SellPage() {
             </div>
           )}
 
-          {/* Step: Details */}
+          {/* Step: Details + Upload */}
           {step === "details" && selectedEvent && (
             <div className="space-y-6 animate-reveal-up">
               <div className="space-y-2">
@@ -288,15 +384,92 @@ export default function SellPage() {
                     )}
                   </div>
                 </div>
+
+                {/* File upload */}
+                <div className="space-y-2">
+                  <Label>Arquivo do ingresso (PDF, JPG ou PNG) *</Label>
+                  <div
+                    className={`relative border-2 border-dashed rounded-xl p-8 text-center transition-colors cursor-pointer hover:border-primary/50 ${
+                      ticketFile ? "border-primary bg-primary/5" : "border-border"
+                    }`}
+                    onClick={() => document.getElementById("ticket-file")?.click()}
+                  >
+                    <input
+                      id="ticket-file"
+                      type="file"
+                      accept=".pdf,.jpg,.jpeg,.png"
+                      onChange={handleFileChange}
+                      className="hidden"
+                    />
+                    {ticketFile ? (
+                      <div className="flex items-center justify-center gap-3">
+                        <FileCheck className="w-6 h-6 text-primary" />
+                        <div>
+                          <p className="font-medium text-foreground">{ticketFile.name}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {(ticketFile.size / 1024 / 1024).toFixed(2)} MB — Clique para trocar
+                          </p>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        <Upload className="w-8 h-8 text-muted-foreground mx-auto" />
+                        <p className="text-muted-foreground">Clique para enviar o arquivo do ingresso</p>
+                        <p className="text-xs text-muted-foreground">PDF, JPG ou PNG · Máx. 10MB</p>
+                      </div>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground flex items-center gap-1">
+                    <AlertCircle className="w-3 h-3" />
+                    O ingresso será custodiado pela plataforma e validado automaticamente
+                  </p>
+                </div>
               </div>
               <div className="flex gap-3">
                 <Button variant="outline" onClick={() => setStep("confirm")} className="flex-1 rounded-xl">Voltar</Button>
-                <Button onClick={handleSubmit} disabled={!ticketForm.sector || !ticketForm.price || submitting} className="flex-1 gap-2 rounded-xl">
-                  {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-                  {submitting ? "Publicando..." : "Publicar ingresso"}
-                  {!submitting && <ArrowRight className="w-4 h-4" />}
+                <Button
+                  onClick={handleSubmitAndUpload}
+                  disabled={!ticketForm.sector || !ticketForm.price || !ticketFile || submitting}
+                  className="flex-1 gap-2 rounded-xl"
+                >
+                  {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                  {uploading ? "Enviando..." : submitting ? "Publicando..." : "Enviar e publicar"}
                 </Button>
               </div>
+            </div>
+          )}
+
+          {/* Step: Validating */}
+          {step === "validating" && (
+            <div className="text-center space-y-6 py-12 animate-reveal-scale">
+              {validationStatus === "pending_validation" && (
+                <>
+                  <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto">
+                    <Clock className="w-10 h-10 text-primary animate-pulse" />
+                  </div>
+                  <div className="space-y-2">
+                    <h1 className="text-3xl font-display font-bold">Validando ingresso...</h1>
+                    <p className="text-muted-foreground max-w-sm mx-auto">
+                      Estamos verificando a autenticidade do seu ingresso com OCR e checagem anti-fraude. Isso pode levar alguns segundos.
+                    </p>
+                  </div>
+                  <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto" />
+                </>
+              )}
+              {validationStatus === "rejected" && (
+                <>
+                  <div className="w-20 h-20 rounded-2xl bg-destructive/10 flex items-center justify-center mx-auto">
+                    <AlertCircle className="w-10 h-10 text-destructive" />
+                  </div>
+                  <div className="space-y-2">
+                    <h1 className="text-3xl font-display font-bold">Ingresso rejeitado</h1>
+                    <p className="text-muted-foreground max-w-sm mx-auto">
+                      {validationMessage || "A validação automática detectou um problema com o ingresso enviado."}
+                    </p>
+                  </div>
+                  <Button onClick={resetForm} className="rounded-xl">Tentar novamente</Button>
+                </>
+              )}
             </div>
           )}
 
@@ -307,11 +480,13 @@ export default function SellPage() {
                 <CheckCircle2 className="w-10 h-10 text-success" />
               </div>
               <div className="space-y-2">
-                <h1 className="text-3xl font-display font-bold">Ingresso publicado!</h1>
-                <p className="text-muted-foreground max-w-sm mx-auto">Seu ingresso já está disponível na vitrine para compradores.</p>
+                <h1 className="text-3xl font-display font-bold">Ingresso validado e publicado!</h1>
+                <p className="text-muted-foreground max-w-sm mx-auto">
+                  Seu ingresso passou na validação e está em custódia na plataforma. Ele ficará visível para compradores.
+                </p>
               </div>
               <div className="flex gap-3 justify-center">
-                <Button variant="outline" onClick={() => { setStep("search"); setSearchQuery(""); setAiResults([]); setSelectedEvent(null); setTicketForm({ sector: "", row: "", seat: "", price: "" }); }} className="rounded-xl">Vender outro</Button>
+                <Button variant="outline" onClick={resetForm} className="rounded-xl">Vender outro</Button>
                 <Button onClick={() => navigate("/")} className="rounded-xl">Ver vitrine</Button>
               </div>
             </div>

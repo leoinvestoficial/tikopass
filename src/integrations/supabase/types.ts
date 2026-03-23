@@ -14,6 +14,44 @@ export type Database = {
   }
   public: {
     Tables: {
+      buyer_access: {
+        Row: {
+          buyer_id: string
+          created_at: string
+          expires_at: string
+          id: string
+          invalidated_at: string | null
+          ticket_id: string
+          token: string
+        }
+        Insert: {
+          buyer_id: string
+          created_at?: string
+          expires_at: string
+          id?: string
+          invalidated_at?: string | null
+          ticket_id: string
+          token: string
+        }
+        Update: {
+          buyer_id?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          invalidated_at?: string | null
+          ticket_id?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "buyer_access_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       events: {
         Row: {
           category: string
@@ -221,11 +259,45 @@ export type Database = {
           },
         ]
       }
+      ticket_hashes: {
+        Row: {
+          created_at: string
+          hash: string
+          id: string
+          status: string
+          ticket_id: string
+        }
+        Insert: {
+          created_at?: string
+          hash: string
+          id?: string
+          status?: string
+          ticket_id: string
+        }
+        Update: {
+          created_at?: string
+          hash?: string
+          id?: string
+          status?: string
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ticket_hashes_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tickets: {
         Row: {
           created_at: string
           event_id: string
+          extracted_code: string | null
           id: string
+          order_id: string | null
           original_price: number | null
           price: number
           row: string | null
@@ -233,12 +305,16 @@ export type Database = {
           sector: string
           seller_id: string
           status: string
+          storage_path: string | null
           updated_at: string
+          validated_at: string | null
         }
         Insert: {
           created_at?: string
           event_id: string
+          extracted_code?: string | null
           id?: string
+          order_id?: string | null
           original_price?: number | null
           price: number
           row?: string | null
@@ -246,12 +322,16 @@ export type Database = {
           sector: string
           seller_id: string
           status?: string
+          storage_path?: string | null
           updated_at?: string
+          validated_at?: string | null
         }
         Update: {
           created_at?: string
           event_id?: string
+          extracted_code?: string | null
           id?: string
+          order_id?: string | null
           original_price?: number | null
           price?: number
           row?: string | null
@@ -259,7 +339,9 @@ export type Database = {
           sector?: string
           seller_id?: string
           status?: string
+          storage_path?: string | null
           updated_at?: string
+          validated_at?: string | null
         }
         Relationships: [
           {

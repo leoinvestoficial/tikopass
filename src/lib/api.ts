@@ -43,7 +43,7 @@ export async function fetchTickets(filters?: { city?: string; category?: string;
   let query = supabase
     .from("tickets")
     .select("*, events(*)")
-    .eq("status", "available")
+    .in("status", ["available", "validated"])
     .gte("events.date", filters?.dateFrom || today)
     .order("created_at", { ascending: false });
 
@@ -73,7 +73,7 @@ export async function fetchTicketsByEvent(eventId: string) {
     .from("tickets")
     .select("*, events(*)")
     .eq("event_id", eventId)
-    .eq("status", "available")
+    .in("status", ["available", "validated"])
     .order("price", { ascending: true });
   if (error) throw error;
 
