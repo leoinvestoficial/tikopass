@@ -14,20 +14,13 @@ type AIEvent = {
   category: string;
 };
 
-/** Normalize text: fix common encoding artifacts and ensure proper Unicode */
+/** Normalize text: fix encoding artifacts and ensure proper Unicode */
 function normalizeText(text: string): string {
+  // NFC normalization to compose accented characters properly
   let normalized = text.normalize("NFC");
+  // Remove null bytes and other control chars (except newline/tab)
   normalized = normalized.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, "");
-  const mojibakeMap: Record<string, string> = {
-    "Ã£": "ã", "Ã¡": "á", "Ã©": "é", "Ã­": "í", "Ã³": "ó", "Ãº": "ú",
-    "Ã¢": "â", "Ãª": "ê", "Ã´": "ô", "Ã§": "ç", "Ã±": "ñ",
-    "Ã€": "À", "Ã": "Á", "Ã‰": "É", "Ã"": "Ó", "Ãš": "Ú",
-    "Ã‚": "Â", "ÃŠ": "Ê", "Ã"": "Ô", "Ã‡": "Ç",
-    "Ã£o": "ão", "Ã§Ã£o": "ção",
-  };
-  for (const [bad, good] of Object.entries(mojibakeMap)) {
-    normalized = normalized.replaceAll(bad, good);
-  }
+  // Remove replacement character U+FFFD
   normalized = normalized.replace(/\uFFFD/g, "");
   return normalized.trim();
 }
