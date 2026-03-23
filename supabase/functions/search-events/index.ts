@@ -147,7 +147,8 @@ REGRAS:
 - Para eventos que já aconteceram e não são recorrentes, mantenha a data original e inclua o ano no nome.
 - Categorias permitidas: Shows, Esportes, Teatro, Festivais, Stand-up, Conferências.
 - Locais conhecidos de Salvador: Arena Fonte Nova, Concha Acústica do TCA, WET Salvador, Casa Pia, Groove Bar, Bahia Café Hall, Arena Parque, Largo do Pelourinho, Mali (casa de eventos).
-- Se não houver dados suficientes para um campo, faça sua melhor estimativa baseada no contexto.`;
+- Se não houver dados suficientes para um campo, faça sua melhor estimativa baseada no contexto.
+- IMPORTANTE: Use SEMPRE acentos e caracteres especiais corretos em português. Ex: "São João", "D'Ávila", "Camaçari", "João", "ção", "ã", "é", "ó". Nunca omita acentos.`;
 
   const userPrompt = `Busca: "${query}" em ${city} e região da Bahia.
 
