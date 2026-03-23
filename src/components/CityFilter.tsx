@@ -2,6 +2,7 @@ const CITIES = [
   "Salvador",
   "Lauro de Freitas",
   "Camaçari",
+  "Mata de São João",
   "Feira de Santana",
   "Porto Seguro",
   "Ilhéus",
