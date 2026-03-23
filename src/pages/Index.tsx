@@ -14,7 +14,7 @@ import SafetyBanner from "@/components/SafetyBanner";
 import SocialProof from "@/components/SocialProof";
 import QuickDateFilters, { getDateRange } from "@/components/QuickDateFilters";
 import { fetchTickets, type Ticket as TicketType } from "@/lib/api";
-import { useScrollReveal } from "@/hooks/use-scroll-reveal";
+
 import { Link } from "react-router-dom";
 
 type DateFilter = "" | "today" | "tomorrow" | "weekend";
