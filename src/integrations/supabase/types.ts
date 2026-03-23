@@ -353,6 +353,53 @@ export type Database = {
           },
         ]
       }
+      wallet_transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          description: string | null
+          id: string
+          negotiation_id: string | null
+          released_at: string | null
+          status: string
+          type: string
+          user_id: string
+          withdrawn_at: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          negotiation_id?: string | null
+          released_at?: string | null
+          status?: string
+          type: string
+          user_id: string
+          withdrawn_at?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          negotiation_id?: string | null
+          released_at?: string | null
+          status?: string
+          type?: string
+          user_id?: string
+          withdrawn_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wallet_transactions_negotiation_id_fkey"
+            columns: ["negotiation_id"]
+            isOneToOne: false
+            referencedRelation: "negotiations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

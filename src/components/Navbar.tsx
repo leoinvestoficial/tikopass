@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Ticket, Menu, X, User, MessageSquare, LogOut, Settings, ShoppingBag } from "lucide-react";
+import { Ticket, Menu, X, User, MessageSquare, LogOut, ShoppingBag, Wallet } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 
 export default function Navbar() {
@@ -94,6 +94,11 @@ export default function Navbar() {
                 <DropdownMenuItem asChild>
                   <Link to="/negotiations" className="flex items-center gap-2 cursor-pointer">
                     <MessageSquare className="w-4 h-4" /> Negociações
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/wallet" className="flex items-center gap-2 cursor-pointer">
+                    <Wallet className="w-4 h-4" /> Carteira
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />

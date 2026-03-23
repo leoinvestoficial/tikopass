@@ -14,6 +14,7 @@ import SellerProfilePage from "./pages/SellerProfilePage.tsx";
 import AuthPage from "./pages/AuthPage.tsx";
 import ProfilePage from "./pages/ProfilePage.tsx";
 import PaymentSuccess from "./pages/PaymentSuccess.tsx";
+import WalletPage from "./pages/WalletPage.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -36,6 +37,7 @@ const App = () => (
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/payment-success" element={<PaymentSuccess />} />
+            <Route path="/wallet" element={<WalletPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>

@@ -7,7 +7,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const PLATFORM_FEE_PERCENT = 10; // 10% commission
+const PLATFORM_FEE_PERCENT = 10;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -20,7 +20,6 @@ serve(async (req) => {
   );
 
   try {
-    // Authenticate user
     const authHeader = req.headers.get("Authorization")!;
     const token = authHeader.replace("Bearer ", "");
     const { data } = await supabaseClient.auth.getUser(token);
@@ -30,7 +29,6 @@ serve(async (req) => {
     const { negotiation_id } = await req.json();
     if (!negotiation_id) throw new Error("negotiation_id é obrigatório");
 
-    // Fetch negotiation with ticket and event info
     const supabaseAdmin = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
@@ -49,24 +47,22 @@ serve(async (req) => {
 
     const ticketPrice = negotiation.offer_price;
     const platformFee = Math.round(ticketPrice * PLATFORM_FEE_PERCENT) / 100;
-    const totalAmount = Math.round((ticketPrice + platformFee) * 100); // in centavos
+    const totalAmount = Math.round((ticketPrice + platformFee) * 100); // centavos
 
     const eventName = negotiation.tickets?.events?.name || "Ingresso";
     const sector = negotiation.tickets?.sector || "";
 
-    // Initialize Stripe
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
       apiVersion: "2025-08-27.basil",
     });
 
-    // Check/create Stripe customer
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
     let customerId;
     if (customers.data.length > 0) {
       customerId = customers.data[0].id;
     }
 
-    // Create checkout session with dynamic price
+    // ESCROW: Use manual capture — money is authorized but NOT captured yet
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       customer_email: customerId ? undefined : user.email,
@@ -84,6 +80,9 @@ serve(async (req) => {
         },
       ],
       mode: "payment",
+      payment_intent_data: {
+        capture_method: "manual", // ESCROW: authorize only, capture later post-event
+      },
       success_url: `${req.headers.get("origin")}/payment-success?session_id={CHECKOUT_SESSION_ID}&negotiation_id=${negotiation_id}`,
       cancel_url: `${req.headers.get("origin")}/negotiations`,
       metadata: {
@@ -96,7 +95,6 @@ serve(async (req) => {
       },
     });
 
-    // Update negotiation with checkout info
     await supabaseAdmin
       .from("negotiations")
       .update({
