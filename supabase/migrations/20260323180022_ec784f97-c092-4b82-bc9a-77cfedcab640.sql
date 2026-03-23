@@ -1,0 +1,1 @@
+UPDATE negotiations SET status = 'accepted' WHERE id = '6fed6fc4-1f38-4586-83da-e60554587786';
