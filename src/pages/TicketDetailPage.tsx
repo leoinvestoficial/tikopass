@@ -283,8 +283,7 @@ export default function TicketDetailPage() {
 
       <section className="border-b border-border bg-gradient-to-br from-primary/5 via-transparent to-transparent">
         <div
-          ref={heroReveal.ref}
-          className={`container py-10 ${heroReveal.isVisible ? "animate-reveal-up" : "opacity-0"}`}
+          className="container py-10 animate-reveal-up"
         >
           <div className="mb-6 flex flex-wrap items-center gap-3">
             <Link
