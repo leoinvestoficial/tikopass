@@ -43,6 +43,8 @@ export default function SellPage() {
   useEffect(() => {
     if (step !== "validating" || !savedTicketId) return;
 
+    let isActive = true;
+
     const interval = setInterval(async () => {
       const { data } = await supabase
         .from("tickets")
@@ -50,42 +52,47 @@ export default function SellPage() {
         .eq("id", savedTicketId)
         .single();
 
-      if (data && data.status !== "pending_validation") {
-        setValidationStatus(data.status);
-        if (data.status === "validated") {
-          setStep("success");
-          toast.success("Ingresso validado e publicado!");
-        } else if (data.status === "rejected") {
-          setValidationMessage("Seu ingresso foi rejeitado pela validação automática.");
-          toast.error("Ingresso rejeitado na validação.");
-        }
-        clearInterval(interval);
+      if (!isActive || !data || data.status === "pending_validation") return;
+
+      setValidationStatus(data.status);
+      if (data.status === "validated") {
+        setStep("success");
+        toast.success("Ingresso validado e publicado!");
+      } else if (data.status === "rejected") {
+        setValidationMessage("Seu ingresso foi rejeitado pela validação automática.");
+        toast.error("Ingresso rejeitado na validação.");
       }
+      clearInterval(interval);
     }, 3000);
 
-    // Timeout after 60s
-    const timeout = setTimeout(() => {
+    const timeout = setTimeout(async () => {
       clearInterval(interval);
-      // Check one last time
-      supabase
+      const { data } = await supabase
         .from("tickets")
         .select("status")
         .eq("id", savedTicketId)
-        .single()
-        .then(({ data }) => {
-          if (data?.status === "validated") {
-            setStep("success");
-          } else if (data?.status === "rejected") {
-            setValidationStatus("rejected");
-            setValidationMessage("Ingresso rejeitado pela validação.");
-          } else {
-            // Still pending - assume validated to not block
-            setStep("success");
-          }
-        });
+        .single();
+
+      if (!isActive) return;
+
+      if (data?.status === "validated") {
+        setStep("success");
+        return;
+      }
+
+      if (data?.status === "rejected") {
+        setValidationStatus("rejected");
+        setValidationMessage("Ingresso rejeitado pela validação.");
+        return;
+      }
+
+      setValidationStatus("timeout");
+      setValidationMessage("A validação não foi concluída automaticamente. Seu ingresso não foi publicado.");
+      toast.error("A validação não foi concluída. O ingresso não foi publicado.");
     }, 60000);
 
     return () => {
+      isActive = false;
       clearInterval(interval);
       clearTimeout(timeout);
     };
