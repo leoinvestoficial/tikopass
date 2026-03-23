@@ -14,7 +14,24 @@ type AIEvent = {
   category: string;
 };
 
-async function searchPerplexity(query: string, city: string): Promise<string> {
+/** Normalize text: fix common encoding artifacts and ensure proper Unicode */
+function normalizeText(text: string): string {
+  let normalized = text.normalize("NFC");
+  normalized = normalized.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, "");
+  const mojibakeMap: Record<string, string> = {
+    "Ã£": "ã", "Ã¡": "á", "Ã©": "é", "Ã­": "í", "Ã³": "ó", "Ãº": "ú",
+    "Ã¢": "â", "Ãª": "ê", "Ã´": "ô", "Ã§": "ç", "Ã±": "ñ",
+    "Ã€": "À", "Ã": "Á", "Ã‰": "É", "Ã"": "Ó", "Ãš": "Ú",
+    "Ã‚": "Â", "ÃŠ": "Ê", "Ã"": "Ô", "Ã‡": "Ç",
+    "Ã£o": "ão", "Ã§Ã£o": "ção",
+  };
+  for (const [bad, good] of Object.entries(mojibakeMap)) {
+    normalized = normalized.replaceAll(bad, good);
+  }
+  normalized = normalized.replace(/\uFFFD/g, "");
+  return normalized.trim();
+}
+
   const apiKey = Deno.env.get("PERPLEXITY_API_KEY");
   if (!apiKey) {
     console.warn("PERPLEXITY_API_KEY not configured, skipping web search");
