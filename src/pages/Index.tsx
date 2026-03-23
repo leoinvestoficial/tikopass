@@ -99,8 +99,7 @@ export default function Index() {
       <section className="relative overflow-hidden border-b border-border">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/3" />
         <div
-          ref={heroReveal.ref}
-          className={`container relative ${hasActiveSearch ? "py-10 md:py-12" : "py-16 md:py-24"} ${heroReveal.isVisible ? "animate-reveal-up" : "opacity-0"}`}
+          className={`container relative ${hasActiveSearch ? "py-10 md:py-12" : "py-16 md:py-24"} animate-reveal-up`}
         >
           <div className={`${hasActiveSearch ? "max-w-4xl" : "max-w-2xl"} space-y-6`}>
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium">
