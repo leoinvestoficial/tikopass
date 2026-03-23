@@ -32,130 +32,172 @@ serve(async (req) => {
 
     if (downloadError || !fileData) throw new Error("Erro ao baixar arquivo para validação");
 
-    // 2. Convert file to base64 safely (no stack overflow)
+    // 2. Convert file to base64
     const arrayBuffer = await fileData.arrayBuffer();
     const uint8 = new Uint8Array(arrayBuffer);
-    
-    // Check file size - reject files > 10MB
+
     if (uint8.length > 10 * 1024 * 1024) {
-      await rejectTicket(supabaseAdmin, ticket_id, null);
+      await rejectTicket(supabaseAdmin, ticket_id, null, "Arquivo muito grande. Máximo 10MB.");
       return jsonResponse({ success: false, reason: "Arquivo muito grande. Máximo 10MB." });
     }
 
     const base64 = base64Encode(uint8);
-    const mimeType = storage_path.endsWith(".pdf") ? "application/pdf" : 
+    const isPdf = storage_path.endsWith(".pdf");
+    const mimeType = isPdf ? "application/pdf" : 
                      storage_path.endsWith(".png") ? "image/png" : "image/jpeg";
 
-    // 3. OCR via Lovable AI (Gemini) - extract text and validate if it's a real ticket
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY não configurada");
+    // ========== CAMADA 1: OCR via Google Vision API ==========
+    const GOOGLE_VISION_API_KEY = Deno.env.get("GOOGLE_VISION_API_KEY");
+    if (!GOOGLE_VISION_API_KEY) throw new Error("GOOGLE_VISION_API_KEY não configurada");
 
-    const ocrResponse = await fetch("https://ai.lovable.dev/api/v1/chat/completions", {
+    const visionUrl = `https://vision.googleapis.com/v1/images:annotate?key=${GOOGLE_VISION_API_KEY}`;
+
+    // For PDFs, we use DOCUMENT_TEXT_DETECTION; for images, TEXT_DETECTION
+    const visionPayload = {
+      requests: [
+        {
+          image: { content: base64 },
+          features: [
+            { type: "TEXT_DETECTION", maxResults: 50 },
+            { type: "LOGO_DETECTION", maxResults: 10 },
+            { type: "WEB_DETECTION", maxResults: 5 },
+          ],
+        },
+      ],
+    };
+
+    console.log("Calling Google Vision API...");
+    const visionResponse = await fetch(visionUrl, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [
-          {
-            role: "user",
-            content: [
-              {
-                type: "text",
-                text: `Você é um validador de ingressos. Analise esta imagem/documento e determine:
-
-1. Este arquivo é realmente um ingresso/ticket para um evento? (shows, festivais, jogos, teatro, etc.)
-2. Se SIM, extraia as informações abaixo.
-3. Se NÃO é um ingresso (é uma foto aleatória, documento, meme, etc.), defina is_valid_ticket como false.
-
-Responda APENAS com JSON válido neste formato:
-{
-  "is_valid_ticket": true/false,
-  "confidence": 0.0 a 1.0,
-  "rejection_reason": "motivo se não for ingresso, ou null",
-  "event_name": "nome do evento ou null",
-  "event_date": "YYYY-MM-DD ou null",
-  "event_time": "HH:MM ou null",
-  "venue": "local ou null",
-  "sector": "setor ou null",
-  "seat": "assento ou null",
-  "ticket_code": "código único do ingresso (barcode, QR code text, número do pedido) ou null"
-}
-
-IMPORTANTE: Seja rigoroso. Apenas marque is_valid_ticket=true se o documento claramente parece um ingresso com informações como evento, data, código de barras/QR, etc.`,
-              },
-              {
-                type: "image_url",
-                image_url: {
-                  url: `data:${mimeType};base64,${base64}`,
-                },
-              },
-            ],
-          },
-        ],
-        max_tokens: 1000,
-      }),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(visionPayload),
     });
 
-    if (!ocrResponse.ok) {
-      const errText = await ocrResponse.text();
-      console.error("OCR API error:", ocrResponse.status, errText);
-      await rejectTicket(supabaseAdmin, ticket_id, null);
-      return jsonResponse({ success: false, reason: "Erro na validação. Tente novamente com uma imagem mais clara." });
+    if (!visionResponse.ok) {
+      const errText = await visionResponse.text();
+      console.error("Google Vision API error:", visionResponse.status, errText);
+      await rejectTicket(supabaseAdmin, ticket_id, null, "Erro na análise do documento. Tente novamente.");
+      return jsonResponse({ success: false, reason: "Erro na análise do documento. Tente novamente com uma imagem mais clara." });
     }
 
-    const ocrResult = await ocrResponse.json();
-    const ocrText = ocrResult.choices?.[0]?.message?.content || "";
-
-    // Parse OCR result
-    let extracted: any = {};
-    try {
-      const jsonMatch = ocrText.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        extracted = JSON.parse(jsonMatch[0]);
-      }
-    } catch {
-      console.error("Failed to parse OCR JSON:", ocrText);
-      await rejectTicket(supabaseAdmin, ticket_id, null);
+    const visionResult = await visionResponse.json();
+    const annotations = visionResult.responses?.[0];
+    
+    if (!annotations) {
+      await rejectTicket(supabaseAdmin, ticket_id, null, "Não foi possível analisar o arquivo.");
       return jsonResponse({ success: false, reason: "Não foi possível analisar o arquivo. Envie uma foto clara do ingresso." });
     }
 
-    // 4. CHECK: Is it actually a ticket?
-    if (!extracted.is_valid_ticket || extracted.confidence < 0.6) {
-      await rejectTicket(supabaseAdmin, ticket_id, extracted.ticket_code);
-      const reason = extracted.rejection_reason || "O arquivo enviado não parece ser um ingresso válido. Envie uma foto ou PDF do seu ingresso.";
+    const fullText = annotations.fullTextAnnotation?.text || 
+                     annotations.textAnnotations?.[0]?.description || "";
+    const detectedLogos = (annotations.logoAnnotations || []).map((l: any) => l.description?.toLowerCase() || "");
+    const webEntities = (annotations.webDetection?.webEntities || []).map((e: any) => e.description?.toLowerCase() || "");
+
+    console.log("OCR text length:", fullText.length);
+    console.log("Detected logos:", detectedLogos);
+    console.log("Web entities:", webEntities.slice(0, 5));
+
+    // ========== VALIDAÇÃO: É um ingresso? ==========
+    const textLower = fullText.toLowerCase();
+
+    // Keywords that indicate a ticket
+    const ticketKeywords = [
+      "ingresso", "ticket", "entrada", "qr code", "código", "pedido",
+      "setor", "pista", "camarote", "arquibancada", "meia", "inteira",
+      "portão", "gate", "admit", "seat", "row", "section",
+      "sympla", "eventim", "ingresse", "ticketmaster", "eventbrite",
+      "ticket360", "uhuu", "even3", "bilheteria digital", "ticket maker",
+      "comprovante", "confirmação", "e-ticket", "voucher",
+      "data do evento", "local do evento", "horário",
+    ];
+
+    // Keywords that indicate NOT a ticket (false positives)
+    const antiKeywords = [
+      "meme", "receita", "curriculum", "currículo", "nota fiscal",
+      "boleto bancário", "fatura", "extrato", "holerite",
+      "selfie", "instagram", "facebook", "twitter",
+    ];
+
+    const matchedTicketKeywords = ticketKeywords.filter(k => textLower.includes(k));
+    const matchedAntiKeywords = antiKeywords.filter(k => textLower.includes(k));
+
+    console.log("Ticket keywords found:", matchedTicketKeywords);
+    console.log("Anti keywords found:", matchedAntiKeywords);
+
+    // Decision: need at least 3 ticket keywords and no anti-keywords
+    const isLikelyTicket = matchedTicketKeywords.length >= 3 && matchedAntiKeywords.length === 0;
+    
+    // Also check logos and web entities for ticket platforms
+    const platformNames = ["sympla", "eventim", "ingresse", "ticketmaster", "eventbrite", 
+                          "ticket360", "uhuu", "even3", "bilheteria digital", "ticket maker", "quentro"];
+    const detectedPlatform = platformNames.find(p => 
+      textLower.includes(p) || 
+      detectedLogos.some((l: string) => l.includes(p)) ||
+      webEntities.some((e: string) => e.includes(p))
+    );
+
+    const hasMinimalTicketStructure = matchedTicketKeywords.length >= 1 && detectedPlatform;
+
+    if (!isLikelyTicket && !hasMinimalTicketStructure) {
+      // Not enough evidence this is a ticket
+      const reason = matchedAntiKeywords.length > 0
+        ? `O arquivo enviado parece ser um(a) ${matchedAntiKeywords[0]}, não um ingresso.`
+        : fullText.length < 20
+          ? "Não foi possível extrair texto do arquivo. Envie uma foto nítida ou PDF do ingresso."
+          : "O arquivo enviado não parece ser um ingresso válido. Envie o PDF ou foto do ingresso com informações como evento, data, setor e código visíveis.";
+      
+      await rejectTicket(supabaseAdmin, ticket_id, null, reason);
       return jsonResponse({ success: false, reason });
     }
 
-    // 5. Compare with event data if event_id provided
-    if (event_id && extracted.event_name) {
+    // ========== CAMADA 2: Identificação da plataforma e extração de dados ==========
+
+    // Detect platform from QR URLs or text
+    let identifiedPlatform = detectedPlatform || "desconhecida";
+    
+    // Check for SafeTix (Ticketmaster) - block these
+    if (identifiedPlatform === "ticketmaster" || identifiedPlatform === "quentro") {
+      await rejectTicket(supabaseAdmin, ticket_id, null, 
+        "Ingressos da Ticketmaster usam SafeTix (QR rotativo). Não é possível validar por upload. O vendedor deve transferir o ingresso pelo app Quentro diretamente para o comprador.");
+      return jsonResponse({ 
+        success: false, 
+        reason: "Ingressos da Ticketmaster usam SafeTix (QR rotativo). Não é possível validar por upload. O vendedor deve transferir o ingresso pelo app Quentro diretamente para o comprador.",
+        platform: "ticketmaster",
+        requires_transfer: true,
+      });
+    }
+
+    // Extract key fields from OCR text
+    const extracted = extractTicketData(fullText);
+    console.log("Extracted data:", JSON.stringify(extracted));
+
+    // ========== CAMADA 3: Comparação com evento cadastrado ==========
+    if (event_id) {
       const { data: event } = await supabaseAdmin
         .from("events")
         .select("name, date")
         .eq("id", event_id)
         .single();
 
-      if (event) {
+      if (event && extracted.event_name) {
         const similarity = levenshteinSimilarity(
-          (extracted.event_name || "").toLowerCase(),
+          extracted.event_name.toLowerCase(),
           event.name.toLowerCase()
         );
 
+        console.log(`Event name similarity: "${extracted.event_name}" vs "${event.name}" = ${similarity}`);
+
         if (similarity < 0.4) {
-          await rejectTicket(supabaseAdmin, ticket_id, extracted.ticket_code);
-          return jsonResponse({
-            success: false,
-            reason: `O ingresso parece ser do evento "${extracted.event_name}", mas você selecionou "${event.name}". Verifique o evento correto.`,
-          });
+          const reason = `O ingresso parece ser do evento "${extracted.event_name}", mas você selecionou "${event.name}". Verifique o evento correto.`;
+          await rejectTicket(supabaseAdmin, ticket_id, extracted.ticket_code, reason);
+          return jsonResponse({ success: false, reason });
         }
       }
     }
 
+    // ========== CAMADA 4: Anti-duplicidade (hash) ==========
     const ticketCode = extracted.ticket_code;
-
-    // 6. Hash check for duplicates (only if code found)
+    
     if (ticketCode) {
       const encoder = new TextEncoder();
       const data = encoder.encode(ticketCode);
@@ -171,14 +213,13 @@ IMPORTANTE: Seja rigoroso. Apenas marque is_valid_ticket=true se o documento cla
         .maybeSingle();
 
       if (existingHash) {
-        await rejectTicket(supabaseAdmin, ticket_id, ticketCode);
+        await rejectTicket(supabaseAdmin, ticket_id, ticketCode, "Ingresso duplicado detectado.");
         return jsonResponse({
           success: false,
           reason: "Ingresso duplicado detectado. Este código já foi cadastrado na plataforma.",
         });
       }
 
-      // Save hash
       await supabaseAdmin.from("ticket_hashes").insert({
         hash: hashHex,
         ticket_id: ticket_id,
@@ -186,7 +227,7 @@ IMPORTANTE: Seja rigoroso. Apenas marque is_valid_ticket=true se o documento cla
       });
     }
 
-    // 7. APPROVED - update ticket
+    // ========== APROVADO ==========
     await supabaseAdmin
       .from("tickets")
       .update({
@@ -196,17 +237,18 @@ IMPORTANTE: Seja rigoroso. Apenas marque is_valid_ticket=true se o documento cla
       })
       .eq("id", ticket_id);
 
-    return jsonResponse({ success: true, status: "validated", extracted });
+    return jsonResponse({ 
+      success: true, 
+      status: "validated", 
+      platform: identifiedPlatform,
+      extracted,
+    });
+
   } catch (error) {
     console.error("validate-ticket error:", error);
-
-    // On error, REJECT the ticket (don't auto-approve)
     if (ticketId) {
-      try {
-        await rejectTicket(supabaseAdmin, ticketId, null);
-      } catch {}
+      try { await rejectTicket(supabaseAdmin, ticketId, null, "Erro interno na validação."); } catch {}
     }
-
     return new Response(
       JSON.stringify({ success: false, reason: "Erro na validação do ingresso. Tente novamente." }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 }
@@ -214,7 +256,74 @@ IMPORTANTE: Seja rigoroso. Apenas marque is_valid_ticket=true se o documento cla
   }
 });
 
-async function rejectTicket(supabase: any, ticketId: string, code: string | null) {
+// ========== Helper functions ==========
+
+function extractTicketData(text: string) {
+  const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
+  const textLower = text.toLowerCase();
+
+  // Extract event name - usually the largest/first prominent text
+  let event_name: string | null = null;
+  // Look for patterns like "Evento: X" or the first line that looks like an event name
+  const eventPatterns = [
+    /evento[:\s]+(.+)/i,
+    /show[:\s]+(.+)/i,
+    /espetáculo[:\s]+(.+)/i,
+  ];
+  for (const p of eventPatterns) {
+    const m = text.match(p);
+    if (m) { event_name = m[1].trim(); break; }
+  }
+
+  // Extract date
+  let event_date: string | null = null;
+  const datePatterns = [
+    /(\d{2}\/\d{2}\/\d{4})/,
+    /(\d{2}\.\d{2}\.\d{4})/,
+    /(\d{4}-\d{2}-\d{2})/,
+    /(\d{2}\s+de\s+\w+\s+de\s+\d{4})/i,
+  ];
+  for (const p of datePatterns) {
+    const m = text.match(p);
+    if (m) { event_date = m[1]; break; }
+  }
+
+  // Extract ticket code / order number
+  let ticket_code: string | null = null;
+  const codePatterns = [
+    /(?:pedido|order|código|code|ingresso|ticket)\s*(?:#|n[°ºo]?\.?\s*)?[:.]?\s*([A-Z0-9]{4,})/i,
+    /(?:n[°ºo]?\s*do\s*(?:pedido|ingresso|ticket))\s*[:.]?\s*([A-Z0-9]{4,})/i,
+    /(?:código\s*de\s*barras|barcode)\s*[:.]?\s*([A-Z0-9]{6,})/i,
+  ];
+  for (const p of codePatterns) {
+    const m = text.match(p);
+    if (m) { ticket_code = m[1]; break; }
+  }
+
+  // Extract venue
+  let venue: string | null = null;
+  const venuePatterns = [
+    /(?:local|venue|endereço|onde)[:\s]+(.+)/i,
+  ];
+  for (const p of venuePatterns) {
+    const m = text.match(p);
+    if (m) { venue = m[1].trim(); break; }
+  }
+
+  // Extract sector
+  let sector: string | null = null;
+  const sectorPatterns = [
+    /(?:setor|sector|área|area|pista|camarote|arquibancada)[:\s]+(.+)/i,
+  ];
+  for (const p of sectorPatterns) {
+    const m = text.match(p);
+    if (m) { sector = m[1].trim(); break; }
+  }
+
+  return { event_name, event_date, ticket_code, venue, sector };
+}
+
+async function rejectTicket(supabase: any, ticketId: string, code: string | null, _reason: string) {
   await supabase
     .from("tickets")
     .update({ status: "rejected", extracted_code: code })
@@ -227,7 +336,6 @@ function jsonResponse(data: any) {
   });
 }
 
-// Levenshtein similarity (0 to 1)
 function levenshteinSimilarity(a: string, b: string): number {
   if (a === b) return 1;
   const matrix: number[][] = [];
