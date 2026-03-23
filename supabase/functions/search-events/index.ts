@@ -25,6 +25,7 @@ function normalizeText(text: string): string {
   return normalized.trim();
 }
 
+async function searchPerplexity(query: string, city: string): Promise<string> {
   const apiKey = Deno.env.get("PERPLEXITY_API_KEY");
   if (!apiKey) {
     console.warn("PERPLEXITY_API_KEY not configured, skipping web search");
