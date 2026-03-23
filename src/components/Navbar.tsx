@@ -96,6 +96,11 @@ export default function Navbar() {
                     <MessageSquare className="w-4 h-4" /> Negociações
                   </Link>
                 </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/wallet" className="flex items-center gap-2 cursor-pointer">
+                    <Wallet className="w-4 h-4" /> Carteira
+                  </Link>
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={signOut} className="flex items-center gap-2 cursor-pointer text-destructive">
                   <LogOut className="w-4 h-4" /> Sair
