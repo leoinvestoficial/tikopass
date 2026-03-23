@@ -126,7 +126,7 @@ export default function Index() {
 
               {hasActiveSearch && (
                 <div className="flex flex-wrap gap-2 text-sm text-muted-foreground">
-                  <span className="rounded-full border border-border bg-card px-3 py-1.5">Cidade: {selectedCity}</span>
+                  <span className="rounded-full border border-border bg-card px-3 py-1.5">Cidade: {selectedCity || "Todas"}</span>
                   {selectedCategory && (
                     <span className="rounded-full border border-border bg-card px-3 py-1.5">Categoria: {selectedCategory}</span>
                   )}
