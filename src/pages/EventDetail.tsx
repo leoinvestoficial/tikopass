@@ -253,11 +253,7 @@ export default function EventDetail() {
 
       {/* Tickets section */}
       <section className="flex-1">
-        <div
-          ref={ticketsReveal.ref}
-          className={`container py-10 ${ticketsReveal.isVisible ? "animate-reveal-up" : "opacity-0"}`}
-          style={{ animationDelay: "150ms" }}
-        >
+        <div className="container py-10">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
             <div>
               <h2 className="text-xl font-display font-semibold text-foreground">

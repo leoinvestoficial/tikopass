@@ -188,8 +188,10 @@ export async function createNegotiation(neg: {
   return data;
 }
 
-export async function updateNegotiationStatus(id: string, status: string) {
-  const { error } = await supabase.from("negotiations").update({ status }).eq("id", id);
+export async function updateNegotiationStatus(id: string, status: string, counterOfferPrice?: number) {
+  const updates: any = { status };
+  if (counterOfferPrice !== undefined) updates.counter_offer_price = counterOfferPrice;
+  const { error } = await supabase.from("negotiations").update(updates).eq("id", id);
   if (error) throw error;
 }
 
