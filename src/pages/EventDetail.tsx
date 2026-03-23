@@ -10,7 +10,7 @@ import {
   Calendar, MapPin, Tag, TrendingDown, MessageSquare, ArrowLeft,
   Clock, Loader2, Star, ArrowUpDown, User, ShieldCheck, Pencil, Trash2,
 } from "lucide-react";
-import { useScrollReveal } from "@/hooks/use-scroll-reveal";
+
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
