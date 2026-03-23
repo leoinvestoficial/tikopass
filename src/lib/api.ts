@@ -73,7 +73,7 @@ export async function fetchTicketsByEvent(eventId: string) {
     .from("tickets")
     .select("*, events(*)")
     .eq("event_id", eventId)
-    .eq("status", "available")
+    .in("status", ["available", "validated"])
     .order("price", { ascending: true });
   if (error) throw error;
 
