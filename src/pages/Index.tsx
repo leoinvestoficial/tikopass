@@ -21,7 +21,7 @@ type DateFilter = "" | "today" | "tomorrow" | "weekend";
 
 export default function Index() {
   const [search, setSearch] = useState("");
-  const [selectedCity, setSelectedCity] = useState("Salvador");
+  const [selectedCity, setSelectedCity] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [dateFilter, setDateFilter] = useState<DateFilter>("");
   const [tickets, setTickets] = useState<TicketType[]>([]);
