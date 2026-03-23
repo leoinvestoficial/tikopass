@@ -227,10 +227,7 @@ export default function EventDetail() {
 
       {/* Event header */}
       <section className="border-b border-border bg-gradient-to-br from-primary/5 via-transparent to-transparent">
-        <div
-          ref={headerReveal.ref}
-          className={`container py-10 ${headerReveal.isVisible ? "animate-reveal-up" : "opacity-0"}`}
-        >
+        <div className="container py-10">
           <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6">
             <ArrowLeft className="w-4 h-4" /> Voltar
           </Link>
