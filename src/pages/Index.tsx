@@ -278,7 +278,7 @@ export default function Index() {
       {!hasActiveSearch && (
         <section className="border-t border-border">
           <div
-            className="container py-16 animate-reveal-up"
+            className="container py-16"
             style={{ animationDelay: "100ms" }}
           >
             <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent rounded-2xl p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-6">
