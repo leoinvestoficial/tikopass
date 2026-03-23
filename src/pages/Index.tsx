@@ -168,8 +168,7 @@ export default function Index() {
       {!hasActiveSearch && (
         <section className="border-b border-border bg-card/50">
           <div
-            ref={filtersReveal.ref}
-            className={`container py-8 space-y-6 ${filtersReveal.isVisible ? "animate-reveal-up" : "opacity-0"}`}
+            className="container py-8 space-y-6 animate-reveal-up"
             style={{ animationDelay: "100ms" }}
           >
             {/* Quick date filters */}
