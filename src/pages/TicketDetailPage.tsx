@@ -283,7 +283,7 @@ export default function TicketDetailPage() {
 
       <section className="border-b border-border bg-gradient-to-br from-primary/5 via-transparent to-transparent">
         <div
-          className="container py-10 animate-reveal-up"
+          className="container py-10"
         >
           <div className="mb-6 flex flex-wrap items-center gap-3">
             <Link
@@ -382,7 +382,7 @@ export default function TicketDetailPage() {
             </div>
 
             <aside
-              className="rounded-[28px] border border-border bg-card p-6 shadow-lg shadow-primary/5 animate-reveal-up"
+              className="rounded-[28px] border border-border bg-card p-6 shadow-lg shadow-primary/5"
               style={{ animationDelay: "120ms" }}
             >
               <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">Preço do anúncio</p>

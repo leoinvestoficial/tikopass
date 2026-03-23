@@ -14,23 +14,19 @@ import SafetyBanner from "@/components/SafetyBanner";
 import SocialProof from "@/components/SocialProof";
 import QuickDateFilters, { getDateRange } from "@/components/QuickDateFilters";
 import { fetchTickets, type Ticket as TicketType } from "@/lib/api";
-import { useScrollReveal } from "@/hooks/use-scroll-reveal";
+
 import { Link } from "react-router-dom";
 
 type DateFilter = "" | "today" | "tomorrow" | "weekend";
 
 export default function Index() {
   const [search, setSearch] = useState("");
-  const [selectedCity, setSelectedCity] = useState("Salvador");
+  const [selectedCity, setSelectedCity] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [dateFilter, setDateFilter] = useState<DateFilter>("");
   const [tickets, setTickets] = useState<TicketType[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const heroReveal = useScrollReveal<HTMLDivElement>();
-  const filtersReveal = useScrollReveal<HTMLDivElement>();
-  const ticketsReveal = useScrollReveal<HTMLDivElement>();
-  const ctaReveal = useScrollReveal<HTMLDivElement>();
 
   const normalizedSearch = search.trim();
   const hasActiveSearch = normalizedSearch.length > 0;
@@ -103,8 +99,7 @@ export default function Index() {
       <section className="relative overflow-hidden border-b border-border">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/3" />
         <div
-          ref={heroReveal.ref}
-          className={`container relative ${hasActiveSearch ? "py-10 md:py-12" : "py-16 md:py-24"} ${heroReveal.isVisible ? "animate-reveal-up" : "opacity-0"}`}
+          className={`container relative ${hasActiveSearch ? "py-10 md:py-12" : "py-16 md:py-24"}`}
         >
           <div className={`${hasActiveSearch ? "max-w-4xl" : "max-w-2xl"} space-y-6`}>
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium">
@@ -126,7 +121,7 @@ export default function Index() {
 
               {hasActiveSearch && (
                 <div className="flex flex-wrap gap-2 text-sm text-muted-foreground">
-                  <span className="rounded-full border border-border bg-card px-3 py-1.5">Cidade: {selectedCity}</span>
+                  <span className="rounded-full border border-border bg-card px-3 py-1.5">Cidade: {selectedCity || "Todas"}</span>
                   {selectedCategory && (
                     <span className="rounded-full border border-border bg-card px-3 py-1.5">Categoria: {selectedCategory}</span>
                   )}
@@ -173,8 +168,7 @@ export default function Index() {
       {!hasActiveSearch && (
         <section className="border-b border-border bg-card/50">
           <div
-            ref={filtersReveal.ref}
-            className={`container py-8 space-y-6 ${filtersReveal.isVisible ? "animate-reveal-up" : "opacity-0"}`}
+            className="container py-8 space-y-6"
             style={{ animationDelay: "100ms" }}
           >
             {/* Quick date filters */}
@@ -199,8 +193,7 @@ export default function Index() {
       {/* Tickets grid */}
       <section className={`flex-1 ${hasActiveSearch ? "bg-muted/20" : "border-t border-border"}`}>
         <div
-          ref={ticketsReveal.ref}
-          className={`container py-12 ${ticketsReveal.isVisible ? "animate-reveal-up" : "opacity-0"}`}
+          className="container py-12"
           style={{ animationDelay: "200ms" }}
         >
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
@@ -285,8 +278,7 @@ export default function Index() {
       {!hasActiveSearch && (
         <section className="border-t border-border">
           <div
-            ref={ctaReveal.ref}
-            className={`container py-16 ${ctaReveal.isVisible ? "animate-reveal-up" : "opacity-0"}`}
+            className="container py-16"
             style={{ animationDelay: "100ms" }}
           >
             <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent rounded-2xl p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-6">
