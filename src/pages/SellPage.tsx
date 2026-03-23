@@ -463,6 +463,20 @@ export default function SellPage() {
                   <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto" />
                 </>
               )}
+              {validationStatus === "timeout" && (
+                <>
+                  <div className="w-20 h-20 rounded-2xl bg-warning/10 flex items-center justify-center mx-auto">
+                    <Clock className="w-10 h-10 text-warning" />
+                  </div>
+                  <div className="space-y-2">
+                    <h1 className="text-3xl font-display font-bold">Validação pendente</h1>
+                    <p className="text-muted-foreground max-w-sm mx-auto">
+                      {validationMessage || "A validação não foi concluída automaticamente. Seu ingresso ainda não foi publicado."}
+                    </p>
+                  </div>
+                  <Button onClick={resetForm} className="rounded-xl">Voltar</Button>
+                </>
+              )}
               {validationStatus === "rejected" && (
                 <>
                   <div className="w-20 h-20 rounded-2xl bg-destructive/10 flex items-center justify-center mx-auto">
