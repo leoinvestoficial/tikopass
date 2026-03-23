@@ -27,10 +27,6 @@ export default function Index() {
   const [tickets, setTickets] = useState<TicketType[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const heroReveal = useScrollReveal<HTMLDivElement>();
-  const filtersReveal = useScrollReveal<HTMLDivElement>();
-  const ticketsReveal = useScrollReveal<HTMLDivElement>();
-  const ctaReveal = useScrollReveal<HTMLDivElement>();
 
   const normalizedSearch = search.trim();
   const hasActiveSearch = normalizedSearch.length > 0;
