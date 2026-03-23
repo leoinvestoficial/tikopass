@@ -1,0 +1,1 @@
+UPDATE events SET venue = 'Castelo Garcia D''Ávila', city = 'Mata de São João' WHERE id = 'a9efcec4-6bc2-4fa5-87c1-a98a5d3d47d7';
