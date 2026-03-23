@@ -12,6 +12,7 @@ import MyTicketsPage from "./pages/MyTicketsPage.tsx";
 import TicketDetailPage from "./pages/TicketDetailPage.tsx";
 import SellerProfilePage from "./pages/SellerProfilePage.tsx";
 import AuthPage from "./pages/AuthPage.tsx";
+import ProfilePage from "./pages/ProfilePage.tsx";
 import PaymentSuccess from "./pages/PaymentSuccess.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
