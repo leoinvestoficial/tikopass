@@ -37,8 +37,6 @@ export default function EventDetail() {
   const [editForm, setEditForm] = useState({ sector: "", row: "", seat: "", price: "" });
   const [deleting, setDeleting] = useState<string | null>(null);
 
-  const headerReveal = useScrollReveal<HTMLDivElement>();
-  const ticketsReveal = useScrollReveal<HTMLDivElement>();
   const { user } = useAuth();
   const navigate = useNavigate();
 
