@@ -54,7 +54,7 @@ async function searchPerplexity(query: string, city: string): Promise<string> {
     const content = data.choices?.[0]?.message?.content || "";
     const citations = data.citations || [];
     console.log("Perplexity found content, citations:", citations.length);
-    return content + "\n\nFontes: " + citations.join(", ");
+    return normalizeText(content + "\n\nFontes: " + citations.join(", "));
   } catch (e) {
     console.error("Perplexity search error:", e);
     return "";
