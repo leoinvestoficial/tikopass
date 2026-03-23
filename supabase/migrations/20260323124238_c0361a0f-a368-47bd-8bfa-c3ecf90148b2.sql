@@ -1,0 +1,1 @@
+ALTER TABLE public.negotiations ADD COLUMN IF NOT EXISTS counter_offer_price numeric DEFAULT NULL;
