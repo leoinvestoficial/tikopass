@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { Search, Ticket, ArrowRight, X, SlidersHorizontal, MapPin, Calendar } from "lucide-react";
+import { Search, Ticket, ArrowRight, X, SlidersHorizontal, MapPin, Calendar, Mic, PartyPopper, Trophy, Drama, Tent, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import TicketCard from "@/components/TicketCard";
