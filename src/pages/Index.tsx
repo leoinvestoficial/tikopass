@@ -181,7 +181,7 @@ export default function Index() {
           <div className="container">
             <div className="flex items-center gap-1">
               {/* Scrollable category tabs */}
-              <div className="flex items-center gap-8 overflow-x-auto no-scrollbar py-4 flex-1">
+              <div className="flex items-center gap-12 overflow-x-auto no-scrollbar py-4 flex-1">
                 {CATEGORIES.map(({ label, icon: Icon }) => {
                   const isSelected = selectedCategory === label;
                   return (
