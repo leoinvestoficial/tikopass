@@ -108,16 +108,17 @@ export default function Index() {
       <Navbar />
 
       {/* ── HERO ─────────────────────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden">
-        {/* Full-bleed gradient backdrop */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/40 to-background" />
+      <section className="relative overflow-hidden min-h-[420px]">
+        {/* Background image */}
         <img
           src={heroBg}
           alt="Festival de música ao vivo"
-          className="absolute inset-0 w-full h-full object-cover -z-10"
+          className="absolute inset-0 w-full h-full object-cover"
           width={1920}
           height={1080}
         />
+        {/* Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70" />
 
         <div className="relative container pt-20 pb-16 md:pt-28 md:pb-20">
           {/* Headline */}
