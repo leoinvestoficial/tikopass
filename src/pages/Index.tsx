@@ -332,7 +332,7 @@ export default function Index() {
       {/* ── SELL CTA (Airbnb "Become a host" style) ──────────────────────────── */}
       {!hasActiveSearch && (
         <section className="container pb-16">
-          <div className="relative overflow-hidden rounded-3xl text-white flex flex-col md:flex-row items-center justify-between gap-8">
+          <div className="relative overflow-hidden rounded-3xl text-white p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-8">
             {/* Background image */}
             <img
               src={sellCtaBg}
