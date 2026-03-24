@@ -111,13 +111,12 @@ export default function Index() {
       <section className="relative overflow-hidden">
         {/* Full-bleed gradient backdrop */}
         <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/40 to-background" />
-        {/* Background image strip — replace src with a real event photo */}
-        <div
-          className="absolute inset-0 -z-10 bg-cover bg-center"
-          style={{
-            backgroundImage:
-              "url('https://images.unsplash.com/photo-1506157786151-b8491531f063?w=1400&q=80')",
-          }}
+        <img
+          src={heroBg}
+          alt="Festival de música ao vivo"
+          className="absolute inset-0 w-full h-full object-cover -z-10"
+          width={1920}
+          height={1080}
         />
 
         <div className="relative container pt-20 pb-16 md:pt-28 md:pb-20">
