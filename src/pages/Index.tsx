@@ -3,6 +3,8 @@ import { Search, Ticket, ArrowRight, X, SlidersHorizontal, MapPin, Calendar, Mic
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import TicketCard from "@/components/TicketCard";
+import heroBg from "@/assets/hero-bg.jpg";
+import sellCtaBg from "@/assets/sell-cta.jpg";
 import CityFilter from "@/components/CityFilter";
 import CategoryGrid from "@/components/CategoryGrid";
 import Navbar from "@/components/Navbar";
