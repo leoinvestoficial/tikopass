@@ -4,13 +4,13 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Search, CheckCircle2, ArrowRight, Sparkles, MapPin, Calendar, Tag, Loader2, Upload, FileCheck, AlertCircle, Clock } from "lucide-react";
-import { useScrollReveal } from "@/hooks/use-scroll-reveal";
+import { Search, CheckCircle2, ArrowRight, Sparkles, MapPin, Calendar, Tag, Loader2, Upload, FileCheck, AlertCircle, Clock, Shield, Zap, DollarSign } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { searchEventsWithAI, createEvent, createTicket } from "@/lib/api";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import sellCtaBg from "@/assets/sell-cta.jpg";
 
 type AIEvent = {
   name: string; date: string; time: string; venue: string; city: string; category: string;
@@ -35,111 +35,60 @@ export default function SellPage() {
   const [validationStatus, setValidationStatus] = useState<string>("pending_validation");
   const [validationMessage, setValidationMessage] = useState("");
 
-  const heroReveal = useScrollReveal<HTMLDivElement>();
   const { user } = useAuth();
   const navigate = useNavigate();
 
   // Poll for validation status
   useEffect(() => {
     if (step !== "validating" || !savedTicketId) return;
-
     let isActive = true;
-
     const interval = setInterval(async () => {
-      const { data } = await supabase
-        .from("tickets")
-        .select("status")
-        .eq("id", savedTicketId)
-        .single();
-
+      const { data } = await supabase.from("tickets").select("status").eq("id", savedTicketId).single();
       if (!isActive || !data || data.status === "pending_validation") return;
-
       setValidationStatus(data.status);
-      if (data.status === "validated") {
-        setStep("success");
-        toast.success("Ingresso validado e publicado!");
-      } else if (data.status === "rejected") {
-        setValidationMessage("Seu ingresso foi rejeitado pela validação automática.");
-        toast.error("Ingresso rejeitado na validação.");
-      }
+      if (data.status === "validated") { setStep("success"); toast.success("Ingresso validado e publicado!"); }
+      else if (data.status === "rejected") { setValidationMessage("Seu ingresso foi rejeitado pela validação automática."); toast.error("Ingresso rejeitado na validação."); }
       clearInterval(interval);
     }, 3000);
-
     const timeout = setTimeout(async () => {
       clearInterval(interval);
-      const { data } = await supabase
-        .from("tickets")
-        .select("status")
-        .eq("id", savedTicketId)
-        .single();
-
+      const { data } = await supabase.from("tickets").select("status").eq("id", savedTicketId).single();
       if (!isActive) return;
-
-      if (data?.status === "validated") {
-        setStep("success");
-        return;
-      }
-
-      if (data?.status === "rejected") {
-        setValidationStatus("rejected");
-        setValidationMessage("Ingresso rejeitado pela validação.");
-        return;
-      }
-
+      if (data?.status === "validated") { setStep("success"); return; }
+      if (data?.status === "rejected") { setValidationStatus("rejected"); setValidationMessage("Ingresso rejeitado pela validação."); return; }
       setValidationStatus("timeout");
       setValidationMessage("A validação não foi concluída automaticamente. Seu ingresso não foi publicado.");
       toast.error("A validação não foi concluída. O ingresso não foi publicado.");
     }, 60000);
-
-    return () => {
-      isActive = false;
-      clearInterval(interval);
-      clearTimeout(timeout);
-    };
+    return () => { isActive = false; clearInterval(interval); clearTimeout(timeout); };
   }, [step, savedTicketId]);
 
   const handleAISearch = async () => {
     if (!user) { toast.error("Faça login para vender ingressos"); navigate("/auth"); return; }
     if (searchQuery.length < 2) { toast.error("Digite pelo menos 2 caracteres"); return; }
-
     setSearching(true);
     try {
       const events = await searchEventsWithAI(searchQuery, searchCity || undefined);
       setAiResults(events);
       if (events.length === 0) toast.info("Nenhum evento encontrado. Tente outros termos.");
-    } catch (err: any) {
-      toast.error(err.message || "Erro na busca com IA");
-    } finally {
-      setSearching(false);
-    }
+    } catch (err: any) { toast.error(err.message || "Erro na busca com IA"); }
+    finally { setSearching(false); }
   };
 
-  const handleSelectEvent = (event: AIEvent) => {
-    setSelectedEvent(event);
-    setEditedEvent({ ...event });
-    setStep("confirm");
-  };
+  const handleSelectEvent = (event: AIEvent) => { setSelectedEvent(event); setEditedEvent({ ...event }); setStep("confirm"); };
 
   const handleConfirmEvent = async () => {
     if (!editedEvent || !user) return;
     const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      toast.error("Sua sessão expirou. Faça login novamente.");
-      navigate("/auth");
-      return;
-    }
+    if (!session) { toast.error("Sua sessão expirou. Faça login novamente."); navigate("/auth"); return; }
     try {
       const created = await createEvent({ ...editedEvent, source: "ai_search" });
       setSavedEventId(created.id);
       setSelectedEvent(editedEvent);
       setStep("details");
     } catch (err: any) {
-      if (err.message?.includes("row-level security")) {
-        toast.error("Sessão expirada. Faça login novamente.");
-        navigate("/auth");
-      } else {
-        toast.error("Erro ao salvar evento: " + (err.message || ""));
-      }
+      if (err.message?.includes("row-level security")) { toast.error("Sessão expirada. Faça login novamente."); navigate("/auth"); }
+      else { toast.error("Erro ao salvar evento: " + (err.message || "")); }
     }
   };
 
@@ -147,136 +96,144 @@ export default function SellPage() {
     if (!savedEventId || !user || !ticketFile) return;
     setSubmitting(true);
     try {
-      // 1. Create ticket record first
-      const ticket = await createTicket({
-        event_id: savedEventId,
-        seller_id: user.id,
-        sector: ticketForm.sector,
-        row: ticketForm.row || undefined,
-        seat: ticketForm.seat || undefined,
-        price: parseFloat(ticketForm.price),
-      });
+      const ticket = await createTicket({ event_id: savedEventId, seller_id: user.id, sector: ticketForm.sector, row: ticketForm.row || undefined, seat: ticketForm.seat || undefined, price: parseFloat(ticketForm.price) });
       setSavedTicketId(ticket.id);
-
-      // 2. Upload file to edge function
       setUploading(true);
       const formData = new FormData();
       formData.append("file", ticketFile);
       formData.append("ticket_id", ticket.id);
       formData.append("event_id", savedEventId);
-
-      const { data, error } = await supabase.functions.invoke("upload-ticket", {
-        body: formData,
-      });
-
+      const { data, error } = await supabase.functions.invoke("upload-ticket", { body: formData });
       if (error) throw error;
       if (!data?.success) throw new Error(data?.error || "Erro no upload");
-
-      // 3. Go to validation step
       setStep("validating");
       toast.info("Ingresso enviado! Validação em andamento...");
-    } catch (err: any) {
-      toast.error("Erro ao publicar: " + (err.message || ""));
-    } finally {
-      setSubmitting(false);
-      setUploading(false);
-    }
+    } catch (err: any) { toast.error("Erro ao publicar: " + (err.message || "")); }
+    finally { setSubmitting(false); setUploading(false); }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     const allowed = ["application/pdf", "image/jpeg", "image/png", "image/jpg"];
-    if (!allowed.includes(file.type)) {
-      toast.error("Formato não aceito. Use PDF, JPG ou PNG.");
-      return;
-    }
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error("Arquivo muito grande. Máximo 10MB.");
-      return;
-    }
+    if (!allowed.includes(file.type)) { toast.error("Formato não aceito. Use PDF, JPG ou PNG."); return; }
+    if (file.size > 10 * 1024 * 1024) { toast.error("Arquivo muito grande. Máximo 10MB."); return; }
     setTicketFile(file);
   };
 
   const resetForm = () => {
-    setStep("search");
-    setSearchQuery("");
-    setAiResults([]);
-    setSelectedEvent(null);
-    setSavedEventId(null);
-    setSavedTicketId(null);
-    setTicketForm({ sector: "", row: "", seat: "", price: "" });
-    setTicketFile(null);
-    setValidationStatus("pending_validation");
-    setValidationMessage("");
+    setStep("search"); setSearchQuery(""); setAiResults([]); setSelectedEvent(null);
+    setSavedEventId(null); setSavedTicketId(null); setTicketForm({ sector: "", row: "", seat: "", price: "" });
+    setTicketFile(null); setValidationStatus("pending_validation"); setValidationMessage("");
   };
 
   const stepsList = [
-    { key: "search", label: "Buscar evento" },
-    { key: "confirm", label: "Confirmar" },
-    { key: "details", label: "Cadastrar" },
-    { key: "upload", label: "Enviar ingresso" },
+    { key: "search", label: "Buscar evento", num: 1 },
+    { key: "confirm", label: "Confirmar", num: 2 },
+    { key: "details", label: "Cadastrar", num: 3 },
+    { key: "upload", label: "Enviar ingresso", num: 4 },
   ];
 
   const stepOrder = ["search", "confirm", "details", "upload", "validating", "success"];
   const currentIndex = stepOrder.indexOf(step);
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="min-h-screen flex flex-col bg-background font-sans">
       <Navbar />
+
+      {/* ── Hero banner ── */}
+      <section className="relative overflow-hidden h-48 md:h-56">
+        <img src={sellCtaBg} alt="" className="absolute inset-0 w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-black/40" />
+        <div className="relative container h-full flex flex-col justify-center">
+          <h1 className="text-3xl md:text-4xl font-bold text-white leading-tight">
+            Venda seus ingressos
+          </h1>
+          <p className="text-white/60 text-sm md:text-base mt-2 max-w-lg">
+            Publique em segundos com ajuda de IA. Pagamento protegido e validação automática.
+          </p>
+        </div>
+      </section>
+
+      {/* ── Trust strip ── */}
+      <div className="border-b border-border bg-muted/30">
+        <div className="container py-3 flex items-center justify-center gap-8 text-xs text-muted-foreground">
+          <span className="flex items-center gap-1.5"><Shield className="w-3.5 h-3.5 text-primary" /> Pagamento protegido</span>
+          <span className="flex items-center gap-1.5 hidden sm:flex"><Zap className="w-3.5 h-3.5 text-primary" /> Validação com IA</span>
+          <span className="flex items-center gap-1.5"><DollarSign className="w-3.5 h-3.5 text-primary" /> Receba após o evento</span>
+        </div>
+      </div>
+
       <div className="flex-1">
-        <div
-          ref={heroReveal.ref}
-          className={`container max-w-2xl py-12 ${heroReveal.isVisible ? "animate-reveal-up" : "opacity-0"}`}
-        >
-          {/* Steps indicator */}
-          <div className="flex items-center gap-3 mb-10">
+        <div className="container max-w-2xl py-10">
+
+          {/* ── Steps indicator ── */}
+          <div className="flex items-center gap-2 mb-10">
             {stepsList.map((s, i) => {
               const sIndex = stepOrder.indexOf(s.key);
               const isActive = sIndex <= currentIndex;
+              const isDone = sIndex < currentIndex;
               return (
-                <div key={s.key} className="flex items-center gap-3 flex-1">
-                  <div className="flex items-center gap-2 flex-1">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-display font-semibold shrink-0 transition-colors ${isActive ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
-                      {sIndex < currentIndex ? <CheckCircle2 className="w-4 h-4" /> : i + 1}
+                <div key={s.key} className="flex items-center gap-2 flex-1">
+                  <div className="flex items-center gap-2.5">
+                    <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold shrink-0 transition-all duration-300 ${
+                      isDone ? "bg-primary text-primary-foreground shadow-md" :
+                      isActive ? "bg-primary text-primary-foreground shadow-lg scale-110" :
+                      "bg-muted text-muted-foreground"
+                    }`}>
+                      {isDone ? <CheckCircle2 className="w-4 h-4" /> : s.num}
                     </div>
-                    <span className={`text-sm font-medium hidden sm:block ${isActive ? "text-foreground" : "text-muted-foreground"}`}>{s.label}</span>
+                    <span className={`text-sm font-medium hidden sm:block transition-colors ${isActive ? "text-foreground" : "text-muted-foreground"}`}>
+                      {s.label}
+                    </span>
                   </div>
-                  {i < stepsList.length - 1 && <div className={`h-px flex-1 ${isActive ? "bg-primary" : "bg-border"}`} />}
+                  {i < stepsList.length - 1 && (
+                    <div className={`h-0.5 flex-1 rounded-full transition-colors duration-300 ${isDone ? "bg-primary" : "bg-border"}`} />
+                  )}
                 </div>
               );
             })}
           </div>
 
-          {/* Step: Search with AI */}
+          {/* ── Step: Search ── */}
           {step === "search" && (
-            <div className="space-y-6 animate-reveal-up">
-              <div className="space-y-2">
-                <h1 className="text-3xl font-display font-bold">Vender ingresso</h1>
-                <p className="text-muted-foreground flex items-center gap-2">
+            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-300">
+              <div className="space-y-1">
+                <h2 className="text-2xl font-bold text-foreground">Buscar evento</h2>
+                <p className="text-muted-foreground flex items-center gap-2 text-sm">
                   <Sparkles className="w-4 h-4 text-primary" />
                   Nossa IA busca eventos reais e atuais para você
                 </p>
               </div>
-              <div className="space-y-3">
+
+              <div className="bg-card border border-border rounded-2xl p-6 space-y-4 shadow-sm">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
                     placeholder="Nome do evento (ex: Retronejo, Réveillon Destino...)"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && handleAISearch()}
-                    className="pl-10 h-12 rounded-xl"
+                    className="pl-11 h-12 rounded-xl text-base"
                   />
                 </div>
-                <div className="flex gap-2">
-                  <Input placeholder="Cidade (opcional)" value={searchCity} onChange={(e) => setSearchCity(e.target.value)} className="rounded-xl" />
-                  <Button onClick={handleAISearch} disabled={searching} className="rounded-xl gap-2 shrink-0">
+                <div className="flex gap-3">
+                  <div className="relative flex-1">
+                    <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Cidade (opcional)"
+                      value={searchCity}
+                      onChange={(e) => setSearchCity(e.target.value)}
+                      className="pl-11 h-11 rounded-xl"
+                    />
+                  </div>
+                  <Button onClick={handleAISearch} disabled={searching} size="lg" className="rounded-xl gap-2 shrink-0 px-6">
                     {searching ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
                     {searching ? "Buscando..." : "Buscar com IA"}
                   </Button>
                 </div>
               </div>
+
               {aiResults.length > 0 && (
                 <div className="space-y-3">
                   <p className="text-sm text-muted-foreground flex items-center gap-2">
@@ -289,17 +246,18 @@ export default function SellPage() {
                       <button
                         key={i}
                         onClick={() => handleSelectEvent(event)}
-                        className={`w-full text-left bg-card border border-border rounded-xl p-4 hover:shadow-md hover:border-primary/30 transition-all duration-200 active:scale-[0.98] space-y-2 ${isPast ? "opacity-75" : ""}`}
+                        className={`w-full text-left bg-card border border-border rounded-2xl p-5 hover:shadow-lg hover:border-primary/40 transition-all duration-200 active:scale-[0.98] space-y-3 group ${isPast ? "opacity-60" : ""}`}
                       >
-                        <div className="flex items-center gap-2">
-                          <span className="font-display font-semibold text-foreground">{event.name}</span>
-                          {isPast && <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground font-medium">Encerrado</span>}
+                        <div className="flex items-center justify-between">
+                          <span className="font-bold text-foreground text-base group-hover:text-primary transition-colors">{event.name}</span>
+                          <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
                         </div>
-                        <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
-                          <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5" />{event.date} · {event.time}</span>
-                          <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5" />{event.venue} · {event.city}</span>
-                          <span className="flex items-center gap-1"><Tag className="w-3.5 h-3.5" />{event.category}</span>
+                        <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+                          <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" />{event.date} · {event.time}</span>
+                          <span className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5" />{event.venue} · {event.city}</span>
+                          <span className="flex items-center gap-1.5"><Tag className="w-3.5 h-3.5" />{event.category}</span>
                         </div>
+                        {isPast && <span className="text-xs px-2.5 py-1 rounded-full bg-muted text-muted-foreground font-medium">Encerrado</span>}
                       </button>
                     );
                   })}
@@ -308,135 +266,138 @@ export default function SellPage() {
             </div>
           )}
 
-          {/* Step: Confirm */}
+          {/* ── Step: Confirm ── */}
           {step === "confirm" && editedEvent && (
-            <div className="space-y-6 animate-reveal-up">
-              <div className="space-y-2">
-                <h1 className="text-3xl font-display font-bold">Confirme o evento</h1>
-                <p className="text-muted-foreground">Corrija os dados se necessário.</p>
+            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-300">
+              <div className="space-y-1">
+                <h2 className="text-2xl font-bold text-foreground">Confirme o evento</h2>
+                <p className="text-sm text-muted-foreground">Corrija os dados se necessário antes de continuar.</p>
               </div>
-              <div className="bg-card border border-border rounded-xl p-6 space-y-4">
+              <div className="bg-card border border-border rounded-2xl p-6 space-y-5 shadow-sm">
                 <div className="space-y-2">
-                  <Label htmlFor="ev-name">Nome do evento</Label>
-                  <Input id="ev-name" value={editedEvent.name} onChange={(e) => setEditedEvent({ ...editedEvent, name: e.target.value })} className="rounded-xl" />
+                  <Label htmlFor="ev-name" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Nome do evento</Label>
+                  <Input id="ev-name" value={editedEvent.name} onChange={(e) => setEditedEvent({ ...editedEvent, name: e.target.value })} className="rounded-xl h-11" />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="ev-date">Data</Label>
-                    <Input id="ev-date" type="date" value={editedEvent.date} onChange={(e) => setEditedEvent({ ...editedEvent, date: e.target.value })} className="rounded-xl" />
+                    <Label htmlFor="ev-date" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Data</Label>
+                    <Input id="ev-date" type="date" value={editedEvent.date} onChange={(e) => setEditedEvent({ ...editedEvent, date: e.target.value })} className="rounded-xl h-11" />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="ev-time">Horário</Label>
-                    <Input id="ev-time" type="time" value={editedEvent.time !== "N/A" ? editedEvent.time : ""} onChange={(e) => setEditedEvent({ ...editedEvent, time: e.target.value })} className="rounded-xl" />
+                    <Label htmlFor="ev-time" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Horário</Label>
+                    <Input id="ev-time" type="time" value={editedEvent.time !== "N/A" ? editedEvent.time : ""} onChange={(e) => setEditedEvent({ ...editedEvent, time: e.target.value })} className="rounded-xl h-11" />
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="ev-venue">Local</Label>
-                    <Input id="ev-venue" value={editedEvent.venue} onChange={(e) => setEditedEvent({ ...editedEvent, venue: e.target.value })} className="rounded-xl" />
+                    <Label htmlFor="ev-venue" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Local</Label>
+                    <Input id="ev-venue" value={editedEvent.venue} onChange={(e) => setEditedEvent({ ...editedEvent, venue: e.target.value })} className="rounded-xl h-11" />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="ev-city">Cidade</Label>
-                    <Input id="ev-city" value={editedEvent.city} onChange={(e) => setEditedEvent({ ...editedEvent, city: e.target.value })} className="rounded-xl" />
+                    <Label htmlFor="ev-city" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Cidade</Label>
+                    <Input id="ev-city" value={editedEvent.city} onChange={(e) => setEditedEvent({ ...editedEvent, city: e.target.value })} className="rounded-xl h-11" />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="ev-category">Categoria</Label>
-                  <Input id="ev-category" value={editedEvent.category} onChange={(e) => setEditedEvent({ ...editedEvent, category: e.target.value })} className="rounded-xl" />
+                  <Label htmlFor="ev-category" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Categoria</Label>
+                  <Input id="ev-category" value={editedEvent.category} onChange={(e) => setEditedEvent({ ...editedEvent, category: e.target.value })} className="rounded-xl h-11" />
                 </div>
               </div>
               <div className="flex gap-3">
-                <Button variant="outline" onClick={() => setStep("search")} className="flex-1 rounded-xl">Buscar outro</Button>
-                <Button onClick={handleConfirmEvent} className="flex-1 gap-2 rounded-xl">
+                <Button variant="outline" onClick={() => setStep("search")} size="lg" className="flex-1 rounded-xl">Buscar outro</Button>
+                <Button onClick={handleConfirmEvent} size="lg" className="flex-1 gap-2 rounded-xl">
                   Confirmar e continuar <ArrowRight className="w-4 h-4" />
                 </Button>
               </div>
             </div>
           )}
 
-          {/* Step: Details + Upload */}
+          {/* ── Step: Details + Upload ── */}
           {step === "details" && selectedEvent && (
-            <div className="space-y-6 animate-reveal-up">
-              <div className="space-y-2">
-                <h1 className="text-3xl font-display font-bold">Dados do ingresso</h1>
-                <p className="text-muted-foreground"><Tag className="w-4 h-4 inline mr-1" />{selectedEvent.name}</p>
+            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-300">
+              <div className="space-y-1">
+                <h2 className="text-2xl font-bold text-foreground">Dados do ingresso</h2>
+                <p className="text-sm text-muted-foreground flex items-center gap-2">
+                  <Tag className="w-4 h-4 text-primary" />{selectedEvent.name}
+                </p>
               </div>
-              <div className="space-y-4">
+
+              <div className="bg-card border border-border rounded-2xl p-6 space-y-5 shadow-sm">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="sector">Setor *</Label>
-                    <Input id="sector" placeholder="Ex: Pista Premium" value={ticketForm.sector} onChange={(e) => setTicketForm({ ...ticketForm, sector: e.target.value })} className="rounded-xl" />
+                    <Label htmlFor="sector" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Setor *</Label>
+                    <Input id="sector" placeholder="Ex: Pista Premium" value={ticketForm.sector} onChange={(e) => setTicketForm({ ...ticketForm, sector: e.target.value })} className="rounded-xl h-11" />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="row">Fileira</Label>
-                    <Input id="row" placeholder="Ex: A (opcional)" value={ticketForm.row} onChange={(e) => setTicketForm({ ...ticketForm, row: e.target.value })} className="rounded-xl" />
+                    <Label htmlFor="row" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Fileira</Label>
+                    <Input id="row" placeholder="Ex: A (opcional)" value={ticketForm.row} onChange={(e) => setTicketForm({ ...ticketForm, row: e.target.value })} className="rounded-xl h-11" />
                   </div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="seat">Assento</Label>
-                    <Input id="seat" placeholder="Ex: 12 (opcional)" value={ticketForm.seat} onChange={(e) => setTicketForm({ ...ticketForm, seat: e.target.value })} className="rounded-xl" />
+                    <Label htmlFor="seat" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Assento</Label>
+                    <Input id="seat" placeholder="Ex: 12 (opcional)" value={ticketForm.seat} onChange={(e) => setTicketForm({ ...ticketForm, seat: e.target.value })} className="rounded-xl h-11" />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="price">Preço (R$) *</Label>
-                    <Input id="price" type="number" placeholder="Ex: 500" value={ticketForm.price} onChange={(e) => setTicketForm({ ...ticketForm, price: e.target.value })} className="rounded-xl" />
+                    <Label htmlFor="price" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Preço (R$) *</Label>
+                    <Input id="price" type="number" placeholder="Ex: 500" value={ticketForm.price} onChange={(e) => setTicketForm({ ...ticketForm, price: e.target.value })} className="rounded-xl h-11" />
                     {ticketForm.price && parseFloat(ticketForm.price) > 0 && (
-                      <p className="text-sm text-muted-foreground">
+                      <div className="bg-muted/50 rounded-lg px-3 py-2 text-sm">
                         Você receberá{" "}
-                        <span className="font-semibold text-foreground">
+                        <span className="font-bold text-foreground">
                           R$ {(parseFloat(ticketForm.price) * 0.9).toFixed(2).replace(".", ",")}
                         </span>{" "}
-                        <span className="text-xs">(taxa de 10% da plataforma)</span>
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                {/* File upload */}
-                <div className="space-y-2">
-                  <Label>Arquivo do ingresso (PDF, JPG ou PNG) *</Label>
-                  <div
-                    className={`relative border-2 border-dashed rounded-xl p-8 text-center transition-colors cursor-pointer hover:border-primary/50 ${
-                      ticketFile ? "border-primary bg-primary/5" : "border-border"
-                    }`}
-                    onClick={() => document.getElementById("ticket-file")?.click()}
-                  >
-                    <input
-                      id="ticket-file"
-                      type="file"
-                      accept=".pdf,.jpg,.jpeg,.png"
-                      onChange={handleFileChange}
-                      className="hidden"
-                    />
-                    {ticketFile ? (
-                      <div className="flex items-center justify-center gap-3">
-                        <FileCheck className="w-6 h-6 text-primary" />
-                        <div>
-                          <p className="font-medium text-foreground">{ticketFile.name}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {(ticketFile.size / 1024 / 1024).toFixed(2)} MB — Clique para trocar
-                          </p>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="space-y-2">
-                        <Upload className="w-8 h-8 text-muted-foreground mx-auto" />
-                        <p className="text-muted-foreground">Clique para enviar o arquivo do ingresso</p>
-                        <p className="text-xs text-muted-foreground">PDF, JPG ou PNG · Máx. 10MB</p>
+                        <span className="text-xs text-muted-foreground">(taxa de 10%)</span>
                       </div>
                     )}
                   </div>
-                  <p className="text-xs text-muted-foreground flex items-center gap-1">
-                    <AlertCircle className="w-3 h-3" />
-                    O ingresso será custodiado pela plataforma e validado automaticamente
-                  </p>
                 </div>
               </div>
+
+              {/* File upload */}
+              <div className="space-y-3">
+                <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Arquivo do ingresso (PDF, JPG ou PNG) *</Label>
+                <div
+                  className={`relative border-2 border-dashed rounded-2xl p-10 text-center transition-all cursor-pointer hover:border-primary/50 hover:bg-primary/5 ${
+                    ticketFile ? "border-primary bg-primary/5" : "border-border"
+                  }`}
+                  onClick={() => document.getElementById("ticket-file")?.click()}
+                >
+                  <input id="ticket-file" type="file" accept=".pdf,.jpg,.jpeg,.png" onChange={handleFileChange} className="hidden" />
+                  {ticketFile ? (
+                    <div className="flex items-center justify-center gap-4">
+                      <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                        <FileCheck className="w-6 h-6 text-primary" />
+                      </div>
+                      <div className="text-left">
+                        <p className="font-semibold text-foreground">{ticketFile.name}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {(ticketFile.size / 1024 / 1024).toFixed(2)} MB — Clique para trocar
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center mx-auto">
+                        <Upload className="w-7 h-7 text-muted-foreground" />
+                      </div>
+                      <p className="text-muted-foreground font-medium">Clique para enviar o arquivo do ingresso</p>
+                      <p className="text-xs text-muted-foreground">PDF, JPG ou PNG · Máx. 10MB</p>
+                    </div>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+                  <Shield className="w-3 h-3 text-primary" />
+                  O ingresso será custodiado pela plataforma e validado automaticamente
+                </p>
+              </div>
+
               <div className="flex gap-3">
-                <Button variant="outline" onClick={() => setStep("confirm")} className="flex-1 rounded-xl">Voltar</Button>
+                <Button variant="outline" onClick={() => setStep("confirm")} size="lg" className="flex-1 rounded-xl">Voltar</Button>
                 <Button
                   onClick={handleSubmitAndUpload}
                   disabled={!ticketForm.sector || !ticketForm.price || !ticketFile || submitting}
+                  size="lg"
                   className="flex-1 gap-2 rounded-xl"
                 >
                   {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
@@ -446,18 +407,18 @@ export default function SellPage() {
             </div>
           )}
 
-          {/* Step: Validating */}
+          {/* ── Step: Validating ── */}
           {step === "validating" && (
-            <div className="text-center space-y-6 py-12 animate-reveal-scale">
+            <div className="text-center space-y-8 py-16 animate-in fade-in zoom-in-95 duration-300">
               {validationStatus === "pending_validation" && (
                 <>
-                  <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto">
-                    <Clock className="w-10 h-10 text-primary animate-pulse" />
+                  <div className="w-24 h-24 rounded-3xl bg-primary/10 flex items-center justify-center mx-auto">
+                    <Clock className="w-12 h-12 text-primary animate-pulse" />
                   </div>
-                  <div className="space-y-2">
-                    <h1 className="text-3xl font-display font-bold">Validando ingresso...</h1>
+                  <div className="space-y-3">
+                    <h2 className="text-3xl font-bold">Validando ingresso...</h2>
                     <p className="text-muted-foreground max-w-sm mx-auto">
-                      Estamos verificando a autenticidade do seu ingresso com OCR e checagem anti-fraude. Isso pode levar alguns segundos.
+                      Estamos verificando a autenticidade do seu ingresso com OCR e checagem anti-fraude.
                     </p>
                   </div>
                   <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto" />
@@ -465,50 +426,48 @@ export default function SellPage() {
               )}
               {validationStatus === "timeout" && (
                 <>
-                  <div className="w-20 h-20 rounded-2xl bg-warning/10 flex items-center justify-center mx-auto">
-                    <Clock className="w-10 h-10 text-warning" />
+                  <div className="w-24 h-24 rounded-3xl bg-accent flex items-center justify-center mx-auto">
+                    <Clock className="w-12 h-12 text-muted-foreground" />
                   </div>
-                  <div className="space-y-2">
-                    <h1 className="text-3xl font-display font-bold">Validação pendente</h1>
-                    <p className="text-muted-foreground max-w-sm mx-auto">
-                      {validationMessage || "A validação não foi concluída automaticamente. Seu ingresso ainda não foi publicado."}
-                    </p>
+                  <div className="space-y-3">
+                    <h2 className="text-3xl font-bold">Validação pendente</h2>
+                    <p className="text-muted-foreground max-w-sm mx-auto">{validationMessage}</p>
                   </div>
-                  <Button onClick={resetForm} className="rounded-xl">Voltar</Button>
+                  <Button onClick={resetForm} size="lg" className="rounded-xl">Voltar</Button>
                 </>
               )}
               {validationStatus === "rejected" && (
                 <>
-                  <div className="w-20 h-20 rounded-2xl bg-destructive/10 flex items-center justify-center mx-auto">
-                    <AlertCircle className="w-10 h-10 text-destructive" />
+                  <div className="w-24 h-24 rounded-3xl bg-destructive/10 flex items-center justify-center mx-auto">
+                    <AlertCircle className="w-12 h-12 text-destructive" />
                   </div>
-                  <div className="space-y-2">
-                    <h1 className="text-3xl font-display font-bold">Ingresso rejeitado</h1>
-                    <p className="text-muted-foreground max-w-sm mx-auto">
-                      {validationMessage || "A validação automática detectou um problema com o ingresso enviado."}
-                    </p>
+                  <div className="space-y-3">
+                    <h2 className="text-3xl font-bold">Ingresso rejeitado</h2>
+                    <p className="text-muted-foreground max-w-sm mx-auto">{validationMessage}</p>
                   </div>
-                  <Button onClick={resetForm} className="rounded-xl">Tentar novamente</Button>
+                  <Button onClick={resetForm} size="lg" className="rounded-xl">Tentar novamente</Button>
                 </>
               )}
             </div>
           )}
 
-          {/* Step: Success */}
+          {/* ── Step: Success ── */}
           {step === "success" && (
-            <div className="text-center space-y-6 py-12 animate-reveal-scale">
-              <div className="w-20 h-20 rounded-2xl bg-success/10 flex items-center justify-center mx-auto">
-                <CheckCircle2 className="w-10 h-10 text-success" />
+            <div className="text-center space-y-8 py-16 animate-in fade-in zoom-in-95 duration-300">
+              <div className="w-24 h-24 rounded-3xl bg-success/10 flex items-center justify-center mx-auto">
+                <CheckCircle2 className="w-12 h-12 text-success" />
               </div>
-              <div className="space-y-2">
-                <h1 className="text-3xl font-display font-bold">Ingresso validado e publicado!</h1>
+              <div className="space-y-3">
+                <h2 className="text-3xl font-bold">Ingresso publicado! 🎉</h2>
                 <p className="text-muted-foreground max-w-sm mx-auto">
-                  Seu ingresso passou na validação e está em custódia na plataforma. Ele ficará visível para compradores.
+                  Seu ingresso foi validado e está disponível para compradores na vitrine.
                 </p>
               </div>
               <div className="flex gap-3 justify-center">
-                <Button variant="outline" onClick={resetForm} className="rounded-xl">Vender outro</Button>
-                <Button onClick={() => navigate("/")} className="rounded-xl">Ver vitrine</Button>
+                <Button variant="outline" onClick={resetForm} size="lg" className="rounded-xl">Vender outro</Button>
+                <Button onClick={() => navigate("/")} size="lg" className="rounded-xl gap-2">
+                  Ver vitrine <ArrowRight className="w-4 h-4" />
+                </Button>
               </div>
             </div>
           )}
