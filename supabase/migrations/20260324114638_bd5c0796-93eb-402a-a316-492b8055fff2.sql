@@ -1,0 +1,2 @@
+ALTER TABLE public.tickets DROP CONSTRAINT tickets_status_check;
+ALTER TABLE public.tickets ADD CONSTRAINT tickets_status_check CHECK (status = ANY (ARRAY['available', 'negotiating', 'sold', 'paid', 'pending_validation', 'validated', 'rejected']));
