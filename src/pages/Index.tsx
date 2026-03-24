@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { Search, Ticket, ArrowRight, X, SlidersHorizontal, MapPin, Calendar } from "lucide-react";
+import { Search, Ticket, ArrowRight, X, SlidersHorizontal, MapPin, Calendar, Mic, PartyPopper, Trophy, Drama, Tent, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import TicketCard from "@/components/TicketCard";
@@ -18,58 +18,15 @@ import { Link } from "react-router-dom";
 
 type DateFilter = "" | "today" | "tomorrow" | "weekend";
 
-// ─── Category pills with emoji covers ─────────────────────────────────────────
-const CATEGORY_COVERS: Record<string, { emoji: string; bg: string }> = {
-  Shows:       { emoji: "🎤", bg: "from-rose-500 to-pink-700" },
-  Festas:      { emoji: "🎉", bg: "from-violet-500 to-purple-700" },
-  Esportes:    { emoji: "⚽", bg: "from-green-500 to-emerald-700" },
-  Teatro:      { emoji: "🎭", bg: "from-amber-500 to-orange-700" },
-  Festivais:   { emoji: "🎪", bg: "from-sky-500 to-blue-700" },
-  Outros:      { emoji: "✨", bg: "from-slate-500 to-gray-700" },
-};
-
-// ─── Destination-style category cards (like Airbnb's "Explore nearby") ───────
-function CategoryCard({
-  label,
-  emoji,
-  bg,
-  selected,
-  onClick,
-}: {
-  label: string;
-  emoji: string;
-  bg: string;
-  selected: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={`
-        group relative flex flex-col items-center gap-2 rounded-2xl p-1
-        transition-all duration-200 focus:outline-none
-        ${selected ? "scale-95" : "hover:scale-105"}
-      `}
-    >
-      <div
-        className={`
-          relative w-full aspect-square rounded-2xl bg-gradient-to-br ${bg}
-          flex items-center justify-center text-4xl shadow-md
-          ${selected ? "ring-2 ring-offset-2 ring-foreground" : ""}
-          group-hover:shadow-xl transition-shadow duration-200
-        `}
-      >
-        <span className="drop-shadow-sm">{emoji}</span>
-      </div>
-      <span
-        className={`text-xs font-semibold tracking-wide uppercase
-          ${selected ? "text-foreground" : "text-muted-foreground"}`}
-      >
-        {label}
-      </span>
-    </button>
-  );
-}
+// ─── Airbnb-style category tabs ───────────────────────────────────────────────
+const CATEGORIES = [
+  { label: "Shows", icon: Mic },
+  { label: "Festas", icon: PartyPopper },
+  { label: "Esportes", icon: Trophy },
+  { label: "Teatro", icon: Drama },
+  { label: "Festivais", icon: Tent },
+  { label: "Outros", icon: Sparkles },
+];
 
 // ─── Skeleton card ─────────────────────────────────────────────────────────────
 function SkeletonCard() {
@@ -216,64 +173,78 @@ export default function Index() {
         </div>
       </section>
 
-      {/* ── CATEGORY PILLS (Airbnb "Explore categories") ─────────────────────── */}
+      {/* ── CATEGORY TABS (Airbnb style) ──────────────────────────────────────── */}
       {!hasActiveSearch && (
-        <section className="container py-8">
-          <div className="flex items-center justify-between mb-5">
-            <h2 className="text-lg font-bold text-foreground">O que você procura?</h2>
-            <button
-              className="flex items-center gap-1.5 text-sm text-muted-foreground border border-border rounded-full px-3 py-1.5 hover:border-foreground transition-colors"
-              onClick={() => setShowFilters(!showFilters)}
-            >
-              <SlidersHorizontal className="w-3.5 h-3.5" />
-              Filtros {hasFilters && <span className="ml-1 bg-foreground text-background text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">!</span>}
-            </button>
-          </div>
-
-          {/* Category grid */}
-          <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
-            {Object.entries(CATEGORY_COVERS).map(([label, { emoji, bg }]) => (
-              <CategoryCard
-                key={label}
-                label={label}
-                emoji={emoji}
-                bg={bg}
-                selected={selectedCategory === label}
-                onClick={() => setSelectedCategory(selectedCategory === label ? "" : label)}
-              />
-            ))}
-          </div>
-
-          {/* Expandable filters */}
-          {showFilters && (
-            <div className="mt-5 p-5 rounded-2xl border border-border bg-card space-y-4 animate-in fade-in slide-in-from-top-2 duration-200">
-              <div>
-                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3 flex items-center gap-1.5">
-                  <Calendar className="w-3.5 h-3.5" /> Quando?
-                </p>
-                <QuickDateFilters selected={dateFilter} onChange={setDateFilter} />
+        <section className="border-b border-border sticky top-0 z-30 bg-background/95 backdrop-blur-sm">
+          <div className="container">
+            <div className="flex items-center gap-1">
+              {/* Scrollable category tabs */}
+              <div className="flex items-center gap-8 overflow-x-auto no-scrollbar py-4 flex-1">
+                {CATEGORIES.map(({ label, icon: Icon }) => {
+                  const isSelected = selectedCategory === label;
+                  return (
+                    <button
+                      key={label}
+                      onClick={() => setSelectedCategory(isSelected ? "" : label)}
+                      className={`flex flex-col items-center gap-1.5 min-w-fit pb-2 border-b-2 transition-all duration-200 ${
+                        isSelected
+                          ? "border-foreground text-foreground"
+                          : "border-transparent text-muted-foreground hover:text-foreground hover:border-border"
+                      }`}
+                    >
+                      <Icon className="w-6 h-6" strokeWidth={isSelected ? 2 : 1.5} />
+                      <span className="text-xs font-medium whitespace-nowrap">{label}</span>
+                    </button>
+                  );
+                })}
               </div>
-              <div>
-                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3 flex items-center gap-1.5">
-                  <MapPin className="w-3.5 h-3.5" /> Localização
-                </p>
-                <CityFilter
-                  selectedCity={selectedCity}
-                  onCityChange={setSelectedCity}
-                  selectedCategory={selectedCategory}
-                  onCategoryChange={setSelectedCategory}
-                />
-              </div>
-              {hasFilters && (
-                <button
-                  className="text-sm text-muted-foreground underline underline-offset-2"
-                  onClick={() => { setSelectedCity(""); setSelectedCategory(""); setDateFilter(""); }}
-                >
-                  Limpar filtros
-                </button>
-              )}
+
+              {/* Filters button */}
+              <button
+                className="flex items-center gap-2 text-xs font-medium border border-border rounded-xl px-4 py-2.5 ml-4 hover:shadow-md transition-shadow shrink-0"
+                onClick={() => setShowFilters(!showFilters)}
+              >
+                <SlidersHorizontal className="w-4 h-4" />
+                Filtros
+                {hasFilters && (
+                  <span className="bg-foreground text-background text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">!</span>
+                )}
+              </button>
             </div>
-          )}
+
+            {/* Expandable filters */}
+            {showFilters && (
+              <div className="pb-5 pt-2 space-y-4 animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="flex flex-wrap gap-6">
+                  <div className="flex-1 min-w-[200px]">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2 flex items-center gap-1.5">
+                      <Calendar className="w-3.5 h-3.5" /> Quando?
+                    </p>
+                    <QuickDateFilters selected={dateFilter} onChange={setDateFilter} />
+                  </div>
+                  <div className="flex-1 min-w-[200px]">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2 flex items-center gap-1.5">
+                      <MapPin className="w-3.5 h-3.5" /> Localização
+                    </p>
+                    <CityFilter
+                      selectedCity={selectedCity}
+                      onCityChange={setSelectedCity}
+                      selectedCategory={selectedCategory}
+                      onCategoryChange={setSelectedCategory}
+                    />
+                  </div>
+                </div>
+                {hasFilters && (
+                  <button
+                    className="text-sm text-muted-foreground underline underline-offset-2"
+                    onClick={() => { setSelectedCity(""); setSelectedCategory(""); setDateFilter(""); }}
+                  >
+                    Limpar filtros
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
         </section>
       )}
 
