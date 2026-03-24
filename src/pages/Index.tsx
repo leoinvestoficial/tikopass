@@ -10,7 +10,7 @@ import Footer from "@/components/Footer";
 import HowItWorks from "@/components/HowItWorks";
 import PopularEvents, { type PopularEventItem } from "@/components/PopularEvents";
 import TrustBanner from "@/components/TrustBanner";
-import SafetyBanner from "@/components/SafetyBanner";
+
 import SocialProof from "@/components/SocialProof";
 import QuickDateFilters, { getDateRange } from "@/components/QuickDateFilters";
 import { fetchTickets, type Ticket as TicketType } from "@/lib/api";
@@ -92,7 +92,7 @@ export default function Index() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <SafetyBanner />
+      
       <Navbar />
 
       {/* Hero */}
