@@ -18,58 +18,15 @@ import { Link } from "react-router-dom";
 
 type DateFilter = "" | "today" | "tomorrow" | "weekend";
 
-// ─── Category pills with emoji covers ─────────────────────────────────────────
-const CATEGORY_COVERS: Record<string, { emoji: string; bg: string }> = {
-  Shows:       { emoji: "🎤", bg: "from-rose-500 to-pink-700" },
-  Festas:      { emoji: "🎉", bg: "from-violet-500 to-purple-700" },
-  Esportes:    { emoji: "⚽", bg: "from-green-500 to-emerald-700" },
-  Teatro:      { emoji: "🎭", bg: "from-amber-500 to-orange-700" },
-  Festivais:   { emoji: "🎪", bg: "from-sky-500 to-blue-700" },
-  Outros:      { emoji: "✨", bg: "from-slate-500 to-gray-700" },
-};
-
-// ─── Destination-style category cards (like Airbnb's "Explore nearby") ───────
-function CategoryCard({
-  label,
-  emoji,
-  bg,
-  selected,
-  onClick,
-}: {
-  label: string;
-  emoji: string;
-  bg: string;
-  selected: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={`
-        group relative flex flex-col items-center gap-2 rounded-2xl p-1
-        transition-all duration-200 focus:outline-none
-        ${selected ? "scale-95" : "hover:scale-105"}
-      `}
-    >
-      <div
-        className={`
-          relative w-full aspect-square rounded-2xl bg-gradient-to-br ${bg}
-          flex items-center justify-center text-4xl shadow-md
-          ${selected ? "ring-2 ring-offset-2 ring-foreground" : ""}
-          group-hover:shadow-xl transition-shadow duration-200
-        `}
-      >
-        <span className="drop-shadow-sm">{emoji}</span>
-      </div>
-      <span
-        className={`text-xs font-semibold tracking-wide uppercase
-          ${selected ? "text-foreground" : "text-muted-foreground"}`}
-      >
-        {label}
-      </span>
-    </button>
-  );
-}
+// ─── Airbnb-style category tabs ───────────────────────────────────────────────
+const CATEGORIES = [
+  { label: "Shows", icon: Mic },
+  { label: "Festas", icon: PartyPopper },
+  { label: "Esportes", icon: Trophy },
+  { label: "Teatro", icon: Drama },
+  { label: "Festivais", icon: Tent },
+  { label: "Outros", icon: Sparkles },
+];
 
 // ─── Skeleton card ─────────────────────────────────────────────────────────────
 function SkeletonCard() {
