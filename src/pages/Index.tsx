@@ -332,10 +332,17 @@ export default function Index() {
       {/* ── SELL CTA (Airbnb "Become a host" style) ──────────────────────────── */}
       {!hasActiveSearch && (
         <section className="container pb-16">
-          <div className="relative overflow-hidden rounded-3xl bg-foreground text-background p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-8">
-            {/* Decorative circle */}
-            <div className="absolute -right-16 -top-16 w-64 h-64 rounded-full bg-white/5 pointer-events-none" />
-            <div className="absolute -right-6 -bottom-10 w-40 h-40 rounded-full bg-white/5 pointer-events-none" />
+          <div className="relative overflow-hidden rounded-3xl text-white flex flex-col md:flex-row items-center justify-between gap-8">
+            {/* Background image */}
+            <img
+              src={sellCtaBg}
+              alt="Ingressos em show"
+              className="absolute inset-0 w-full h-full object-cover"
+              loading="lazy"
+              width={1920}
+              height={800}
+            />
+            <div className="absolute inset-0 bg-black/60" />
 
             <div className="relative space-y-2 max-w-md">
               <p className="text-sm font-semibold uppercase tracking-widest text-white/50">Para vendedores</p>
