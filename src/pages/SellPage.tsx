@@ -128,6 +128,7 @@ export default function SellPage() {
     setSavedEventId(null); setSavedTicketId(null); setTicketForm({ sector: "", row: "", seat: "", price: "" });
     setTicketFile(null); setValidationStatus("pending_validation"); setValidationMessage("");
     setValidationChecks([]);
+  };
 
   const stepsList = [
     { key: "search", label: "Buscar evento", num: 1 },
