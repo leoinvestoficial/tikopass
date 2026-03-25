@@ -4,7 +4,7 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Search, CheckCircle2, ArrowRight, Sparkles, MapPin, Calendar, Tag, Loader2, Upload, FileCheck, AlertCircle, Clock, Shield, Zap, DollarSign } from "lucide-react";
+import { Search, CheckCircle2, ArrowRight, Sparkles, MapPin, Calendar, Tag, Loader2, Upload, FileCheck, AlertCircle, Clock, Shield, Zap, DollarSign, XCircle } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { searchEventsWithAI, createEvent, createTicket } from "@/lib/api";
 import { supabase } from "@/integrations/supabase/client";
@@ -17,6 +17,7 @@ type AIEvent = {
 };
 
 type Step = "search" | "confirm" | "details" | "upload" | "validating" | "success";
+type ValidationCheck = { id: string; label: string; passed: boolean; detail: string };
 
 export default function SellPage() {
   const [step, setStep] = useState<Step>("search");
@@ -34,6 +35,7 @@ export default function SellPage() {
   const [ticketFile, setTicketFile] = useState<File | null>(null);
   const [validationStatus, setValidationStatus] = useState<string>("pending_validation");
   const [validationMessage, setValidationMessage] = useState("");
+  const [validationChecks, setValidationChecks] = useState<ValidationCheck[]>([]);
 
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -43,19 +45,28 @@ export default function SellPage() {
     if (step !== "validating" || !savedTicketId) return;
     let isActive = true;
     const interval = setInterval(async () => {
-      const { data } = await supabase.from("tickets").select("status").eq("id", savedTicketId).single();
+      const { data } = await supabase.from("tickets").select("status, rejection_reason, validation_checks").eq("id", savedTicketId).single();
       if (!isActive || !data || data.status === "pending_validation") return;
       setValidationStatus(data.status);
       if (data.status === "validated") { setStep("success"); toast.success("Ingresso validado e publicado!"); }
-      else if (data.status === "rejected") { setValidationMessage("Seu ingresso foi rejeitado pela validação automática."); toast.error("Ingresso rejeitado na validação."); }
+      else if (data.status === "rejected") {
+        setValidationMessage((data as any).rejection_reason || "Seu ingresso foi rejeitado pela validação automática.");
+        setValidationChecks(((data as any).validation_checks || []) as ValidationCheck[]);
+        toast.error("Ingresso rejeitado na validação.");
+      }
       clearInterval(interval);
     }, 3000);
     const timeout = setTimeout(async () => {
       clearInterval(interval);
-      const { data } = await supabase.from("tickets").select("status").eq("id", savedTicketId).single();
+      const { data } = await supabase.from("tickets").select("status, rejection_reason, validation_checks").eq("id", savedTicketId).single();
       if (!isActive) return;
       if (data?.status === "validated") { setStep("success"); return; }
-      if (data?.status === "rejected") { setValidationStatus("rejected"); setValidationMessage("Ingresso rejeitado pela validação."); return; }
+      if (data?.status === "rejected") {
+        setValidationStatus("rejected");
+        setValidationMessage((data as any).rejection_reason || "Ingresso rejeitado pela validação.");
+        setValidationChecks(((data as any).validation_checks || []) as ValidationCheck[]);
+        return;
+      }
       setValidationStatus("timeout");
       setValidationMessage("A validação não foi concluída automaticamente. Seu ingresso não foi publicado.");
       toast.error("A validação não foi concluída. O ingresso não foi publicado.");
@@ -125,6 +136,7 @@ export default function SellPage() {
     setStep("search"); setSearchQuery(""); setAiResults([]); setSelectedEvent(null);
     setSavedEventId(null); setSavedTicketId(null); setTicketForm({ sector: "", row: "", seat: "", price: "" });
     setTicketFile(null); setValidationStatus("pending_validation"); setValidationMessage("");
+    setValidationChecks([]);
   };
 
   const stepsList = [
@@ -445,6 +457,27 @@ export default function SellPage() {
                     <h2 className="text-3xl font-bold">Ingresso rejeitado</h2>
                     <p className="text-muted-foreground max-w-sm mx-auto">{validationMessage}</p>
                   </div>
+
+                  {/* Diagnostic checklist */}
+                  {validationChecks.length > 0 && (
+                    <div className="max-w-md mx-auto w-full bg-card border border-border rounded-2xl p-5 text-left space-y-3">
+                      <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Diagnóstico da validação</p>
+                      {validationChecks.map((check) => (
+                        <div key={check.id} className="flex items-start gap-3">
+                          {check.passed ? (
+                            <CheckCircle2 className="w-5 h-5 text-green-500 shrink-0 mt-0.5" />
+                          ) : (
+                            <XCircle className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
+                          )}
+                          <div>
+                            <p className="text-sm font-medium text-foreground">{check.label}</p>
+                            <p className="text-xs text-muted-foreground">{check.detail}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
                   <Button onClick={resetForm} size="lg" className="rounded-xl">Tentar novamente</Button>
                 </>
               )}
