@@ -35,6 +35,7 @@ export default function SellPage() {
   const [ticketFile, setTicketFile] = useState<File | null>(null);
   const [validationStatus, setValidationStatus] = useState<string>("pending_validation");
   const [validationMessage, setValidationMessage] = useState("");
+  const [validationChecks, setValidationChecks] = useState<ValidationCheck[]>([]);
 
   const { user } = useAuth();
   const navigate = useNavigate();
