@@ -307,7 +307,7 @@ serve(async (req) => {
     // ========== APROVADO ==========
     await supabaseAdmin
       .from("tickets")
-      .update({ status: "validated", validated_at: new Date().toISOString(), extracted_code: ticketCode || null })
+      .update({ status: "validated", validated_at: new Date().toISOString(), extracted_code: ticketCode || null, validation_checks: checks })
       .eq("id", ticket_id);
 
     return jsonResponse({
