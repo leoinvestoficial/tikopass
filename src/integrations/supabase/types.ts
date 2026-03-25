@@ -300,6 +300,7 @@ export type Database = {
           order_id: string | null
           original_price: number | null
           price: number
+          rejection_reason: string | null
           row: string | null
           seat: string | null
           sector: string
@@ -308,6 +309,7 @@ export type Database = {
           storage_path: string | null
           updated_at: string
           validated_at: string | null
+          validation_checks: Json | null
         }
         Insert: {
           created_at?: string
@@ -317,6 +319,7 @@ export type Database = {
           order_id?: string | null
           original_price?: number | null
           price: number
+          rejection_reason?: string | null
           row?: string | null
           seat?: string | null
           sector: string
@@ -325,6 +328,7 @@ export type Database = {
           storage_path?: string | null
           updated_at?: string
           validated_at?: string | null
+          validation_checks?: Json | null
         }
         Update: {
           created_at?: string
@@ -334,6 +338,7 @@ export type Database = {
           order_id?: string | null
           original_price?: number | null
           price?: number
+          rejection_reason?: string | null
           row?: string | null
           seat?: string | null
           sector?: string
@@ -342,6 +347,7 @@ export type Database = {
           storage_path?: string | null
           updated_at?: string
           validated_at?: string | null
+          validation_checks?: Json | null
         }
         Relationships: [
           {
