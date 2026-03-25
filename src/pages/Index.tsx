@@ -47,6 +47,7 @@ function SkeletonCard() {
 
 // ─── Main page ─────────────────────────────────────────────────────────────────
 export default function Index() {
+  const { city: userCity } = useUserCity();
   const [search, setSearch] = useState("");
   const [selectedCity, setSelectedCity] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
