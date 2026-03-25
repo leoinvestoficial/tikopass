@@ -17,6 +17,7 @@ type AIEvent = {
 };
 
 type Step = "search" | "confirm" | "details" | "upload" | "validating" | "success";
+type ValidationCheck = { id: string; label: string; passed: boolean; detail: string };
 
 export default function SellPage() {
   const [step, setStep] = useState<Step>("search");
