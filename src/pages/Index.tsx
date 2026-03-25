@@ -12,11 +12,12 @@ import Footer from "@/components/Footer";
 import HowItWorks from "@/components/HowItWorks";
 import PopularEvents, { type PopularEventItem } from "@/components/PopularEvents";
 import TrustBanner from "@/components/TrustBanner";
-
+import RecommendedEvents from "@/components/RecommendedEvents";
 import SocialProof from "@/components/SocialProof";
 import QuickDateFilters, { getDateRange } from "@/components/QuickDateFilters";
 import { fetchTickets, type Ticket as TicketType } from "@/lib/api";
 import { Link } from "react-router-dom";
+import { useUserCity } from "@/hooks/use-user-city";
 
 type DateFilter = "" | "today" | "tomorrow" | "weekend";
 
