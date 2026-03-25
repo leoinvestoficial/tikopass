@@ -448,6 +448,27 @@ export default function SellPage() {
                     <h2 className="text-3xl font-bold">Ingresso rejeitado</h2>
                     <p className="text-muted-foreground max-w-sm mx-auto">{validationMessage}</p>
                   </div>
+
+                  {/* Diagnostic checklist */}
+                  {validationChecks.length > 0 && (
+                    <div className="max-w-md mx-auto w-full bg-card border border-border rounded-2xl p-5 text-left space-y-3">
+                      <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Diagnóstico da validação</p>
+                      {validationChecks.map((check) => (
+                        <div key={check.id} className="flex items-start gap-3">
+                          {check.passed ? (
+                            <CheckCircle2 className="w-5 h-5 text-green-500 shrink-0 mt-0.5" />
+                          ) : (
+                            <XCircle className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
+                          )}
+                          <div>
+                            <p className="text-sm font-medium text-foreground">{check.label}</p>
+                            <p className="text-xs text-muted-foreground">{check.detail}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
                   <Button onClick={resetForm} size="lg" className="rounded-xl">Tentar novamente</Button>
                 </>
               )}
