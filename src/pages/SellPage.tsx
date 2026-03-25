@@ -45,19 +45,28 @@ export default function SellPage() {
     if (step !== "validating" || !savedTicketId) return;
     let isActive = true;
     const interval = setInterval(async () => {
-      const { data } = await supabase.from("tickets").select("status").eq("id", savedTicketId).single();
+      const { data } = await supabase.from("tickets").select("status, rejection_reason, validation_checks").eq("id", savedTicketId).single();
       if (!isActive || !data || data.status === "pending_validation") return;
       setValidationStatus(data.status);
       if (data.status === "validated") { setStep("success"); toast.success("Ingresso validado e publicado!"); }
-      else if (data.status === "rejected") { setValidationMessage("Seu ingresso foi rejeitado pela validação automática."); toast.error("Ingresso rejeitado na validação."); }
+      else if (data.status === "rejected") {
+        setValidationMessage((data as any).rejection_reason || "Seu ingresso foi rejeitado pela validação automática.");
+        setValidationChecks(((data as any).validation_checks || []) as ValidationCheck[]);
+        toast.error("Ingresso rejeitado na validação.");
+      }
       clearInterval(interval);
     }, 3000);
     const timeout = setTimeout(async () => {
       clearInterval(interval);
-      const { data } = await supabase.from("tickets").select("status").eq("id", savedTicketId).single();
+      const { data } = await supabase.from("tickets").select("status, rejection_reason, validation_checks").eq("id", savedTicketId).single();
       if (!isActive) return;
       if (data?.status === "validated") { setStep("success"); return; }
-      if (data?.status === "rejected") { setValidationStatus("rejected"); setValidationMessage("Ingresso rejeitado pela validação."); return; }
+      if (data?.status === "rejected") {
+        setValidationStatus("rejected");
+        setValidationMessage((data as any).rejection_reason || "Ingresso rejeitado pela validação.");
+        setValidationChecks(((data as any).validation_checks || []) as ValidationCheck[]);
+        return;
+      }
       setValidationStatus("timeout");
       setValidationMessage("A validação não foi concluída automaticamente. Seu ingresso não foi publicado.");
       toast.error("A validação não foi concluída. O ingresso não foi publicado.");

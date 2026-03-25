@@ -393,10 +393,14 @@ function extractTicketData(text: string) {
 async function rejectTicket(supabase: any, ticketId: string, code: string | null, reason: string, checks: Check[]) {
   await supabase
     .from("tickets")
-    .update({ status: "rejected", extracted_code: code })
+    .update({
+      status: "rejected",
+      extracted_code: code,
+      rejection_reason: reason,
+      validation_checks: checks,
+    })
     .eq("id", ticketId);
-  // Store rejection reason + checks as a log (could be a separate table later)
-  console.log("Ticket rejected:", ticketId, reason, JSON.stringify(checks));
+  console.log("Ticket rejected:", ticketId, reason);
 }
 
 function jsonResponse(data: any) {
