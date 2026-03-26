@@ -38,7 +38,7 @@ export default function Navbar() {
     <nav className="sticky top-0 z-50 bg-card/80 backdrop-blur-lg border-b border-border">
       <div className="container flex items-center justify-between h-16">
         <Link to="/" className="flex items-center group">
-          <img src={tikoLogo} alt="Tiko Pass" className="h-14 object-contain transition-transform duration-200 group-hover:scale-105 group-active:scale-95" />
+          <img src={tikoLogo} alt="Tiko Pass" className="h-20 object-contain transition-transform duration-200 group-hover:scale-105 group-active:scale-95" />
         </Link>
 
         <div className="hidden md:flex items-center gap-1">
