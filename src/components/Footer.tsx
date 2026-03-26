@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
-import { Ticket, ShieldCheck } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
+import tikoIcon from "@/assets/tiko-icon.png";
 
 export default function Footer() {
   return (
@@ -8,15 +9,13 @@ export default function Footer() {
         <div className="flex flex-col md:flex-row justify-between gap-8">
           <div className="space-y-3 max-w-xs">
             <Link to="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-                <Ticket className="w-4 h-4 text-primary-foreground" />
-              </div>
-              <span className="font-display font-bold text-lg">
-                TICKET<span className="text-primary">4U</span>
+              <img src={tikoIcon} alt="Tiko" className="w-8 h-8 rounded-lg object-cover" />
+              <span className="font-display font-bold text-lg text-foreground">
+                tiko
               </span>
             </Link>
             <p className="text-sm text-muted-foreground">
-              O marketplace de revenda de ingressos mais seguro e prático do Brasil. Compre e venda com pagamento protegido.
+              O marketplace de revenda de ingressos para shows e festivais mais seguro do Brasil.
             </p>
             <div className="flex items-center gap-2 text-xs text-muted-foreground pt-1">
               <ShieldCheck className="w-3.5 h-3.5 text-success" />
@@ -35,12 +34,12 @@ export default function Footer() {
               </div>
             </div>
             <div className="space-y-3">
-              <h4 className="font-display font-semibold text-foreground">Categorias</h4>
+              <h4 className="font-display font-semibold text-foreground">Gêneros</h4>
               <div className="space-y-2 text-muted-foreground">
-                <span className="block">Shows</span>
-                <span className="block">Festivais</span>
-                <span className="block">Esportes</span>
-                <span className="block">Teatro</span>
+                <span className="block">Sertanejo</span>
+                <span className="block">Rock & Pop</span>
+                <span className="block">Pagode & Samba</span>
+                <span className="block">Eletrônica</span>
               </div>
             </div>
             <div className="space-y-3">
@@ -56,7 +55,7 @@ export default function Footer() {
 
         <div className="mt-8 pt-6 border-t border-border">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted-foreground">
-            <span>© 2025 TICKET4U. Todos os direitos reservados.</span>
+            <span>© 2025 Tiko. Todos os direitos reservados.</span>
             <span className="text-center">
               Você está comprando ingressos de terceiros. Os preços são definidos pelos vendedores e podem estar abaixo ou acima do valor nominal.
             </span>

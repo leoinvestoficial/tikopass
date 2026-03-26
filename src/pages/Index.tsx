@@ -1,7 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
-import { Search, Ticket, ArrowRight, X, SlidersHorizontal, MapPin, Calendar, Music, Tent, Guitar, Disc3, Drum, Headphones } from "lucide-react";
+import { Search, ArrowRight, X, SlidersHorizontal, MapPin, Calendar, Guitar, Disc3, Drum, Headphones, Mic, Piano } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import TicketCard from "@/components/TicketCard";
 import heroBg from "@/assets/hero-bg.jpg";
 import sellCtaBg from "@/assets/sell-cta.jpg";
@@ -21,14 +20,14 @@ import { useUserCity } from "@/hooks/use-user-city";
 
 type DateFilter = "" | "today" | "tomorrow" | "weekend";
 
-// ─── Airbnb-style category tabs ───────────────────────────────────────────────
+// ─── Music genre category tabs ────────────────────────────────────────────────
 const CATEGORIES = [
-  { label: "Shows", icon: Music },
-  { label: "Festivais", icon: Tent },
   { label: "Sertanejo", icon: Guitar },
   { label: "Rock & Pop", icon: Disc3 },
   { label: "Pagode & Samba", icon: Drum },
   { label: "Eletrônica", icon: Headphones },
+  { label: "MPB & Axé", icon: Mic },
+  { label: "Funk & Rap", icon: Piano },
 ];
 
 // ─── Skeleton card ─────────────────────────────────────────────────────────────
@@ -111,38 +110,34 @@ export default function Index() {
 
       {/* ── HERO ─────────────────────────────────────────────────────────────── */}
       <section className="relative overflow-hidden min-h-[420px]">
-        {/* Background image */}
         <img
           src={heroBg}
-          alt="Festival de música ao vivo"
+          alt="Show de música ao vivo"
           className="absolute inset-0 w-full h-full object-cover"
           width={1920}
           height={1080}
         />
-        {/* Overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70" />
 
         <div className="relative container pt-20 pb-16 md:pt-28 md:pb-20">
-          {/* Headline */}
           <div className="max-w-xl mb-8 space-y-3">
             <h1 className="text-4xl md:text-5xl font-bold text-white leading-tight tracking-tight drop-shadow">
-              Seu próximo evento<br />começa aqui.
+              Seu próximo show<br />começa aqui.
             </h1>
             <p className="text-white/70 text-base md:text-lg">
-              Ingressos verificados. Pagamento protegido. Salvador e Bahia.
+              Ingressos verificados por IA. Pagamento protegido. Shows e festivais.
             </p>
           </div>
 
-          {/* ── Airbnb-style search bar ── */}
+          {/* ── Search bar ── */}
           <div className="bg-white dark:bg-card rounded-2xl shadow-2xl flex flex-col sm:flex-row sm:items-center divide-y sm:divide-y-0 sm:divide-x divide-border overflow-hidden max-w-2xl">
-            {/* Event search */}
             <div className="flex items-center gap-3 px-5 py-4 flex-1">
               <Search className="w-4 h-4 text-muted-foreground shrink-0" />
               <div className="flex flex-col">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-foreground">Evento</span>
-                  <input
-                    className="text-sm bg-transparent outline-none placeholder:text-muted-foreground text-foreground w-full"
-                    placeholder="Artista, show, festival..."
+                <input
+                  className="text-sm bg-transparent outline-none placeholder:text-muted-foreground text-foreground w-full"
+                  placeholder="Artista, show, festival..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && loadTickets()}
@@ -150,7 +145,6 @@ export default function Index() {
               </div>
             </div>
 
-            {/* City */}
             <div className="flex items-center gap-3 px-5 py-4 flex-1">
               <MapPin className="w-4 h-4 text-muted-foreground shrink-0" />
               <div className="flex flex-col">
@@ -164,7 +158,6 @@ export default function Index() {
               </div>
             </div>
 
-            {/* CTA */}
             <div className="px-3 py-3 flex justify-center sm:justify-start">
               <button
                 onClick={loadTickets}
@@ -177,13 +170,12 @@ export default function Index() {
         </div>
       </section>
 
-      {/* ── CATEGORY TABS (Airbnb style) ──────────────────────────────────────── */}
+      {/* ── CATEGORY TABS ──────────────────────────────────────────────────────── */}
       {!hasActiveSearch && (
         <section className="border-b border-border sticky top-0 z-30 bg-background/95 backdrop-blur-sm">
           <div className="container">
             <div className="flex items-center gap-1">
-              {/* Scrollable category tabs */}
-              <div className="flex items-center gap-12 overflow-x-auto no-scrollbar py-4 flex-1">
+              <div className="flex items-center gap-8 overflow-x-auto no-scrollbar py-4 flex-1">
                 {CATEGORIES.map(({ label, icon: Icon }) => {
                   const isSelected = selectedCategory === label;
                   return (
@@ -203,7 +195,6 @@ export default function Index() {
                 })}
               </div>
 
-              {/* Filters button */}
               <button
                 className="flex items-center gap-2 text-xs font-medium border border-border rounded-xl px-4 py-2.5 ml-4 hover:shadow-md transition-shadow shrink-0"
                 onClick={() => setShowFilters(!showFilters)}
@@ -216,7 +207,6 @@ export default function Index() {
               </button>
             </div>
 
-            {/* Expandable filters */}
             {showFilters && (
               <div className="pb-5 pt-2 space-y-4 animate-in fade-in slide-in-from-top-2 duration-200">
                 <div className="flex flex-wrap gap-6">
@@ -260,8 +250,6 @@ export default function Index() {
 
       {/* ── TICKETS GRID ─────────────────────────────────────────────────────── */}
       <section className="flex-1 container py-6 pb-16">
-
-        {/* Active search state header */}
         {hasActiveSearch && (
           <div className="flex items-center justify-between mb-6">
             <div>
@@ -278,7 +266,6 @@ export default function Index() {
           </div>
         )}
 
-        {/* Default state header */}
         {!hasActiveSearch && (
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold text-foreground">
@@ -291,7 +278,6 @@ export default function Index() {
           </div>
         )}
 
-        {/* Grid */}
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
             {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => <SkeletonCard key={i} />)}
@@ -307,7 +293,6 @@ export default function Index() {
             ))}
           </div>
         ) : (
-          /* Empty state */
           <div className="flex flex-col items-center justify-center py-24 space-y-4 text-center">
             <div className="w-20 h-20 rounded-3xl bg-muted flex items-center justify-center text-4xl">
               🎟️
@@ -335,11 +320,10 @@ export default function Index() {
         )}
       </section>
 
-      {/* ── SELL CTA (Airbnb "Become a host" style) ──────────────────────────── */}
+      {/* ── SELL CTA ──────────────────────────────────────────────────────────── */}
       {!hasActiveSearch && (
         <section className="container pb-16">
           <div className="relative overflow-hidden rounded-3xl text-white p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-8">
-            {/* Background image */}
             <img
               src={sellCtaBg}
               alt="Ingressos em show"
