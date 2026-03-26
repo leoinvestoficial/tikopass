@@ -150,9 +150,8 @@ export default function AuthPage() {
           ref={reveal.ref}
           className={`w-full max-w-md space-y-6 ${reveal.isVisible ? "animate-reveal-scale" : "opacity-0"}`}
         >
-          <div className="lg:hidden flex items-center gap-2 justify-center mb-4">
-            <img src={tikoIcon} alt="Tiko" className="w-10 h-10 rounded-xl" />
-            <span className="font-display font-bold text-xl text-foreground">tiko</span>
+          <div className="lg:hidden flex items-center justify-center mb-4">
+            <img src={tikoLogo} alt="Tiko Pass" className="h-9 object-contain" />
           </div>
 
           <div className="text-center space-y-2">
