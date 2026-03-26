@@ -84,7 +84,7 @@ serve(async (req) => {
         "Content-Type": "application/json",
         Authorization: `Bearer ${serviceKey}`,
       },
-      body: JSON.stringify({ ticket_id: ticketId, event_id: eventId, storage_path: storagePath }),
+      body: JSON.stringify({ ticket_id: ticketId, event_id: eventId, storage_path: storagePath, seller_id: user.id }),
     }).catch((err) => console.error("Failed to trigger validation:", err));
 
     return new Response(

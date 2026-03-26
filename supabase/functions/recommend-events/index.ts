@@ -30,8 +30,8 @@ serve(async (req) => {
           body: JSON.stringify({
             model: "sonar",
             messages: [
-              { role: "system", content: "Você busca os próximos shows e concertos musicais populares em uma cidade brasileira. Foque APENAS em eventos de música: shows, turnês, festivais musicais. Busque nas ticketeiras Ticketmaster, Eventim, Livepass, Sympla, Tickets For Fun, Clube do Ingresso, Guichê Web e Ticket Maker." },
-              { role: "user", content: `Quais são os próximos shows e concertos musicais em ${cityFilter} e região? Hoje é ${today}. Liste os shows mais relevantes dos próximos 30 dias com nome do artista/banda, data, horário e local.` },
+              { role: "system", content: "Você busca os próximos grandes shows e concertos musicais em uma cidade brasileira. Foque APENAS em eventos de GRANDE PORTE: turnês nacionais/internacionais, festivais musicais grandes, shows muito comentados em redes sociais e com alta adesão do público jovem. Busque nas ticketeiras Ticketmaster, Eventim, Livepass, Sympla, Tickets For Fun, Clube do Ingresso, Guichê Web e Ticket Maker. NÃO inclua eventos pequenos ou locais." },
+              { role: "user", content: `Quais são os próximos grandes shows e concertos musicais em ${cityFilter} e região? Hoje é ${today}. Quero apenas eventos de grande porte, festivais famosos, turnês de artistas conhecidos e eventos virais nas redes sociais (como Retronejo, Oboe, etc). Liste os mais relevantes dos próximos 60 dias.` },
             ],
             search_recency_filter: "month",
           }),
@@ -52,8 +52,8 @@ serve(async (req) => {
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          { role: "system", content: `Você estrutura dados de shows e eventos musicais reais no Brasil. Hoje é ${today}. Extraia APENAS shows/concertos/festivais musicais que existam nos dados fornecidos. IGNORE eventos não-musicais. Categorias: Shows, Festivais, Sertanejo, Rock & Pop, Pagode & Samba, Eletrônica. Use acentos corretos em português.` },
-          { role: "user", content: `Shows e concertos em ${cityFilter}:\n\n${webData || "Sem dados de busca disponíveis."}\n\nExtraia até 6 shows/eventos musicais reais dos próximos 30 dias.` },
+          { role: "system", content: `Você estrutura dados de grandes shows e eventos musicais reais no Brasil. Hoje é ${today}. Extraia APENAS shows/concertos/festivais musicais de GRANDE PORTE que existam nos dados fornecidos. Priorize eventos virais, com grande adesão do público jovem, turnês famosas e festivais renomados. IGNORE eventos pequenos ou não-musicais. Categorias: Shows, Festivais, Sertanejo, Rock & Pop, Pagode & Samba, Eletrônica. Use acentos corretos em português.` },
+          { role: "user", content: `Grandes shows em ${cityFilter}:\n\n${webData || "Sem dados de busca disponíveis."}\n\nExtraia até 6 grandes shows/eventos musicais reais dos próximos 60 dias. Apenas eventos de grande porte e alta repercussão.` },
         ],
         tools: [{
           type: "function",

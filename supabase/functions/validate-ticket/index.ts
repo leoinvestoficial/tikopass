@@ -23,7 +23,7 @@ serve(async (req) => {
   let ticketId: string | null = null;
 
   try {
-    const { ticket_id, event_id, storage_path } = await req.json();
+    const { ticket_id, event_id, storage_path, seller_id } = await req.json();
     ticketId = ticket_id;
     if (!ticket_id || !storage_path) throw new Error("ticket_id e storage_path obrigatórios");
 
@@ -180,10 +180,10 @@ serve(async (req) => {
         : "Ingresso comercial ✓",
     });
 
-    // ========== CAMADA 2b: Validação de CPF ==========
+    // ========== CAMADA 2b: Validação de CPF — deve bater com o CPF do vendedor ==========
     const cpfMatches = fullText.match(/\d{3}[.\s]?\d{3}[.\s]?\d{3}[-.\s]?\d{2}/g) || [];
     let cpfValid = true;
-    let cpfDetail = "Nenhum CPF detectado";
+    let cpfDetail = "Nenhum CPF detectado no ingresso";
 
     if (cpfMatches.length > 0) {
       const invalidCpfs = ["000.000.000-00", "111.111.111-11", "222.222.222-22",
@@ -192,16 +192,39 @@ serve(async (req) => {
         "00000000000", "11111111111", "22222222222", "33333333333",
         "44444444444", "55555555555", "66666666666", "77777777777",
         "88888888888", "99999999999"];
-      const foundInvalid = cpfMatches.find(cpf => invalidCpfs.includes(cpf.replace(/\s/g, "")));
+      const foundInvalid = cpfMatches.find(cpf => invalidCpfs.includes(cpf.replace(/[\s.-]/g, "")));
       if (foundInvalid) {
         cpfValid = false;
         cpfDetail = `CPF ${foundInvalid} é inválido`;
+      } else if (seller_id) {
+        // Check if CPF on ticket matches seller's CPF
+        const { data: sellerProfile } = await supabaseAdmin
+          .from("profiles").select("cpf").eq("user_id", seller_id).single();
+        
+        if (sellerProfile?.cpf) {
+          const sellerCpfClean = sellerProfile.cpf.replace(/\D/g, "");
+          const ticketCpfClean = cpfMatches[0].replace(/\D/g, "");
+          if (sellerCpfClean !== ticketCpfClean) {
+            cpfValid = false;
+            cpfDetail = `CPF do ingresso (${cpfMatches[0]}) não corresponde ao CPF cadastrado na sua conta`;
+          } else {
+            cpfDetail = "CPF corresponde ao cadastro ✓";
+          }
+        } else {
+          cpfDetail = "CPF detectado no ingresso (cadastre seu CPF no perfil para validação automática)";
+        }
       } else {
         cpfDetail = "CPF válido detectado ✓";
       }
     }
 
     checks.push({ id: "cpf_check", label: "CPF do titular", passed: cpfValid, detail: cpfDetail });
+
+    if (!cpfValid && cpfMatches.length > 0) {
+      const reason = cpfDetail;
+      await rejectTicket(supabaseAdmin, ticket_id, null, reason, checks);
+      return jsonResponse({ success: false, reason, checks });
+    }
 
     // ========== CAMADA 2c: Titular genérico ==========
     const genericHolderPatterns = [
