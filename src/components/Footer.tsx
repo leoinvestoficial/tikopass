@@ -8,11 +8,8 @@ export default function Footer() {
       <div className="container py-12">
         <div className="flex flex-col md:flex-row justify-between gap-8">
           <div className="space-y-3 max-w-xs">
-            <Link to="/" className="flex items-center gap-2">
-              <img src={tikoIcon} alt="Tiko" className="w-10 h-10 object-contain" />
-              <span className="font-display font-bold text-lg text-foreground">
-                tiko
-              </span>
+            <Link to="/" className="flex items-center">
+              <img src={tikoLogo} alt="Tiko Pass" className="h-9 object-contain" />
             </Link>
             <p className="text-sm text-muted-foreground">
               O marketplace de revenda de ingressos para shows e festivais mais seguro do Brasil.
