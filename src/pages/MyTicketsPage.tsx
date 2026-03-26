@@ -9,7 +9,94 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Ticket, Loader2, Calendar, MapPin, Tag, ArrowRight, Clock, Eye, ShoppingBag, Store,
+  CheckCircle2, XCircle, AlertCircle, Shield,
 } from "lucide-react";
+
+type ValidationCheck = { id: string; label: string; passed: boolean; detail: string };
+
+function ValidationChecklist({ checks }: { checks: ValidationCheck[] }) {
+  if (!checks || checks.length === 0) return null;
+  return (
+    <div className="mt-3 space-y-1.5 bg-muted/50 rounded-lg p-3">
+      <p className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5 mb-2">
+        <Shield className="w-3.5 h-3.5" /> Diagnóstico da validação
+      </p>
+      {checks.map((check) => (
+        <div key={check.id} className="flex items-start gap-2 text-xs">
+          {check.passed ? (
+            <CheckCircle2 className="w-3.5 h-3.5 text-success shrink-0 mt-0.5" />
+          ) : (
+            <XCircle className="w-3.5 h-3.5 text-destructive shrink-0 mt-0.5" />
+          )}
+          <div>
+            <span className="font-medium">{check.label}</span>
+            <span className="text-muted-foreground ml-1">— {check.detail}</span>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function SellingTicketCard({ ticket, today }: { ticket: any; today: string }) {
+  const event = ticket.events;
+  if (!event) return null;
+  const isPast = event.date < today;
+  const statusLabels: Record<string, { label: string; className: string }> = {
+    available: { label: "Disponível", className: "bg-success/10 text-success border-success/20" },
+    validated: { label: "Validado", className: "bg-success/10 text-success border-success/20" },
+    pending_validation: { label: "Validando...", className: "bg-warning/10 text-warning border-warning/20 animate-pulse" },
+    sold: { label: "Vendido", className: "bg-primary/10 text-primary border-primary/20" },
+    completed: { label: "Concluído", className: "bg-muted text-muted-foreground border-muted" },
+    rejected: { label: "Rejeitado", className: "bg-destructive/10 text-destructive border-destructive/20" },
+  };
+  const st = statusLabels[ticket.status] || statusLabels.available;
+  const checks = (ticket.validation_checks || []) as ValidationCheck[];
+
+  return (
+    <div className={`bg-card rounded-xl border border-border p-5 transition-all duration-300 hover:shadow-md ${isPast ? "opacity-75" : ""}`}>
+      <Link to={`/event/${ticket.event_id}`} className="block group">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="space-y-2 flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h3 className="font-display font-semibold text-foreground group-hover:text-primary transition-colors">{event.name}</h3>
+              <Badge className={`text-xs ${st.className}`}>{st.label}</Badge>
+            </div>
+            <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
+              <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5" />{new Date(event.date).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" })} · {event.time}</span>
+              <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5" />{event.venue}</span>
+              <span className="flex items-center gap-1"><Tag className="w-3.5 h-3.5" />{ticket.sector}</span>
+            </div>
+          </div>
+          <div className="text-right shrink-0">
+            <span className="font-display font-bold text-xl text-foreground">R$ {ticket.price.toLocaleString("pt-BR")}</span>
+          </div>
+        </div>
+      </Link>
+
+      {/* Pending validation indicator */}
+      {ticket.status === "pending_validation" && (
+        <div className="mt-3 flex items-center gap-2 text-xs text-warning bg-warning/5 rounded-lg px-3 py-2">
+          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+          Validação em andamento... Isso pode levar alguns segundos.
+        </div>
+      )}
+
+      {/* Rejection reason */}
+      {ticket.status === "rejected" && ticket.rejection_reason && (
+        <div className="mt-3 flex items-start gap-2 text-xs text-destructive bg-destructive/5 rounded-lg px-3 py-2">
+          <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+          <span>{ticket.rejection_reason}</span>
+        </div>
+      )}
+
+      {/* Validation checklist */}
+      {(ticket.status === "rejected" || ticket.status === "validated") && checks.length > 0 && (
+        <ValidationChecklist checks={checks} />
+      )}
+    </div>
+  );
+}
 
 export default function MyTicketsPage() {
   const { user } = useAuth();
@@ -24,21 +111,29 @@ export default function MyTicketsPage() {
     loadData();
   }, [user]);
 
+  // Auto-refresh while there are pending tickets
+  useEffect(() => {
+    const hasPending = sellingTickets.some(t => t.status === "pending_validation");
+    if (!hasPending || !user) return;
+    const interval = setInterval(async () => {
+      const selling = await fetchMyTickets(user.id);
+      setSellingTickets(selling);
+      if (!selling.some(t => t.status === "pending_validation")) clearInterval(interval);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [sellingTickets, user]);
+
   const loadData = async () => {
     if (!user) return;
     setLoading(true);
     try {
-      // Fetch tickets I'm selling
       const selling = await fetchMyTickets(user.id);
       setSellingTickets(selling);
-
-      // Fetch tickets I've purchased (via buyer_access)
       const { data: accessData } = await supabase
         .from("buyer_access")
         .select("*, tickets:ticket_id(*, events:event_id(*))")
         .eq("buyer_id", user.id)
         .order("created_at", { ascending: false });
-      
       setPurchasedTickets((accessData as any[]) || []);
     } catch (err) {
       console.error(err);
@@ -55,10 +150,7 @@ export default function MyTicketsPage() {
   ];
 
   const handleViewTicket = async (access: any) => {
-    if (access.invalidated_at) {
-      return;
-    }
-    // Open ticket viewer
+    if (access.invalidated_at) return;
     window.open(
       `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-ticket?token=${access.token}`,
       "_blank"
@@ -98,7 +190,6 @@ export default function MyTicketsPage() {
               <Loader2 className="w-8 h-8 animate-spin text-primary" />
             </div>
           ) : tab === "selling" ? (
-            /* Selling tickets */
             sellingTickets.length === 0 ? (
               <div className="text-center py-20 space-y-4">
                 <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mx-auto">
@@ -112,45 +203,12 @@ export default function MyTicketsPage() {
               </div>
             ) : (
               <div className="space-y-3">
-                {sellingTickets.map((ticket) => {
-                  const event = ticket.events;
-                  if (!event) return null;
-                  const isPast = event.date < today;
-                  const statusLabels: Record<string, { label: string; className: string }> = {
-                    available: { label: "Disponível", className: "bg-success/10 text-success border-success/20" },
-                    validated: { label: "Validado", className: "bg-success/10 text-success border-success/20" },
-                    pending_validation: { label: "Em validação", className: "bg-warning/10 text-warning border-warning/20" },
-                    sold: { label: "Vendido", className: "bg-primary/10 text-primary border-primary/20" },
-                    completed: { label: "Concluído", className: "bg-muted text-muted-foreground border-muted" },
-                    rejected: { label: "Rejeitado", className: "bg-destructive/10 text-destructive border-destructive/20" },
-                  };
-                  const st = statusLabels[ticket.status] || statusLabels.available;
-
-                  return (
-                    <Link key={ticket.id} to={`/event/${ticket.event_id}`} className="block group">
-                      <div className={`bg-card rounded-xl border border-border p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all duration-300 hover:shadow-md ${isPast ? "opacity-75" : ""}`}>
-                        <div className="space-y-2 flex-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <h3 className="font-display font-semibold text-foreground group-hover:text-primary transition-colors">{event.name}</h3>
-                            <Badge className={`text-xs ${st.className}`}>{st.label}</Badge>
-                          </div>
-                          <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
-                            <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5" />{new Date(event.date).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" })} · {event.time}</span>
-                            <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5" />{event.venue}</span>
-                            <span className="flex items-center gap-1"><Tag className="w-3.5 h-3.5" />{ticket.sector}</span>
-                          </div>
-                        </div>
-                        <div className="text-right shrink-0">
-                          <span className="font-display font-bold text-xl text-foreground">R$ {ticket.price.toLocaleString("pt-BR")}</span>
-                        </div>
-                      </div>
-                    </Link>
-                  );
-                })}
+                {sellingTickets.map((ticket) => (
+                  <SellingTicketCard key={ticket.id} ticket={ticket} today={today} />
+                ))}
               </div>
             )
           ) : (
-            /* Purchased tickets */
             purchasedTickets.length === 0 ? (
               <div className="text-center py-20 space-y-4">
                 <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mx-auto">
@@ -169,7 +227,6 @@ export default function MyTicketsPage() {
                   const event = ticket?.events;
                   if (!event) return null;
                   const isExpired = access.invalidated_at || new Date(access.expires_at) < new Date();
-                  const isPast = event.date < today;
 
                   return (
                     <div key={access.id} className={`bg-card rounded-xl border border-border p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all ${isExpired ? "opacity-60" : ""}`}>
