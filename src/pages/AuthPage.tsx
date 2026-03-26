@@ -92,6 +92,7 @@ export default function AuthPage() {
         navigate("/");
       } else {
         if (!name.trim()) { toast.error("Informe seu nome"); setLoading(false); return; }
+        if (password !== confirmPassword) { toast.error("As senhas não coincidem"); setLoading(false); return; }
         const cpfDigits = cpf.replace(/\D/g, "");
         if (!validateCpf(cpfDigits)) { toast.error("CPF inválido"); setLoading(false); return; }
         const { error } = await signUp(email, password, name, cpfDigits, {
