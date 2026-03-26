@@ -1,46 +1,65 @@
-import { Guitar, Disc3, Drum, Headphones, Mic, Piano } from "lucide-react";
+import { Guitar, Disc3, Drum, Music, Waves, Piano, Sparkles } from "lucide-react";
 
-const categories = [
-  { id: "Sertanejo", label: "Sertanejo", icon: Guitar, color: "from-amber-500/20 to-amber-500/5", iconColor: "text-amber-500" },
-  { id: "Rock & Pop", label: "Rock & Pop", icon: Disc3, color: "from-emerald-500/20 to-emerald-500/5", iconColor: "text-emerald-500" },
-  { id: "Pagode & Samba", label: "Pagode & Samba", icon: Drum, color: "from-fuchsia-500/20 to-fuchsia-500/5", iconColor: "text-fuchsia-500" },
-  { id: "Eletrônica", label: "Eletrônica", icon: Headphones, color: "from-violet-500/20 to-violet-500/5", iconColor: "text-violet-500" },
-  { id: "MPB & Axé", label: "MPB & Axé", icon: Mic, color: "from-rose-500/20 to-rose-500/5", iconColor: "text-rose-500" },
-  { id: "Funk & Rap", label: "Funk & Rap", icon: Piano, color: "from-sky-500/20 to-sky-500/5", iconColor: "text-sky-500" },
+export const MUSIC_CATEGORIES = [
+  { id: "Sertanejo", label: "Sertanejo", icon: Guitar },
+  { id: "Funk", label: "Funk", icon: Disc3 },
+  { id: "Rock", label: "Rock", icon: Drum },
+  { id: "Pagode", label: "Pagode", icon: Music },
+  { id: "Eletrônico", label: "Eletrônico", icon: Waves },
+  { id: "Forró", label: "Forró", icon: Piano },
+  { id: "Outro", label: "Outro", icon: Sparkles },
 ];
 
 interface CategoryGridProps {
   selectedCategory: string;
   onCategoryChange: (category: string) => void;
+  variant?: "home" | "sell";
 }
 
-export default function CategoryGrid({ selectedCategory, onCategoryChange }: CategoryGridProps) {
+export default function CategoryGrid({ selectedCategory, onCategoryChange, variant = "home" }: CategoryGridProps) {
+  if (variant === "sell") {
+    return (
+      <div className="flex flex-wrap gap-3">
+        {MUSIC_CATEGORIES.map((cat) => {
+          const Icon = cat.icon;
+          const isActive = selectedCategory === cat.id;
+          return (
+            <button
+              key={cat.id}
+              onClick={() => onCategoryChange(cat.id)}
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-full border text-sm font-medium transition-all duration-200 active:scale-95 ${
+                isActive
+                  ? "bg-primary text-primary-foreground border-primary shadow-md"
+                  : "bg-card border-border text-muted-foreground hover:border-primary/40 hover:text-foreground"
+              }`}
+            >
+              <Icon className="w-4 h-4" />
+              {cat.label}
+            </button>
+          );
+        })}
+      </div>
+    );
+  }
+
   return (
-    <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
-      {categories.map((cat) => {
+    <div className="flex items-center justify-center gap-8 overflow-x-auto py-2 px-4">
+      {MUSIC_CATEGORIES.map((cat) => {
         const Icon = cat.icon;
         const isActive = selectedCategory === cat.id;
         return (
           <button
             key={cat.id}
             onClick={() => onCategoryChange(isActive ? "" : cat.id)}
-            className={`group relative flex flex-col items-center gap-2 p-4 rounded-xl border transition-all duration-200 active:scale-95 ${
-              isActive
-                ? "border-primary bg-primary/5 shadow-md"
-                : "border-border bg-card hover:shadow-sm hover:border-primary/20"
+            className={`flex flex-col items-center gap-1.5 min-w-[64px] transition-all duration-200 group ${
+              isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground"
             }`}
           >
-            <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${cat.color} flex items-center justify-center transition-transform duration-200 group-hover:scale-110`}>
-              <Icon className={`w-6 h-6 ${isActive ? "text-primary" : cat.iconColor}`} />
-            </div>
-            <span className={`text-xs font-medium ${isActive ? "text-primary" : "text-muted-foreground"}`}>
+            <Icon className={`w-7 h-7 transition-colors ${isActive ? "text-foreground" : "text-muted-foreground/60 group-hover:text-muted-foreground"}`} strokeWidth={1.5} />
+            <span className={`text-xs font-medium whitespace-nowrap ${isActive ? "text-foreground" : ""}`}>
               {cat.label}
             </span>
-            {isActive && (
-              <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-primary flex items-center justify-center">
-                <span className="text-[8px] text-primary-foreground font-bold">✓</span>
-              </div>
-            )}
+            {isActive && <div className="w-full h-0.5 bg-foreground rounded-full" />}
           </button>
         );
       })}
