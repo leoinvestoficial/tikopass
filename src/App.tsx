@@ -45,6 +45,7 @@ const App = () => (
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/payment-success" element={<PaymentSuccess />} />
             <Route path="/wallet" element={<WalletPage />} />
+            <Route path="/welcome" element={<WelcomePage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <TikoChatWidgetWrapper />
