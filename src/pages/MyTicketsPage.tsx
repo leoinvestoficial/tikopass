@@ -191,7 +191,7 @@ export default function MyTicketsPage() {
 
   const tabs = [
     { key: "selling" as const, label: "Vendendo", count: activeTickets.length, icon: Store },
-    { key: "rejected" as const, label: "Recusados", count: rejectedTickets.length, icon: Ban },
+    { key: "rejected" as const, label: "Recusados / Expirados", count: rejectedTickets.length, icon: Ban },
     { key: "purchased" as const, label: "Comprados", count: purchasedTickets.length, icon: ShoppingBag },
   ];
 
