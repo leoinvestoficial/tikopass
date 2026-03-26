@@ -260,8 +260,8 @@ export default function MyTicketsPage() {
                 <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mx-auto">
                   <Ban className="w-8 h-8 text-muted-foreground" />
                 </div>
-                <h3 className="font-display font-semibold text-lg">Nenhum ingresso recusado</h3>
-                <p className="text-sm text-muted-foreground">Ingressos rejeitados pela validação aparecerão aqui.</p>
+                <h3 className="font-display font-semibold text-lg">Nenhum ingresso recusado ou expirado</h3>
+                <p className="text-sm text-muted-foreground">Ingressos rejeitados ou de eventos passados aparecerão aqui.</p>
               </div>
             ) : (
               <div className="space-y-3">
