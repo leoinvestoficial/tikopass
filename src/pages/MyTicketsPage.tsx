@@ -51,8 +51,10 @@ function SellingTicketCard({ ticket, today, onDelete }: { ticket: any; today: st
     sold: { label: "Vendido", className: "bg-primary/10 text-primary border-primary/20" },
     completed: { label: "Concluído", className: "bg-muted text-muted-foreground border-muted" },
     rejected: { label: "Rejeitado", className: "bg-destructive/10 text-destructive border-destructive/20" },
+    expired: { label: "Expirado", className: "bg-muted text-muted-foreground border-muted" },
   };
-  const st = statusLabels[ticket.status] || statusLabels.available;
+  const displayStatus = isRejected ? "rejected" : isPast ? "expired" : ticket.status;
+  const st = statusLabels[displayStatus] || statusLabels.available;
   const checks = (ticket.validation_checks || []) as ValidationCheck[];
 
   return (
