@@ -9,7 +9,7 @@ export default function Footer() {
         <div className="flex flex-col md:flex-row justify-between gap-8">
           <div className="space-y-3 max-w-xs">
             <Link to="/" className="flex items-center gap-2">
-              <img src={tikoIcon} alt="Tiko" className="w-8 h-8 rounded-lg object-cover" />
+              <img src={tikoIcon} alt="Tiko" className="w-10 h-10 object-contain" />
               <span className="font-display font-bold text-lg text-foreground">
                 tiko
               </span>
