@@ -16,10 +16,11 @@ import AuthPage from "./pages/AuthPage.tsx";
 import ProfilePage from "./pages/ProfilePage.tsx";
 import PaymentSuccess from "./pages/PaymentSuccess.tsx";
 import WalletPage from "./pages/WalletPage.tsx";
+import WelcomePage from "./pages/WelcomePage.tsx";
 import NotFound from "./pages/NotFound.tsx";
 function TikoChatWidgetWrapper() {
   const location = useLocation();
-  if (location.pathname === "/auth") return null;
+  if (location.pathname === "/auth" || location.pathname === "/welcome") return null;
   return <TikoChatWidget />;
 }
 
@@ -44,6 +45,7 @@ const App = () => (
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/payment-success" element={<PaymentSuccess />} />
             <Route path="/wallet" element={<WalletPage />} />
+            <Route path="/welcome" element={<WelcomePage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <TikoChatWidgetWrapper />
