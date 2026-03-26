@@ -95,7 +95,15 @@ export default function AuthPage() {
         if (!name.trim()) { toast.error("Informe seu nome"); setLoading(false); return; }
         const cpfDigits = cpf.replace(/\D/g, "");
         if (!validateCpf(cpfDigits)) { toast.error("CPF inválido"); setLoading(false); return; }
-        const { error } = await signUp(email, password, name, cpfDigits);
+        const { error } = await signUp(email, password, name, cpfDigits, {
+          phone,
+          address_cep: cep.replace(/\D/g, ""),
+          address_street: street,
+          address_number: addressNumber,
+          address_neighborhood: neighborhood,
+          address_city: city,
+          address_state: state,
+        });
         if (error) throw error;
         toast.success("Conta criada! Verifique seu email para confirmar.");
       }
