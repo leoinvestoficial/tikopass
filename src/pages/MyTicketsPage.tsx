@@ -180,8 +180,14 @@ export default function MyTicketsPage() {
 
   const today = new Date().toISOString().split("T")[0];
 
-  const activeTickets = sellingTickets.filter(t => t.status !== "rejected");
-  const rejectedTickets = sellingTickets.filter(t => t.status === "rejected");
+  const expiredOrRejected = (t: any) => {
+    if (t.status === "rejected") return true;
+    const event = t.events;
+    if (event && event.date < today) return true;
+    return false;
+  };
+  const activeTickets = sellingTickets.filter(t => !expiredOrRejected(t));
+  const rejectedTickets = sellingTickets.filter(t => expiredOrRejected(t));
 
   const tabs = [
     { key: "selling" as const, label: "Vendendo", count: activeTickets.length, icon: Store },
