@@ -310,12 +310,8 @@ IMPORTANTE:
         .from("events").select("name, date").eq("id", event_id).single();
 
       if (event) {
-        const similarity = levenshteinSimilarity(
-          extracted.event_name.toLowerCase(),
-          event.name.toLowerCase()
-        );
-        console.log(`Event similarity: "${extracted.event_name}" vs "${event.name}" = ${similarity}`);
-        const matched = similarity >= 0.4;
+        const matched = fuzzyEventMatch(extracted.event_name, event.name);
+        console.log(`Event match: "${extracted.event_name}" vs "${event.name}" = ${matched}`);
         checks.push({
           id: "event_match",
           label: "Correspondência com evento",
