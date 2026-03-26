@@ -80,7 +80,7 @@ export default function TikoChatWidget() {
             {messages.map((msg, i) => (
               <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
                 {msg.role === "assistant" && (
-                  <img src={tikoIcon} alt="" className="w-7 h-7 rounded-lg object-cover shrink-0 mt-0.5 mr-2" />
+                  <img src={tikoChatAvatar} alt="" className="w-7 h-7 rounded-lg object-cover shrink-0 mt-0.5 mr-2" />
                 )}
                 <div
                   className={`max-w-[80%] px-4 py-2.5 text-sm ${
