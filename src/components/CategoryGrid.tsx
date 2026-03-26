@@ -2,11 +2,11 @@ import { Music, Trophy, Theater, Tent, Mic2, Building2 } from "lucide-react";
 
 const categories = [
   { id: "Shows", label: "Shows", icon: Music, color: "from-rose-500/20 to-rose-500/5", iconColor: "text-rose-500" },
-  { id: "Esportes", label: "Esportes", icon: Trophy, color: "from-emerald-500/20 to-emerald-500/5", iconColor: "text-emerald-500" },
-  { id: "Teatro", label: "Teatro", icon: Theater, color: "from-amber-500/20 to-amber-500/5", iconColor: "text-amber-500" },
   { id: "Festivais", label: "Festivais", icon: Tent, color: "from-sky-500/20 to-sky-500/5", iconColor: "text-sky-500" },
-  { id: "Stand-up", label: "Stand-up", icon: Mic2, color: "from-fuchsia-500/20 to-fuchsia-500/5", iconColor: "text-fuchsia-500" },
-  { id: "Conferências", label: "Conferências", icon: Building2, color: "from-slate-500/20 to-slate-500/5", iconColor: "text-slate-500" },
+  { id: "Sertanejo", label: "Sertanejo", icon: Mic2, color: "from-amber-500/20 to-amber-500/5", iconColor: "text-amber-500" },
+  { id: "Rock & Pop", label: "Rock & Pop", icon: Music, color: "from-emerald-500/20 to-emerald-500/5", iconColor: "text-emerald-500" },
+  { id: "Pagode & Samba", label: "Pagode & Samba", icon: Music, color: "from-fuchsia-500/20 to-fuchsia-500/5", iconColor: "text-fuchsia-500" },
+  { id: "Eletrônica", label: "Eletrônica", icon: Music, color: "from-slate-500/20 to-slate-500/5", iconColor: "text-slate-500" },
 ];
 
 interface CategoryGridProps {

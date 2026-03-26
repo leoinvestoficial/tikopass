@@ -30,8 +30,8 @@ serve(async (req) => {
           body: JSON.stringify({
             model: "sonar",
             messages: [
-              { role: "system", content: "Você busca os próximos eventos e festas populares em uma cidade brasileira. Liste eventos reais com nome, data, horário, local e tipo." },
-              { role: "user", content: `Quais são os próximos eventos, festas, shows e jogos populares em ${cityFilter} e região? Hoje é ${today}. Liste os mais relevantes dos próximos 30 dias.` },
+              { role: "system", content: "Você busca os próximos shows e concertos musicais populares em uma cidade brasileira. Foque APENAS em eventos de música: shows, turnês, festivais musicais. Busque nas ticketeiras Ticketmaster, Eventim, Livepass, Sympla, Tickets For Fun, Clube do Ingresso, Guichê Web e Ticket Maker." },
+              { role: "user", content: `Quais são os próximos shows e concertos musicais em ${cityFilter} e região? Hoje é ${today}. Liste os shows mais relevantes dos próximos 30 dias com nome do artista/banda, data, horário e local.` },
             ],
             search_recency_filter: "month",
           }),
@@ -52,8 +52,8 @@ serve(async (req) => {
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          { role: "system", content: `Você estrutura dados de eventos reais no Brasil. Hoje é ${today}. Extraia APENAS eventos que existam nos dados fornecidos. Priorize eventos futuros. Categorias: Shows, Festas, Esportes, Teatro, Festivais, Stand-up. Use acentos corretos em português.` },
-          { role: "user", content: `Eventos em ${cityFilter}:\n\n${webData || "Sem dados de busca disponíveis."}\n\nExtraia até 6 eventos reais dos próximos 30 dias.` },
+          { role: "system", content: `Você estrutura dados de shows e eventos musicais reais no Brasil. Hoje é ${today}. Extraia APENAS shows/concertos/festivais musicais que existam nos dados fornecidos. IGNORE eventos não-musicais. Categorias: Shows, Festivais, Sertanejo, Rock & Pop, Pagode & Samba, Eletrônica. Use acentos corretos em português.` },
+          { role: "user", content: `Shows e concertos em ${cityFilter}:\n\n${webData || "Sem dados de busca disponíveis."}\n\nExtraia até 6 shows/eventos musicais reais dos próximos 30 dias.` },
         ],
         tools: [{
           type: "function",
@@ -73,7 +73,7 @@ serve(async (req) => {
                       time: { type: "string", description: "HH:MM" },
                       venue: { type: "string" },
                       city: { type: "string" },
-                      category: { type: "string", enum: ["Shows", "Festas", "Esportes", "Teatro", "Festivais", "Stand-up"] },
+                      category: { type: "string", enum: ["Shows", "Festivais", "Sertanejo", "Rock & Pop", "Pagode & Samba", "Eletrônica"] },
                     },
                     required: ["name", "date", "time", "venue", "city", "category"],
                   },
