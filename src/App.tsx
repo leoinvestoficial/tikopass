@@ -16,6 +16,7 @@ import AuthPage from "./pages/AuthPage.tsx";
 import ProfilePage from "./pages/ProfilePage.tsx";
 import PaymentSuccess from "./pages/PaymentSuccess.tsx";
 import WalletPage from "./pages/WalletPage.tsx";
+import WelcomePage from "./pages/WelcomePage.tsx";
 import NotFound from "./pages/NotFound.tsx";
 function TikoChatWidgetWrapper() {
   const location = useLocation();
