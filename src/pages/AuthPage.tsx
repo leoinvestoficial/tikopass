@@ -122,7 +122,6 @@ export default function AuthPage() {
           <Link to="/" className="flex items-center">
             <img src={tikoLogo} alt="Tiko Pass" className="h-12 object-contain brightness-0 invert" />
           </Link>
-          </Link>
           <h2 className="text-3xl font-display font-bold text-white leading-tight">
             Seu ingresso verificado,<br />sua diversão garantida 🎶
           </h2>
