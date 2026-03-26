@@ -55,6 +55,7 @@ export default function AuthPage() {
   const [state, setState] = useState("");
   const [showAddress, setShowAddress] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [lgpdConsent, setLgpdConsent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loadingCep, setLoadingCep] = useState(false);
   const { signIn, signUp, user } = useAuth();
@@ -277,6 +278,7 @@ export default function AuthPage() {
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input id="password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="pl-10 rounded-xl h-11" required minLength={6} />
+              </div>
             </div>
 
             {!isLogin && (
@@ -300,9 +302,32 @@ export default function AuthPage() {
                 )}
               </div>
             )}
-            </div>
 
-            <Button type="submit" className="w-full h-12 rounded-xl gap-2 text-base font-semibold" size="lg" disabled={loading}>
+            {!isLogin && (
+              <div className="flex items-start gap-2 pt-1">
+                <input
+                  type="checkbox"
+                  id="lgpd-consent"
+                  checked={lgpdConsent}
+                  onChange={(e) => setLgpdConsent(e.target.checked)}
+                  className="mt-1 rounded border-border"
+                  required
+                />
+                <Label htmlFor="lgpd-consent" className="text-xs text-muted-foreground leading-relaxed cursor-pointer">
+                  Li e aceito a{" "}
+                  <Link to="/privacy" className="text-primary hover:underline underline-offset-2" target="_blank">
+                    Política de Privacidade
+                  </Link>{" "}
+                  e os{" "}
+                  <Link to="/terms" className="text-primary hover:underline underline-offset-2" target="_blank">
+                    Termos de Uso
+                  </Link>
+                  . Autorizo o tratamento dos meus dados pessoais conforme a LGPD.
+                </Label>
+              </div>
+            )}
+
+            <Button type="submit" className="w-full h-12 rounded-xl gap-2 text-base font-semibold" size="lg" disabled={loading || (!isLogin && !lgpdConsent)}>
               {loading ? "Carregando..." : isLogin ? "Entrar" : "Criar conta"}
               {!loading && <ArrowRight className="w-4 h-4" />}
             </Button>

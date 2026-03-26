@@ -9,11 +9,23 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { toast } from "sonner";
-import { Camera, User, Save, Loader2, MapPin, Phone, FileText } from "lucide-react";
-import { Navigate } from "react-router-dom";
+import { Camera, User, Save, Loader2, MapPin, Phone, FileText, Trash2 } from "lucide-react";
+import { Navigate, useNavigate } from "react-router-dom";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export default function ProfilePage() {
-  const { user, profile, loading, refreshProfile } = useAuth();
+  const { user, profile, loading, refreshProfile, signOut } = useAuth();
+  const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [displayName, setDisplayName] = useState(profile?.display_name || "");
@@ -24,6 +36,7 @@ export default function ProfilePage() {
   const [uploading, setUploading] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState(profile?.avatar_url || "");
   const [initialized, setInitialized] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   // Sync state when profile loads
   if (profile && !initialized) {
@@ -249,6 +262,68 @@ export default function ProfilePage() {
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
             Salvar alterações
           </Button>
+
+          {/* Delete Account */}
+          <div className="pt-8 border-t border-border">
+            <h3 className="text-sm font-medium text-destructive mb-2">Zona de perigo</h3>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="outline" className="w-full gap-2 border-destructive/30 text-destructive hover:bg-destructive/10">
+                  <Trash2 className="w-4 h-4" />
+                  Excluir minha conta
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Tem certeza que deseja excluir sua conta?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Esta ação é irreversível. Todos os seus dados pessoais, ingressos e histórico serão permanentemente removidos conforme a LGPD.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={async () => {
+                      setDeleting(true);
+                      try {
+                        const { data: { session } } = await supabase.auth.getSession();
+                        if (!session) throw new Error("Sessão expirada");
+                        
+                        const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+                        const res = await fetch(
+                          `https://${projectId}.supabase.co/functions/v1/delete-account`,
+                          {
+                            method: "POST",
+                            headers: {
+                              Authorization: `Bearer ${session.access_token}`,
+                              "Content-Type": "application/json",
+                            },
+                          }
+                        );
+                        const result = await res.json();
+                        if (!res.ok) throw new Error(result.error);
+                        
+                        await signOut();
+                        toast.success("Conta excluída com sucesso.");
+                        navigate("/");
+                      } catch (err: any) {
+                        toast.error(err.message || "Erro ao excluir conta.");
+                      } finally {
+                        setDeleting(false);
+                      }
+                    }}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    disabled={deleting}
+                  >
+                    {deleting ? "Excluindo..." : "Sim, excluir conta"}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+            <p className="text-xs text-muted-foreground mt-2">
+              Conforme a LGPD, você tem o direito de solicitar a exclusão dos seus dados a qualquer momento.
+            </p>
+          </div>
         </div>
       </div>
 

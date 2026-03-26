@@ -310,12 +310,8 @@ IMPORTANTE:
         .from("events").select("name, date").eq("id", event_id).single();
 
       if (event) {
-        const similarity = levenshteinSimilarity(
-          extracted.event_name.toLowerCase(),
-          event.name.toLowerCase()
-        );
-        console.log(`Event similarity: "${extracted.event_name}" vs "${event.name}" = ${similarity}`);
-        const matched = similarity >= 0.4;
+        const matched = fuzzyEventMatch(extracted.event_name, event.name);
+        console.log(`Event match: "${extracted.event_name}" vs "${event.name}" = ${matched}`);
         checks.push({
           id: "event_match",
           label: "Correspondência com evento",
@@ -478,4 +474,36 @@ function levenshteinSimilarity(a: string, b: string): number {
   }
   const maxLen = Math.max(a.length, b.length);
   return maxLen === 0 ? 1 : 1 - matrix[a.length][b.length] / maxLen;
+}
+
+function normalizeEventName(name: string): string {
+  return name
+    .toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function tokenSetSimilarity(a: string, b: string): number {
+  const tokensA = new Set(normalizeEventName(a).split(" ").filter(t => t.length > 1));
+  const tokensB = new Set(normalizeEventName(b).split(" ").filter(t => t.length > 1));
+  if (tokensA.size === 0 || tokensB.size === 0) return 0;
+  let intersection = 0;
+  for (const t of tokensA) if (tokensB.has(t)) intersection++;
+  return intersection / Math.max(tokensA.size, tokensB.size);
+}
+
+function fuzzyEventMatch(extracted: string, selected: string): boolean {
+  // Direct levenshtein
+  const lev = levenshteinSimilarity(extracted.toLowerCase(), selected.toLowerCase());
+  if (lev >= 0.4) return true;
+  // Token-set similarity (handles "A - B" vs "B - A")
+  const tokenSim = tokenSetSimilarity(extracted, selected);
+  if (tokenSim >= 0.6) return true;
+  // Containment check
+  const normA = normalizeEventName(extracted);
+  const normB = normalizeEventName(selected);
+  if (normA.includes(normB) || normB.includes(normA)) return true;
+  return false;
 }
