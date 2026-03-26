@@ -20,7 +20,7 @@ import WelcomePage from "./pages/WelcomePage.tsx";
 import NotFound from "./pages/NotFound.tsx";
 function TikoChatWidgetWrapper() {
   const location = useLocation();
-  if (location.pathname === "/auth") return null;
+  if (location.pathname === "/auth" || location.pathname === "/welcome") return null;
   return <TikoChatWidget />;
 }
 
