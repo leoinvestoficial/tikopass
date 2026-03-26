@@ -51,8 +51,10 @@ function SellingTicketCard({ ticket, today, onDelete }: { ticket: any; today: st
     sold: { label: "Vendido", className: "bg-primary/10 text-primary border-primary/20" },
     completed: { label: "Concluído", className: "bg-muted text-muted-foreground border-muted" },
     rejected: { label: "Rejeitado", className: "bg-destructive/10 text-destructive border-destructive/20" },
+    expired: { label: "Expirado", className: "bg-muted text-muted-foreground border-muted" },
   };
-  const st = statusLabels[ticket.status] || statusLabels.available;
+  const displayStatus = isRejected ? "rejected" : isPast ? "expired" : ticket.status;
+  const st = statusLabels[displayStatus] || statusLabels.available;
   const checks = (ticket.validation_checks || []) as ValidationCheck[];
 
   return (
@@ -180,12 +182,18 @@ export default function MyTicketsPage() {
 
   const today = new Date().toISOString().split("T")[0];
 
-  const activeTickets = sellingTickets.filter(t => t.status !== "rejected");
-  const rejectedTickets = sellingTickets.filter(t => t.status === "rejected");
+  const expiredOrRejected = (t: any) => {
+    if (t.status === "rejected") return true;
+    const event = t.events;
+    if (event && event.date < today) return true;
+    return false;
+  };
+  const activeTickets = sellingTickets.filter(t => !expiredOrRejected(t));
+  const rejectedTickets = sellingTickets.filter(t => expiredOrRejected(t));
 
   const tabs = [
     { key: "selling" as const, label: "Vendendo", count: activeTickets.length, icon: Store },
-    { key: "rejected" as const, label: "Recusados", count: rejectedTickets.length, icon: Ban },
+    { key: "rejected" as const, label: "Recusados / Expirados", count: rejectedTickets.length, icon: Ban },
     { key: "purchased" as const, label: "Comprados", count: purchasedTickets.length, icon: ShoppingBag },
   ];
 
@@ -254,8 +262,8 @@ export default function MyTicketsPage() {
                 <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mx-auto">
                   <Ban className="w-8 h-8 text-muted-foreground" />
                 </div>
-                <h3 className="font-display font-semibold text-lg">Nenhum ingresso recusado</h3>
-                <p className="text-sm text-muted-foreground">Ingressos rejeitados pela validação aparecerão aqui.</p>
+                <h3 className="font-display font-semibold text-lg">Nenhum ingresso recusado ou expirado</h3>
+                <p className="text-sm text-muted-foreground">Ingressos rejeitados ou de eventos passados aparecerão aqui.</p>
               </div>
             ) : (
               <div className="space-y-3">
