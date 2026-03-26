@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { ShieldCheck } from "lucide-react";
-import tikoIcon from "@/assets/tiko-icon.png";
+import tikoLogo from "@/assets/tiko-logo.png";
 
 export default function Footer() {
   return (
