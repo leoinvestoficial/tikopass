@@ -17,6 +17,11 @@ import ProfilePage from "./pages/ProfilePage.tsx";
 import PaymentSuccess from "./pages/PaymentSuccess.tsx";
 import WalletPage from "./pages/WalletPage.tsx";
 import NotFound from "./pages/NotFound.tsx";
+function TikoChatWidgetWrapper() {
+  const location = useLocation();
+  if (location.pathname === "/auth") return null;
+  return <TikoChatWidget />;
+}
 
 const queryClient = new QueryClient();
 
