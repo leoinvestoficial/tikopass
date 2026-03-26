@@ -154,19 +154,12 @@ export default function SellPage() {
     <div className="min-h-screen flex flex-col bg-background font-sans">
       <Navbar />
 
-      {/* ── Hero banner ── */}
-      <section className="relative overflow-hidden h-48 md:h-56">
-        <img src={sellCtaBg} alt="" className="absolute inset-0 w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-black/40" />
-        <div className="relative container h-full flex flex-col justify-center">
-          <h1 className="text-3xl md:text-4xl font-bold text-white leading-tight">
-            Venda seus ingressos
-          </h1>
-          <p className="text-white/60 text-sm md:text-base mt-2 max-w-lg">
-            Publique em segundos com ajuda de IA. Pagamento protegido e validação automática.
-          </p>
+      {/* ── CPF Warning Banner ── */}
+      <div className="bg-primary/10 border-b border-primary/20">
+        <div className="container py-2.5 text-center text-sm text-primary font-medium">
+          ⚠️ Só aceitamos ingressos no CPF do titular da conta. O CPF do ingresso será verificado automaticamente durante a validação.
         </div>
-      </section>
+      </div>
 
       {/* ── Trust strip ── */}
       <div className="border-b border-border bg-muted/30">
