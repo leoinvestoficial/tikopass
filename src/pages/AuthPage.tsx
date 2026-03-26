@@ -137,7 +137,7 @@ export default function AuthPage() {
           {/* Mobile logo */}
           <div className="lg:hidden flex items-center justify-center mb-2">
             <Link to="/">
-              <img src={tikoLogo} alt="Tiko Pass" className="h-11 object-contain" />
+              <img src={tikoLogo} alt="Tiko Pass" <img src={tikoLogo} alt="Tiko Pass" className="h-20 object-contain" /> />
             </Link>
           </div>
 
