@@ -9,8 +9,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Ticket, Menu, X, User, MessageSquare, LogOut, ShoppingBag, Wallet } from "lucide-react";
+import { Menu, X, User, MessageSquare, LogOut, ShoppingBag, Wallet } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
+import tikoIcon from "@/assets/tiko-icon.png";
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -36,12 +37,10 @@ export default function Navbar() {
   return (
     <nav className="sticky top-0 z-50 bg-card/80 backdrop-blur-lg border-b border-border">
       <div className="container flex items-center justify-between h-16">
-        <Link to="/" className="flex items-center gap-2 group">
-          <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center transition-transform duration-200 group-hover:scale-105 group-active:scale-95">
-            <Ticket className="w-5 h-5 text-primary-foreground" />
-          </div>
-          <span className="font-display font-bold text-xl tracking-tight">
-            TICKET<span className="text-primary">4U</span>
+        <Link to="/" className="flex items-center gap-2.5 group">
+          <img src={tikoIcon} alt="Tiko" className="w-9 h-9 rounded-lg object-cover transition-transform duration-200 group-hover:scale-105 group-active:scale-95" />
+          <span className="font-display font-bold text-xl tracking-tight text-foreground">
+            tiko
           </span>
         </Link>
 

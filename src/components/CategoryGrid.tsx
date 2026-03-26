@@ -1,12 +1,12 @@
-import { Music, Tent, Guitar, Disc3, Drum, Headphones } from "lucide-react";
+import { Guitar, Disc3, Drum, Headphones, Mic, Piano } from "lucide-react";
 
 const categories = [
-  { id: "Shows", label: "Shows", icon: Music, color: "from-rose-500/20 to-rose-500/5", iconColor: "text-rose-500" },
-  { id: "Festivais", label: "Festivais", icon: Tent, color: "from-sky-500/20 to-sky-500/5", iconColor: "text-sky-500" },
   { id: "Sertanejo", label: "Sertanejo", icon: Guitar, color: "from-amber-500/20 to-amber-500/5", iconColor: "text-amber-500" },
   { id: "Rock & Pop", label: "Rock & Pop", icon: Disc3, color: "from-emerald-500/20 to-emerald-500/5", iconColor: "text-emerald-500" },
   { id: "Pagode & Samba", label: "Pagode & Samba", icon: Drum, color: "from-fuchsia-500/20 to-fuchsia-500/5", iconColor: "text-fuchsia-500" },
   { id: "Eletrônica", label: "Eletrônica", icon: Headphones, color: "from-violet-500/20 to-violet-500/5", iconColor: "text-violet-500" },
+  { id: "MPB & Axé", label: "MPB & Axé", icon: Mic, color: "from-rose-500/20 to-rose-500/5", iconColor: "text-rose-500" },
+  { id: "Funk & Rap", label: "Funk & Rap", icon: Piano, color: "from-sky-500/20 to-sky-500/5", iconColor: "text-sky-500" },
 ];
 
 interface CategoryGridProps {
