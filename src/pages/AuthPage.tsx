@@ -7,7 +7,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import tikoLogo from "@/assets/tiko-logo.png";
-import authBg from "@/assets/auth-bg.jpg";
 
 function formatCpf(value: string): string {
   const digits = value.replace(/\D/g, "").slice(0, 11);
@@ -115,41 +114,19 @@ export default function AuthPage() {
 
   return (
     <div className="min-h-screen flex bg-background">
-      {/* ── Left panel: immersive visual ── */}
-      <div className="hidden lg:flex lg:w-[480px] xl:w-[540px] relative overflow-hidden">
-        <img src={authBg} alt="" className="absolute inset-0 w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/30" />
-
-        <div className="relative z-10 flex flex-col justify-between p-10 w-full">
-          {/* Logo top */}
-          <Link to="/">
-            <img src={tikoLogo} alt="Tiko Pass" className="h-12 object-contain brightness-0 invert" />
-          </Link>
-
-          {/* Content bottom */}
+      {/* ── Left panel: dark with logo + text ── */}
+      <div className="hidden lg:flex lg:w-[480px] xl:w-[540px] bg-foreground">
+        <div className="flex flex-col justify-end p-12 w-full">
           <div className="space-y-6">
-            <h2 className="text-3xl font-display font-bold text-white leading-tight">
-              Seu ingresso<br />verificado, sua<br />diversão garantida 🎶
+            <Link to="/">
+              <img src={tikoLogo} alt="Tiko Pass" className="h-14 object-contain brightness-0 invert" />
+            </Link>
+            <h2 className="text-2xl font-display font-bold text-background leading-tight">
+              O marketplace de ingressos<br />feito para fãs de verdade
             </h2>
-            <p className="text-white/60 text-sm leading-relaxed max-w-sm">
-              Compre e venda ingressos para shows e festivais com segurança, validação por IA e pagamento protegido.
+            <p className="text-background/50 text-sm leading-relaxed max-w-sm">
+              Compre e venda ingressos para os melhores shows e festivais do Brasil com segurança e praticidade.
             </p>
-
-            {/* Trust badges */}
-            <div className="flex flex-col gap-3 pt-2">
-              {[
-                { icon: Shield, text: "Pagamento protegido via escrow" },
-                { icon: Sparkles, text: "Validação automática com IA" },
-                { icon: Ticket, text: "Ingressos 100% verificados" },
-              ].map((item) => (
-                <div key={item.text} className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-white/10 backdrop-blur-sm flex items-center justify-center">
-                    <item.icon className="w-4 h-4 text-primary" />
-                  </div>
-                  <span className="text-sm text-white/80">{item.text}</span>
-                </div>
-              ))}
-            </div>
           </div>
         </div>
       </div>
@@ -164,30 +141,10 @@ export default function AuthPage() {
             </Link>
           </div>
 
-          {/* Tab switcher */}
-          <div className="flex bg-muted rounded-xl p-1">
-            <button
-              onClick={() => setIsLogin(true)}
-              className={`flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all ${
-                isLogin ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Entrar
-            </button>
-            <button
-              onClick={() => setIsLogin(false)}
-              className={`flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all ${
-                !isLogin ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Criar conta
-            </button>
-          </div>
-
           {/* Heading */}
           <div className="space-y-1">
             <h1 className="text-2xl font-display font-bold text-foreground">
-              {isLogin ? "Bem-vindo de volta 👋" : "Crie sua conta"}
+              {isLogin ? "Bem-vindo de volta" : "Crie sua conta"}
             </h1>
             <p className="text-sm text-muted-foreground">
               {isLogin ? "Entre para acessar suas negociações" : "Preencha os dados para comprar e vender com segurança"}
@@ -197,7 +154,6 @@ export default function AuthPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {!isLogin && (
               <>
-                {/* Name */}
                 <div className="space-y-1.5">
                   <Label htmlFor="name" className="text-sm font-medium">Nome completo *</Label>
                   <div className="relative">
@@ -206,7 +162,6 @@ export default function AuthPage() {
                   </div>
                 </div>
 
-                {/* CPF */}
                 <div className="space-y-1.5">
                   <Label htmlFor="cpf" className="text-sm font-medium">CPF *</Label>
                   <div className="relative">
@@ -225,7 +180,6 @@ export default function AuthPage() {
                   </p>
                 </div>
 
-                {/* Phone */}
                 <div className="space-y-1.5">
                   <Label htmlFor="phone" className="text-sm font-medium">Telefone</Label>
                   <div className="relative">
@@ -241,7 +195,6 @@ export default function AuthPage() {
                   </div>
                 </div>
 
-                {/* Address collapsible */}
                 <button
                   type="button"
                   onClick={() => setShowAddress(!showAddress)}
@@ -308,18 +261,16 @@ export default function AuthPage() {
               </>
             )}
 
-            {/* Email */}
             <div className="space-y-1.5">
-              <Label htmlFor="email" className="text-sm font-medium">Email *</Label>
+              <Label htmlFor="email" className="text-sm font-medium">Email</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input id="email" type="email" placeholder="seu@email.com" value={email} onChange={(e) => setEmail(e.target.value)} className="pl-10 rounded-xl h-11" required />
               </div>
             </div>
 
-            {/* Password */}
             <div className="space-y-1.5">
-              <Label htmlFor="password" className="text-sm font-medium">Senha *</Label>
+              <Label htmlFor="password" className="text-sm font-medium">Senha</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input id="password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="pl-10 rounded-xl h-11" required minLength={6} />
@@ -332,11 +283,11 @@ export default function AuthPage() {
             </Button>
           </form>
 
-          {/* Footer */}
-          <p className="text-center text-xs text-muted-foreground pt-2">
-            Ao continuar, você concorda com os{" "}
-            <span className="text-foreground font-medium">Termos de Uso</span> e{" "}
-            <span className="text-foreground font-medium">Política de Privacidade</span>
+          <p className="text-center text-sm text-muted-foreground">
+            {isLogin ? "Não tem conta? " : "Já tem conta? "}
+            <button onClick={() => setIsLogin(!isLogin)} className="text-primary font-medium hover:underline underline-offset-4">
+              {isLogin ? "Cadastre-se" : "Fazer login"}
+            </button>
           </p>
         </div>
       </div>
