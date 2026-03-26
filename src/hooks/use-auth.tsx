@@ -61,15 +61,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signUp = async (email: string, password: string, displayName: string) => {
-    const { error } = await supabase.auth.signUp({
+  const signUp = async (email: string, password: string, displayName: string, cpf?: string) => {
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        data: { display_name: displayName },
+        data: { display_name: displayName, cpf },
         emailRedirectTo: window.location.origin,
       },
     });
+    // Save CPF to profile after signup
+    if (!error && data.user && cpf) {
+      await supabase.from("profiles").update({ cpf }).eq("user_id", data.user.id);
+    }
     return { error: error ? new Error(error.message) : null };
   };
 
