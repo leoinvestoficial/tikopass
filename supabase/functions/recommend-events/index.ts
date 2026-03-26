@@ -30,8 +30,8 @@ serve(async (req) => {
           body: JSON.stringify({
             model: "sonar",
             messages: [
-              { role: "system", content: "Você busca os próximos eventos e festas populares em uma cidade brasileira. Liste eventos reais com nome, data, horário, local e tipo." },
-              { role: "user", content: `Quais são os próximos eventos, festas, shows e jogos populares em ${cityFilter} e região? Hoje é ${today}. Liste os mais relevantes dos próximos 30 dias.` },
+              { role: "system", content: "Você busca os próximos shows e concertos musicais populares em uma cidade brasileira. Foque APENAS em eventos de música: shows, turnês, festivais musicais. Busque nas ticketeiras Ticketmaster, Eventim, Livepass, Sympla, Tickets For Fun, Clube do Ingresso, Guichê Web e Ticket Maker." },
+              { role: "user", content: `Quais são os próximos shows e concertos musicais em ${cityFilter} e região? Hoje é ${today}. Liste os shows mais relevantes dos próximos 30 dias com nome do artista/banda, data, horário e local.` },
             ],
             search_recency_filter: "month",
           }),
