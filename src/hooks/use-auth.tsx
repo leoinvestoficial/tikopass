@@ -10,7 +10,7 @@ interface AuthContextType {
   session: Session | null;
   profile: Profile | null;
   loading: boolean;
-  signUp: (email: string, password: string, displayName: string, cpf?: string) => Promise<{ error: Error | null }>;
+  signUp: (email: string, password: string, displayName: string, cpf?: string, extra?: Record<string, string>) => Promise<{ error: Error | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
@@ -61,7 +61,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signUp = async (email: string, password: string, displayName: string, cpf?: string) => {
+  const signUp = async (email: string, password: string, displayName: string, cpf?: string, extra?: Record<string, string>) => {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -70,9 +70,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         emailRedirectTo: window.location.origin,
       },
     });
-    // Save CPF to profile after signup
-    if (!error && data.user && cpf) {
-      await supabase.from("profiles").update({ cpf }).eq("user_id", data.user.id);
+    if (!error && data.user) {
+      const updates: Record<string, string | undefined> = {};
+      if (cpf) updates.cpf = cpf;
+      if (extra?.phone) updates.phone = extra.phone;
+      if (extra?.address_cep) updates.address_cep = extra.address_cep;
+      if (extra?.address_street) updates.address_street = extra.address_street;
+      if (extra?.address_number) updates.address_number = extra.address_number;
+      if (extra?.address_neighborhood) updates.address_neighborhood = extra.address_neighborhood;
+      if (extra?.address_city) updates.address_city = extra.address_city;
+      if (extra?.address_state) updates.address_state = extra.address_state;
+      if (Object.keys(updates).length > 0) {
+        await supabase.from("profiles").update(updates).eq("user_id", data.user.id);
+      }
     }
     return { error: error ? new Error(error.message) : null };
   };
