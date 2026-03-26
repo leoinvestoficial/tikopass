@@ -41,7 +41,7 @@ const App = () => (
             <Route path="/wallet" element={<WalletPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
-          <TikoChatWidget />
+          <TikoChatWidgetWrapper />
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
