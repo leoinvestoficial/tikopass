@@ -54,6 +54,7 @@ export default function AuthPage() {
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
   const [showAddress, setShowAddress] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [loadingCep, setLoadingCep] = useState(false);
   const { signIn, signUp, user } = useAuth();
