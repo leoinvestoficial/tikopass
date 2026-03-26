@@ -119,7 +119,7 @@ export default function AuthPage() {
         <div className="flex flex-col justify-end p-12 w-full">
           <div className="space-y-6">
             <Link to="/">
-              <img src={tikoLogo} alt="Tiko Pass" <img src={tikoLogo} alt="Tiko Pass" className="h-24 object-contain brightness-0 invert" /> />
+              <img src={tikoLogo} alt="Tiko Pass" className="h-24 object-contain brightness-0 invert" />
             </Link>
             <h2 className="text-2xl font-display font-bold text-background leading-tight">
               O marketplace de ingressos<br />feito para fãs de verdade
