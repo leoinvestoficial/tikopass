@@ -104,6 +104,7 @@ export default function AuthPage() {
         });
         if (error) throw error;
         toast.success("Conta criada! Verifique seu email para confirmar.");
+        navigate("/welcome");
       }
     } catch (err: any) {
       toast.error(err.message || "Erro ao autenticar");
