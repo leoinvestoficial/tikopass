@@ -55,6 +55,7 @@ export default function AuthPage() {
   const [state, setState] = useState("");
   const [showAddress, setShowAddress] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [lgpdConsent, setLgpdConsent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loadingCep, setLoadingCep] = useState(false);
   const { signIn, signUp, user } = useAuth();
