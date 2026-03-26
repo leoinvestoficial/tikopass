@@ -24,11 +24,11 @@ type DateFilter = "" | "today" | "tomorrow" | "weekend";
 // ─── Airbnb-style category tabs ───────────────────────────────────────────────
 const CATEGORIES = [
   { label: "Shows", icon: Mic },
-  { label: "Festas", icon: PartyPopper },
-  { label: "Esportes", icon: Trophy },
-  { label: "Teatro", icon: Drama },
   { label: "Festivais", icon: Tent },
-  { label: "Outros", icon: Sparkles },
+  { label: "Sertanejo", icon: PartyPopper },
+  { label: "Rock & Pop", icon: Trophy },
+  { label: "Pagode & Samba", icon: Drama },
+  { label: "Eletrônica", icon: Sparkles },
 ];
 
 // ─── Skeleton card ─────────────────────────────────────────────────────────────
