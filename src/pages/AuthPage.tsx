@@ -119,11 +119,9 @@ export default function AuthPage() {
       {/* Left panel */}
       <div className="hidden lg:flex lg:flex-1 bg-primary items-center justify-center p-12">
         <div className="max-w-md space-y-6">
-          <Link to="/" className="flex items-center gap-3">
-            <img src={tikoIcon} alt="Tiko" className="w-14 h-14 rounded-2xl border-2 border-white/20" />
-            <span className="font-display font-bold text-3xl text-white">
-              tiko
-            </span>
+          <Link to="/" className="flex items-center">
+            <img src={tikoLogo} alt="Tiko Pass" className="h-12 object-contain brightness-0 invert" />
+          </Link>
           </Link>
           <h2 className="text-3xl font-display font-bold text-white leading-tight">
             Seu ingresso verificado,<br />sua diversão garantida 🎶
