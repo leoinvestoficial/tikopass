@@ -68,7 +68,7 @@ export default function TikoChatWidget() {
         >
           {/* Header */}
           <div className="bg-primary px-5 py-4 flex items-center gap-3 shrink-0">
-            <img src={tikoIcon} alt="Tiko" className="w-10 h-10 rounded-xl object-cover border-2 border-white/20" />
+            <img src={tikoChatAvatar} alt="Tiko" className="w-10 h-10 rounded-xl object-cover border-2 border-white/20" />
             <div>
               <h3 className="font-bold text-primary-foreground text-sm">Tiko</h3>
               <p className="text-primary-foreground/70 text-xs">Suporte • Online agora</p>
