@@ -73,7 +73,7 @@ serve(async (req) => {
                       time: { type: "string", description: "HH:MM" },
                       venue: { type: "string" },
                       city: { type: "string" },
-                      category: { type: "string", enum: ["Shows", "Festas", "Esportes", "Teatro", "Festivais", "Stand-up"] },
+                      category: { type: "string", enum: ["Shows", "Festivais", "Sertanejo", "Rock & Pop", "Pagode & Samba", "Eletrônica"] },
                     },
                     required: ["name", "date", "time", "venue", "city", "category"],
                   },

@@ -140,9 +140,9 @@ export default function Index() {
               <Search className="w-4 h-4 text-muted-foreground shrink-0" />
               <div className="flex flex-col">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-foreground">Evento</span>
-                <input
-                  className="text-sm bg-transparent outline-none placeholder:text-muted-foreground text-foreground w-full"
-                  placeholder="Show, festa, jogo..."
+                  <input
+                    className="text-sm bg-transparent outline-none placeholder:text-muted-foreground text-foreground w-full"
+                    placeholder="Artista, show, festival..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && loadTickets()}
