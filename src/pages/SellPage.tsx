@@ -4,7 +4,8 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Search, CheckCircle2, ArrowRight, Sparkles, MapPin, Calendar, Tag, Loader2, Upload, FileCheck, AlertCircle, Clock, Shield, Zap, DollarSign, XCircle } from "lucide-react";
+import { Search, CheckCircle2, ArrowRight, Sparkles, MapPin, Calendar, Tag, Loader2, Upload, FileCheck, AlertCircle, Clock, Shield, Zap, DollarSign, XCircle, ArrowLeft } from "lucide-react";
+import CategoryGrid from "@/components/CategoryGrid";
 import { useAuth } from "@/hooks/use-auth";
 import { searchEventsWithAI, createEvent, createTicket } from "@/lib/api";
 import { supabase } from "@/integrations/supabase/client";
@@ -153,19 +154,12 @@ export default function SellPage() {
     <div className="min-h-screen flex flex-col bg-background font-sans">
       <Navbar />
 
-      {/* ── Hero banner ── */}
-      <section className="relative overflow-hidden h-48 md:h-56">
-        <img src={sellCtaBg} alt="" className="absolute inset-0 w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-black/40" />
-        <div className="relative container h-full flex flex-col justify-center">
-          <h1 className="text-3xl md:text-4xl font-bold text-white leading-tight">
-            Venda seus ingressos
-          </h1>
-          <p className="text-white/60 text-sm md:text-base mt-2 max-w-lg">
-            Publique em segundos com ajuda de IA. Pagamento protegido e validação automática.
-          </p>
+      {/* ── CPF Warning Banner ── */}
+      <div className="bg-primary/10 border-b border-primary/20">
+        <div className="container py-2.5 text-center text-sm text-primary font-medium">
+          ⚠️ Só aceitamos ingressos no CPF do titular da conta. O CPF do ingresso será verificado automaticamente durante a validação.
         </div>
-      </section>
+      </div>
 
       {/* ── Trust strip ── */}
       <div className="border-b border-border bg-muted/30">
@@ -250,7 +244,7 @@ export default function SellPage() {
                 <div className="space-y-3">
                   <p className="text-sm text-muted-foreground flex items-center gap-2">
                     <Sparkles className="w-3.5 h-3.5 text-primary" />
-                    {aiResults.length} evento(s) encontrado(s) pela IA
+                    {aiResults.length} show(s) encontrado(s)
                   </p>
                   {aiResults.map((event, i) => {
                     const isPast = new Date(event.date) < new Date(new Date().toISOString().split("T")[0]);
@@ -261,13 +255,15 @@ export default function SellPage() {
                         className={`w-full text-left bg-card border border-border rounded-2xl p-5 hover:shadow-lg hover:border-primary/40 transition-all duration-200 active:scale-[0.98] space-y-3 group ${isPast ? "opacity-60" : ""}`}
                       >
                         <div className="flex items-center justify-between">
-                          <span className="font-bold text-foreground text-base group-hover:text-primary transition-colors">{event.name}</span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs px-2 py-0.5 rounded bg-muted text-muted-foreground font-medium uppercase">{event.category}</span>
+                            <span className="font-bold text-foreground text-base group-hover:text-primary transition-colors">{event.name}</span>
+                          </div>
                           <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
                         </div>
                         <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-                          <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" />{event.date} · {event.time}</span>
                           <span className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5" />{event.venue} · {event.city}</span>
-                          <span className="flex items-center gap-1.5"><Tag className="w-3.5 h-3.5" />{event.category}</span>
+                          <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" />{event.date}</span>
                         </div>
                         {isPast && <span className="text-xs px-2.5 py-1 rounded-full bg-muted text-muted-foreground font-medium">Encerrado</span>}
                       </button>
@@ -281,44 +277,36 @@ export default function SellPage() {
           {/* ── Step: Confirm ── */}
           {step === "confirm" && editedEvent && (
             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-300">
-              <div className="space-y-1">
-                <h2 className="text-2xl font-bold text-foreground">Confirme o evento</h2>
-                <p className="text-sm text-muted-foreground">Corrija os dados se necessário antes de continuar.</p>
+              <h2 className="text-2xl font-bold text-foreground">Confirmar evento</h2>
+
+              {/* Event card preview */}
+              <div className="bg-card border border-border rounded-2xl p-6 space-y-2 shadow-sm">
+                <span className="text-xs px-2.5 py-1 rounded bg-muted text-muted-foreground font-medium uppercase">
+                  {editedEvent.category}
+                </span>
+                <h3 className="text-xl font-bold text-foreground">{editedEvent.name}</h3>
+                <p className="text-sm text-muted-foreground">{editedEvent.venue} · {editedEvent.city}</p>
+                <p className="text-sm text-muted-foreground">
+                  {new Date(editedEvent.date + "T00:00:00").toLocaleDateString("pt-BR", { day: "numeric", month: "long", year: "numeric" })}
+                </p>
               </div>
-              <div className="bg-card border border-border rounded-2xl p-6 space-y-5 shadow-sm">
-                <div className="space-y-2">
-                  <Label htmlFor="ev-name" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Nome do evento</Label>
-                  <Input id="ev-name" value={editedEvent.name} onChange={(e) => setEditedEvent({ ...editedEvent, name: e.target.value })} className="rounded-xl h-11" />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="ev-date" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Data</Label>
-                    <Input id="ev-date" type="date" value={editedEvent.date} onChange={(e) => setEditedEvent({ ...editedEvent, date: e.target.value })} className="rounded-xl h-11" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="ev-time" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Horário</Label>
-                    <Input id="ev-time" type="time" value={editedEvent.time !== "N/A" ? editedEvent.time : ""} onChange={(e) => setEditedEvent({ ...editedEvent, time: e.target.value })} className="rounded-xl h-11" />
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="ev-venue" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Local</Label>
-                    <Input id="ev-venue" value={editedEvent.venue} onChange={(e) => setEditedEvent({ ...editedEvent, venue: e.target.value })} className="rounded-xl h-11" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="ev-city" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Cidade</Label>
-                    <Input id="ev-city" value={editedEvent.city} onChange={(e) => setEditedEvent({ ...editedEvent, city: e.target.value })} className="rounded-xl h-11" />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="ev-category" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Categoria</Label>
-                  <Input id="ev-category" value={editedEvent.category} onChange={(e) => setEditedEvent({ ...editedEvent, category: e.target.value })} className="rounded-xl h-11" />
-                </div>
+
+              {/* Genre selection */}
+              <div className="space-y-3">
+                <h3 className="text-base font-bold text-foreground">Gênero musical</h3>
+                <CategoryGrid
+                  selectedCategory={editedEvent.category}
+                  onCategoryChange={(cat) => setEditedEvent({ ...editedEvent, category: cat })}
+                  variant="sell"
+                />
               </div>
+
               <div className="flex gap-3">
-                <Button variant="outline" onClick={() => setStep("search")} size="lg" className="flex-1 rounded-xl">Buscar outro</Button>
+                <Button variant="outline" onClick={() => setStep("search")} size="lg" className="rounded-xl gap-2">
+                  <ArrowLeft className="w-4 h-4" /> Voltar
+                </Button>
                 <Button onClick={handleConfirmEvent} size="lg" className="flex-1 gap-2 rounded-xl">
-                  Confirmar e continuar <ArrowRight className="w-4 h-4" />
+                  Confirmar <ArrowRight className="w-4 h-4" />
                 </Button>
               </div>
             </div>
