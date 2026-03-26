@@ -52,8 +52,8 @@ serve(async (req) => {
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          { role: "system", content: `Você estrutura dados de eventos reais no Brasil. Hoje é ${today}. Extraia APENAS eventos que existam nos dados fornecidos. Priorize eventos futuros. Categorias: Shows, Festas, Esportes, Teatro, Festivais, Stand-up. Use acentos corretos em português.` },
-          { role: "user", content: `Eventos em ${cityFilter}:\n\n${webData || "Sem dados de busca disponíveis."}\n\nExtraia até 6 eventos reais dos próximos 30 dias.` },
+          { role: "system", content: `Você estrutura dados de shows e eventos musicais reais no Brasil. Hoje é ${today}. Extraia APENAS shows/concertos/festivais musicais que existam nos dados fornecidos. IGNORE eventos não-musicais. Categorias: Shows, Festivais, Sertanejo, Rock & Pop, Pagode & Samba, Eletrônica. Use acentos corretos em português.` },
+          { role: "user", content: `Shows e concertos em ${cityFilter}:\n\n${webData || "Sem dados de busca disponíveis."}\n\nExtraia até 6 shows/eventos musicais reais dos próximos 30 dias.` },
         ],
         tools: [{
           type: "function",
