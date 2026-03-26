@@ -52,8 +52,8 @@ serve(async (req) => {
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          { role: "system", content: `Você estrutura dados de shows e eventos musicais reais no Brasil. Hoje é ${today}. Extraia APENAS shows/concertos/festivais musicais que existam nos dados fornecidos. IGNORE eventos não-musicais. Categorias: Shows, Festivais, Sertanejo, Rock & Pop, Pagode & Samba, Eletrônica. Use acentos corretos em português.` },
-          { role: "user", content: `Shows e concertos em ${cityFilter}:\n\n${webData || "Sem dados de busca disponíveis."}\n\nExtraia até 6 shows/eventos musicais reais dos próximos 30 dias.` },
+          { role: "system", content: `Você estrutura dados de grandes shows e eventos musicais reais no Brasil. Hoje é ${today}. Extraia APENAS shows/concertos/festivais musicais de GRANDE PORTE que existam nos dados fornecidos. Priorize eventos virais, com grande adesão do público jovem, turnês famosas e festivais renomados. IGNORE eventos pequenos ou não-musicais. Categorias: Shows, Festivais, Sertanejo, Rock & Pop, Pagode & Samba, Eletrônica. Use acentos corretos em português.` },
+          { role: "user", content: `Grandes shows em ${cityFilter}:\n\n${webData || "Sem dados de busca disponíveis."}\n\nExtraia até 6 grandes shows/eventos musicais reais dos próximos 60 dias. Apenas eventos de grande porte e alta repercussão.` },
         ],
         tools: [{
           type: "function",
