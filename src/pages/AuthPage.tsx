@@ -7,7 +7,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useScrollReveal } from "@/hooks/use-scroll-reveal";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
-import tikoIcon from "@/assets/tiko-icon.png";
+import tikoLogo from "@/assets/tiko-logo.png";
 
 function formatCpf(value: string): string {
   const digits = value.replace(/\D/g, "").slice(0, 11);
