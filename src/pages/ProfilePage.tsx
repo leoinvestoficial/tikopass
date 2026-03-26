@@ -36,6 +36,7 @@ export default function ProfilePage() {
   const [uploading, setUploading] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState(profile?.avatar_url || "");
   const [initialized, setInitialized] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   // Sync state when profile loads
   if (profile && !initialized) {
