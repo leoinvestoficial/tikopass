@@ -117,8 +117,8 @@ export default function SellPage() {
       const { data, error } = await supabase.functions.invoke("upload-ticket", { body: formData });
       if (error) throw error;
       if (!data?.success) throw new Error(data?.error || "Erro no upload");
-      setStep("validating");
-      toast.info("Ingresso enviado! Validação em andamento...");
+      toast.success("Ingresso enviado! A validação será feita em segundo plano. Acompanhe em Meus Ingressos.");
+      navigate("/my-tickets");
     } catch (err: any) { toast.error("Erro ao publicar: " + (err.message || "")); }
     finally { setSubmitting(false); setUploading(false); }
   };
