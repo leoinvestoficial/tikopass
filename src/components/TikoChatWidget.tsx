@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { MessageCircle, X, Send, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import tikoIcon from "@/assets/tiko-icon.png";
+import tikoChatAvatar from "@/assets/tiko-chat-avatar.png";
 import ReactMarkdown from "react-markdown";
 
 type Message = { role: "user" | "assistant"; content: string };
@@ -44,15 +44,22 @@ export default function TikoChatWidget() {
 
   return (
     <>
-      {/* FAB */}
-      <button
-        onClick={() => setOpen(!open)}
-        className={`fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 ${
-          open ? "bg-foreground text-background rotate-90" : "bg-primary text-primary-foreground"
-        }`}
-      >
-        {open ? <X className="w-6 h-6" /> : <MessageCircle className="w-6 h-6" />}
-      </button>
+      {/* FAB with label */}
+      <div className="fixed bottom-6 right-6 z-50 flex flex-col items-center gap-1.5">
+        {!open && (
+          <span className="text-[11px] font-bold text-foreground bg-card border border-border rounded-full px-3 py-1 shadow-md whitespace-nowrap">
+            Fale com o Tiko
+          </span>
+        )}
+        <button
+          onClick={() => setOpen(!open)}
+          className={`w-16 h-16 rounded-full shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 overflow-hidden ${
+            open ? "bg-foreground text-background rotate-90" : ""
+          }`}
+        >
+          {open ? <X className="w-6 h-6" /> : <img src={tikoChatAvatar} alt="Fale com o Tiko" className="w-full h-full object-cover" />}
+        </button>
+      </div>
 
       {/* Chat panel */}
       {open && (
@@ -61,7 +68,7 @@ export default function TikoChatWidget() {
         >
           {/* Header */}
           <div className="bg-primary px-5 py-4 flex items-center gap-3 shrink-0">
-            <img src={tikoIcon} alt="Tiko" className="w-10 h-10 rounded-xl object-cover border-2 border-white/20" />
+            <img src={tikoChatAvatar} alt="Tiko" className="w-10 h-10 rounded-xl object-cover border-2 border-white/20" />
             <div>
               <h3 className="font-bold text-primary-foreground text-sm">Tiko</h3>
               <p className="text-primary-foreground/70 text-xs">Suporte • Online agora</p>
@@ -73,7 +80,7 @@ export default function TikoChatWidget() {
             {messages.map((msg, i) => (
               <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
                 {msg.role === "assistant" && (
-                  <img src={tikoIcon} alt="" className="w-7 h-7 rounded-lg object-cover shrink-0 mt-0.5 mr-2" />
+                  <img src={tikoChatAvatar} alt="" className="w-7 h-7 rounded-lg object-cover shrink-0 mt-0.5 mr-2" />
                 )}
                 <div
                   className={`max-w-[80%] px-4 py-2.5 text-sm ${
@@ -94,7 +101,7 @@ export default function TikoChatWidget() {
             ))}
             {loading && (
               <div className="flex items-center gap-2">
-                <img src={tikoIcon} alt="" className="w-7 h-7 rounded-lg object-cover" />
+                <img src={tikoChatAvatar} alt="" className="w-7 h-7 rounded-lg object-cover" />
                 <div className="bg-muted rounded-2xl rounded-bl-md px-4 py-2.5">
                   <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
                 </div>
