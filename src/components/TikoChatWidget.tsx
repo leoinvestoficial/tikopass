@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { MessageCircle, X, Send, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import tikoIcon from "@/assets/tiko-icon.png";
+import tikoChatAvatar from "@/assets/tiko-chat-avatar.png";
 import ReactMarkdown from "react-markdown";
 
 type Message = { role: "user" | "assistant"; content: string };
