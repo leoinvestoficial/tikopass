@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/hooks/use-auth";
+import TikoChatWidget from "@/components/TikoChatWidget";
 import Index from "./pages/Index.tsx";
 import EventDetail from "./pages/EventDetail.tsx";
 import SellPage from "./pages/SellPage.tsx";
@@ -40,6 +41,7 @@ const App = () => (
             <Route path="/wallet" element={<WalletPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
+          <TikoChatWidget />
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
