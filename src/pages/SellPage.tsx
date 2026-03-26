@@ -244,7 +244,7 @@ export default function SellPage() {
                 <div className="space-y-3">
                   <p className="text-sm text-muted-foreground flex items-center gap-2">
                     <Sparkles className="w-3.5 h-3.5 text-primary" />
-                    {aiResults.length} evento(s) encontrado(s) pela IA
+                    {aiResults.length} show(s) encontrado(s)
                   </p>
                   {aiResults.map((event, i) => {
                     const isPast = new Date(event.date) < new Date(new Date().toISOString().split("T")[0]);
@@ -255,13 +255,15 @@ export default function SellPage() {
                         className={`w-full text-left bg-card border border-border rounded-2xl p-5 hover:shadow-lg hover:border-primary/40 transition-all duration-200 active:scale-[0.98] space-y-3 group ${isPast ? "opacity-60" : ""}`}
                       >
                         <div className="flex items-center justify-between">
-                          <span className="font-bold text-foreground text-base group-hover:text-primary transition-colors">{event.name}</span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs px-2 py-0.5 rounded bg-muted text-muted-foreground font-medium uppercase">{event.category}</span>
+                            <span className="font-bold text-foreground text-base group-hover:text-primary transition-colors">{event.name}</span>
+                          </div>
                           <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
                         </div>
                         <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-                          <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" />{event.date} · {event.time}</span>
                           <span className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5" />{event.venue} · {event.city}</span>
-                          <span className="flex items-center gap-1.5"><Tag className="w-3.5 h-3.5" />{event.category}</span>
+                          <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" />{event.date}</span>
                         </div>
                         {isPast && <span className="text-xs px-2.5 py-1 rounded-full bg-muted text-muted-foreground font-medium">Encerrado</span>}
                       </button>
