@@ -7,9 +7,10 @@ import { fetchMyTickets } from "@/lib/api";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import {
   Ticket, Loader2, Calendar, MapPin, Tag, ArrowRight, Clock, Eye, ShoppingBag, Store,
-  CheckCircle2, XCircle, AlertCircle, Shield,
+  CheckCircle2, XCircle, AlertCircle, Shield, Trash2, Ban,
 } from "lucide-react";
 
 type ValidationCheck = { id: string; label: string; passed: boolean; detail: string };
@@ -38,10 +39,11 @@ function ValidationChecklist({ checks }: { checks: ValidationCheck[] }) {
   );
 }
 
-function SellingTicketCard({ ticket, today }: { ticket: any; today: string }) {
+function SellingTicketCard({ ticket, today, onDelete }: { ticket: any; today: string; onDelete?: (id: string) => void }) {
   const event = ticket.events;
   if (!event) return null;
   const isPast = event.date < today;
+  const isRejected = ticket.status === "rejected";
   const statusLabels: Record<string, { label: string; className: string }> = {
     available: { label: "Disponível", className: "bg-success/10 text-success border-success/20" },
     validated: { label: "Validado", className: "bg-success/10 text-success border-success/20" },
@@ -54,7 +56,7 @@ function SellingTicketCard({ ticket, today }: { ticket: any; today: string }) {
   const checks = (ticket.validation_checks || []) as ValidationCheck[];
 
   return (
-    <div className={`bg-card rounded-xl border border-border p-5 transition-all duration-300 hover:shadow-md ${isPast ? "opacity-75" : ""}`}>
+    <div className={`bg-card rounded-xl border border-border p-5 transition-all duration-300 hover:shadow-md ${isRejected ? "opacity-50 grayscale" : isPast ? "opacity-75" : ""}`}>
       <Link to={`/event/${ticket.event_id}`} className="block group">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-2 flex-1 min-w-0">
@@ -83,7 +85,7 @@ function SellingTicketCard({ ticket, today }: { ticket: any; today: string }) {
       )}
 
       {/* Rejection reason */}
-      {ticket.status === "rejected" && ticket.rejection_reason && (
+      {isRejected && ticket.rejection_reason && (
         <div className="mt-3 flex items-start gap-2 text-xs text-destructive bg-destructive/5 rounded-lg px-3 py-2">
           <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
           <span>{ticket.rejection_reason}</span>
@@ -91,8 +93,25 @@ function SellingTicketCard({ ticket, today }: { ticket: any; today: string }) {
       )}
 
       {/* Validation checklist */}
-      {(ticket.status === "rejected" || ticket.status === "validated") && checks.length > 0 && (
+      {(isRejected || ticket.status === "validated") && checks.length > 0 && (
         <ValidationChecklist checks={checks} />
+      )}
+
+      {/* Delete button for rejected tickets */}
+      {isRejected && onDelete && (
+        <div className="mt-3 flex justify-end">
+          <Button
+            variant="destructive"
+            size="sm"
+            className="rounded-xl gap-1.5 text-xs"
+            onClick={(e) => {
+              e.preventDefault();
+              onDelete(ticket.id);
+            }}
+          >
+            <Trash2 className="w-3.5 h-3.5" /> Remover ingresso
+          </Button>
+        </div>
       )}
     </div>
   );
@@ -104,7 +123,8 @@ export default function MyTicketsPage() {
   const [sellingTickets, setSellingTickets] = useState<any[]>([]);
   const [purchasedTickets, setPurchasedTickets] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<"selling" | "purchased">("selling");
+  const [tab, setTab] = useState<"selling" | "rejected" | "purchased">("selling");
+  const [deleting, setDeleting] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) { navigate("/auth"); return; }
@@ -142,10 +162,30 @@ export default function MyTicketsPage() {
     }
   };
 
+  const handleDeleteTicket = async (ticketId: string) => {
+    if (deleting) return;
+    setDeleting(ticketId);
+    try {
+      // Delete the ticket (hashes are cleaned up by DB trigger)
+      const { error } = await supabase.from("tickets").delete().eq("id", ticketId);
+      if (error) throw error;
+      setSellingTickets(prev => prev.filter(t => t.id !== ticketId));
+      toast.success("Ingresso removido. Você pode postá-lo novamente.");
+    } catch (err: any) {
+      toast.error(err.message || "Erro ao remover ingresso");
+    } finally {
+      setDeleting(null);
+    }
+  };
+
   const today = new Date().toISOString().split("T")[0];
 
+  const activeTickets = sellingTickets.filter(t => t.status !== "rejected");
+  const rejectedTickets = sellingTickets.filter(t => t.status === "rejected");
+
   const tabs = [
-    { key: "selling" as const, label: "Vendendo", count: sellingTickets.length, icon: Store },
+    { key: "selling" as const, label: "Vendendo", count: activeTickets.length, icon: Store },
+    { key: "rejected" as const, label: "Recusados", count: rejectedTickets.length, icon: Ban },
     { key: "purchased" as const, label: "Comprados", count: purchasedTickets.length, icon: ShoppingBag },
   ];
 
@@ -190,7 +230,7 @@ export default function MyTicketsPage() {
               <Loader2 className="w-8 h-8 animate-spin text-primary" />
             </div>
           ) : tab === "selling" ? (
-            sellingTickets.length === 0 ? (
+            activeTickets.length === 0 ? (
               <div className="text-center py-20 space-y-4">
                 <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mx-auto">
                   <Ticket className="w-8 h-8 text-muted-foreground" />
@@ -203,8 +243,24 @@ export default function MyTicketsPage() {
               </div>
             ) : (
               <div className="space-y-3">
-                {sellingTickets.map((ticket) => (
+                {activeTickets.map((ticket) => (
                   <SellingTicketCard key={ticket.id} ticket={ticket} today={today} />
+                ))}
+              </div>
+            )
+          ) : tab === "rejected" ? (
+            rejectedTickets.length === 0 ? (
+              <div className="text-center py-20 space-y-4">
+                <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mx-auto">
+                  <Ban className="w-8 h-8 text-muted-foreground" />
+                </div>
+                <h3 className="font-display font-semibold text-lg">Nenhum ingresso recusado</h3>
+                <p className="text-sm text-muted-foreground">Ingressos rejeitados pela validação aparecerão aqui.</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {rejectedTickets.map((ticket) => (
+                  <SellingTicketCard key={ticket.id} ticket={ticket} today={today} onDelete={handleDeleteTicket} />
                 ))}
               </div>
             )
