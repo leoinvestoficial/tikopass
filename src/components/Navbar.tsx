@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Menu, X, User, MessageSquare, LogOut, ShoppingBag, Wallet } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
-import tikoIcon from "@/assets/tiko-icon.png";
+import tikoLogo from "@/assets/tiko-logo.png";
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
