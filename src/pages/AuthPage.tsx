@@ -2,17 +2,42 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Ticket, Mail, Lock, User, ArrowRight } from "lucide-react";
+import { Ticket, Mail, Lock, User, ArrowRight, CreditCard } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useScrollReveal } from "@/hooks/use-scroll-reveal";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
+
+function formatCpf(value: string): string {
+  const digits = value.replace(/\D/g, "").slice(0, 11);
+  if (digits.length <= 3) return digits;
+  if (digits.length <= 6) return `${digits.slice(0, 3)}.${digits.slice(3)}`;
+  if (digits.length <= 9) return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6)}`;
+  return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`;
+}
+
+function validateCpf(cpf: string): boolean {
+  const digits = cpf.replace(/\D/g, "");
+  if (digits.length !== 11) return false;
+  if (/^(\d)\1{10}$/.test(digits)) return false;
+  let sum = 0;
+  for (let i = 0; i < 9; i++) sum += parseInt(digits[i]) * (10 - i);
+  let rest = (sum * 10) % 11;
+  if (rest === 10) rest = 0;
+  if (rest !== parseInt(digits[9])) return false;
+  sum = 0;
+  for (let i = 0; i < 10; i++) sum += parseInt(digits[i]) * (11 - i);
+  rest = (sum * 10) % 11;
+  if (rest === 10) rest = 0;
+  return rest === parseInt(digits[10]);
+}
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [cpf, setCpf] = useState("");
   const [loading, setLoading] = useState(false);
   const reveal = useScrollReveal<HTMLDivElement>();
   const { signIn, signUp, user } = useAuth();
@@ -34,7 +59,9 @@ export default function AuthPage() {
         navigate("/");
       } else {
         if (!name.trim()) { toast.error("Informe seu nome"); setLoading(false); return; }
-        const { error } = await signUp(email, password, name);
+        const cpfDigits = cpf.replace(/\D/g, "");
+        if (!validateCpf(cpfDigits)) { toast.error("CPF inválido"); setLoading(false); return; }
+        const { error } = await signUp(email, password, name, cpfDigits);
         if (error) throw error;
         toast.success("Conta criada! Verifique seu email para confirmar.");
       }
