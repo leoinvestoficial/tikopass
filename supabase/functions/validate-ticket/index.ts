@@ -335,39 +335,52 @@ IMPORTANTE:
     // ========== CHECK: Duplicate (QR code / unique identifiers) ==========
     // Collect all unique identifiers from the ticket
     const allIdentifiers: string[] = [];
-    if (extracted.ticket_code) allIdentifiers.push(extracted.ticket_code);
-    if (extracted.qr_content) allIdentifiers.push(extracted.qr_content);
-    if (extracted.barcode) allIdentifiers.push(extracted.barcode);
+    if (extracted.ticket_code) allIdentifiers.push(String(extracted.ticket_code).trim());
+    if (extracted.qr_content) allIdentifiers.push(String(extracted.qr_content).trim());
+    if (extracted.barcode) allIdentifiers.push(String(extracted.barcode).trim());
     if (extracted.unique_identifiers) {
-      for (const id of extracted.unique_identifiers) {
-        if (id && !allIdentifiers.includes(id)) allIdentifiers.push(id);
+      for (const uid of extracted.unique_identifiers) {
+        const s = String(uid).trim();
+        if (s && !allIdentifiers.includes(s)) allIdentifiers.push(s);
       }
     }
 
-    // Use the best identifier for hashing
+    // Filter out very short or generic identifiers
+    const meaningfulIds = allIdentifiers.filter(id => id.length >= 4);
     const primaryCode = extracted.qr_content || extracted.barcode || extracted.ticket_code;
-    // Also create a composite hash from all identifiers for extra safety
-    const compositeKey = allIdentifiers.length > 0 ? allIdentifiers.sort().join("|") : null;
-    const hashSource = compositeKey || primaryCode;
 
-    if (hashSource) {
-      const encoder = new TextEncoder();
-      const data = encoder.encode(hashSource);
-      const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-      const hashHex = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+    if (meaningfulIds.length > 0) {
+      // Hash EACH identifier individually and check for duplicates
+      const hashesToCheck: string[] = [];
+      for (const identifier of meaningfulIds) {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(identifier);
+        const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const hashHex = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+        hashesToCheck.push(hashHex);
+      }
 
-      const { data: existingHash } = await supabaseAdmin
-        .from("ticket_hashes").select("id, ticket_id").eq("hash", hashHex).eq("status", "active").maybeSingle();
+      console.log(`Checking ${hashesToCheck.length} identifier hashes for duplicates...`);
 
-      const isDuplicate = !!existingHash;
+      // Check ALL hashes at once for any match
+      const { data: existingHashes } = await supabaseAdmin
+        .from("ticket_hashes")
+        .select("id, ticket_id, hash")
+        .in("hash", hashesToCheck)
+        .eq("status", "active");
+
+      // Filter out hashes that belong to the current ticket (re-validation)
+      const duplicates = (existingHashes || []).filter(h => h.ticket_id !== ticket_id);
+      const isDuplicate = duplicates.length > 0;
+
       checks.push({
         id: "duplicate_check",
         label: "Ingresso único",
         passed: !isDuplicate,
         detail: isDuplicate
           ? "QR Code ou código já cadastrado na plataforma"
-          : `Verificado: sem duplicidade ✓ (${allIdentifiers.length} identificador(es))`,
+          : `Verificado: sem duplicidade ✓ (${meaningfulIds.length} identificador(es))`,
       });
 
       if (isDuplicate) {
@@ -376,7 +389,9 @@ IMPORTANTE:
         return jsonResponse({ success: false, reason, checks });
       }
 
-      await supabaseAdmin.from("ticket_hashes").insert({ hash: hashHex, ticket_id, status: "active" });
+      // Insert ALL hashes for this ticket
+      const hashInserts = hashesToCheck.map(h => ({ hash: h, ticket_id, status: "active" }));
+      await supabaseAdmin.from("ticket_hashes").insert(hashInserts);
     } else {
       checks.push({
         id: "duplicate_check",
