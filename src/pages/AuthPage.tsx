@@ -54,6 +54,7 @@ export default function AuthPage() {
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
   const [showAddress, setShowAddress] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [loadingCep, setLoadingCep] = useState(false);
   const { signIn, signUp, user } = useAuth();
@@ -91,6 +92,7 @@ export default function AuthPage() {
         navigate("/");
       } else {
         if (!name.trim()) { toast.error("Informe seu nome"); setLoading(false); return; }
+        if (password !== confirmPassword) { toast.error("As senhas não coincidem"); setLoading(false); return; }
         const cpfDigits = cpf.replace(/\D/g, "");
         if (!validateCpf(cpfDigits)) { toast.error("CPF inválido"); setLoading(false); return; }
         const { error } = await signUp(email, password, name, cpfDigits, {
@@ -275,7 +277,29 @@ export default function AuthPage() {
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input id="password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="pl-10 rounded-xl h-11" required minLength={6} />
+            </div>
+
+            {!isLogin && (
+              <div className="space-y-1.5">
+                <Label htmlFor="confirmPassword" className="text-sm font-medium">Confirmar senha *</Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    id="confirmPassword"
+                    type="password"
+                    placeholder="••••••••"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className={`pl-10 rounded-xl h-11 ${confirmPassword && password !== confirmPassword ? 'border-destructive' : ''}`}
+                    required
+                    minLength={6}
+                  />
+                </div>
+                {confirmPassword && password !== confirmPassword && (
+                  <p className="text-xs text-destructive">As senhas não coincidem</p>
+                )}
               </div>
+            )}
             </div>
 
             <Button type="submit" className="w-full h-12 rounded-xl gap-2 text-base font-semibold" size="lg" disabled={loading}>
