@@ -7,7 +7,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useScrollReveal } from "@/hooks/use-scroll-reveal";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
-import tikoIcon from "@/assets/tiko-icon.png";
+import tikoLogo from "@/assets/tiko-logo.png";
 
 function formatCpf(value: string): string {
   const digits = value.replace(/\D/g, "").slice(0, 11);
@@ -119,11 +119,8 @@ export default function AuthPage() {
       {/* Left panel */}
       <div className="hidden lg:flex lg:flex-1 bg-primary items-center justify-center p-12">
         <div className="max-w-md space-y-6">
-          <Link to="/" className="flex items-center gap-3">
-            <img src={tikoIcon} alt="Tiko" className="w-14 h-14 rounded-2xl border-2 border-white/20" />
-            <span className="font-display font-bold text-3xl text-white">
-              tiko
-            </span>
+          <Link to="/" className="flex items-center">
+            <img src={tikoLogo} alt="Tiko Pass" className="h-12 object-contain brightness-0 invert" />
           </Link>
           <h2 className="text-3xl font-display font-bold text-white leading-tight">
             Seu ingresso verificado,<br />sua diversão garantida 🎶
@@ -152,9 +149,8 @@ export default function AuthPage() {
           ref={reveal.ref}
           className={`w-full max-w-md space-y-6 ${reveal.isVisible ? "animate-reveal-scale" : "opacity-0"}`}
         >
-          <div className="lg:hidden flex items-center gap-2 justify-center mb-4">
-            <img src={tikoIcon} alt="Tiko" className="w-10 h-10 rounded-xl" />
-            <span className="font-display font-bold text-xl text-foreground">tiko</span>
+          <div className="lg:hidden flex items-center justify-center mb-4">
+            <img src={tikoLogo} alt="Tiko Pass" className="h-9 object-contain" />
           </div>
 
           <div className="text-center space-y-2">
