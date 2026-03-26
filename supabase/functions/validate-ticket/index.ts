@@ -23,7 +23,7 @@ serve(async (req) => {
   let ticketId: string | null = null;
 
   try {
-    const { ticket_id, event_id, storage_path } = await req.json();
+    const { ticket_id, event_id, storage_path, seller_id } = await req.json();
     ticketId = ticket_id;
     if (!ticket_id || !storage_path) throw new Error("ticket_id e storage_path obrigatórios");
 
