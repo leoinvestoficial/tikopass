@@ -101,7 +101,7 @@ export default function TikoChatWidget() {
             ))}
             {loading && (
               <div className="flex items-center gap-2">
-                <img src={tikoIcon} alt="" className="w-7 h-7 rounded-lg object-cover" />
+                <img src={tikoChatAvatar} alt="" className="w-7 h-7 rounded-lg object-cover" />
                 <div className="bg-muted rounded-2xl rounded-bl-md px-4 py-2.5">
                   <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
                 </div>
