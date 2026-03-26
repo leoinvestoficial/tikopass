@@ -116,15 +116,15 @@ export default function AuthPage() {
     <div className="min-h-screen flex bg-background">
       {/* ── Left panel: dark with logo + text ── */}
       <div className="hidden lg:flex lg:w-[480px] xl:w-[540px] bg-foreground">
-        <div className="flex flex-col justify-end p-12 w-full">
+        <div className="flex flex-col items-center justify-center p-12 w-full text-center">
           <div className="space-y-6">
-            <Link to="/">
-              <img src={tikoLogo} alt="Tiko Pass" className="h-24 object-contain brightness-0 invert" />
+            <Link to="/" className="inline-block">
+              <img src={tikoLogo} alt="Tiko Pass" className="h-24 object-contain brightness-0 invert mx-auto" />
             </Link>
             <h2 className="text-2xl font-display font-bold text-background leading-tight">
               O marketplace de ingressos<br />feito para fãs de verdade
             </h2>
-            <p className="text-background/50 text-sm leading-relaxed max-w-sm">
+            <p className="text-background/50 text-sm leading-relaxed max-w-sm mx-auto">
               Compre e venda ingressos para os melhores shows e festivais do Brasil com segurança e praticidade.
             </p>
           </div>
