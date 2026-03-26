@@ -390,6 +390,13 @@ function extractTicketData(text: string) {
     /(?:n[°ºo]?\s*do\s*(?:pedido|ingresso|ticket))\s*[:.]?\s*([A-Z0-9]{4,})/i,
     /(?:código\s*de\s*barras|barcode)\s*[:.]?\s*([A-Z0-9]{6,})/i,
     /registro\s+([A-Z0-9]{6,})/i,
+    // QR code content patterns (URLs or alphanumeric codes)
+    /(?:qr\s*code|qrcode)\s*[:.]?\s*(https?:\/\/[^\s]+)/i,
+    /(?:qr\s*code|qrcode)\s*[:.]?\s*([A-Z0-9\-]{8,})/i,
+    // Long alphanumeric strings that look like ticket codes
+    /\b([A-Z0-9]{12,})\b/,
+    // UUID-like patterns
+    /\b([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\b/i,
   ];
   for (const p of codePatterns) {
     const m = text.match(p);

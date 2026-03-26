@@ -12,14 +12,13 @@ serve(async (req) => {
     const { city } = await req.json();
     const cityFilter = city || "Salvador";
 
-    console.log(`Fetching recommended events for: ${cityFilter}`);
+    console.log(`Fetching trending events for: ${cityFilter}`);
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
     const PERPLEXITY_KEY = Deno.env.get("PERPLEXITY_API_KEY");
 
-    // Search for trending events via Perplexity
     let webData = "";
     if (PERPLEXITY_KEY) {
       try {
@@ -30,8 +29,8 @@ serve(async (req) => {
           body: JSON.stringify({
             model: "sonar",
             messages: [
-              { role: "system", content: "Você busca os próximos grandes shows e concertos musicais em uma cidade brasileira. Foque APENAS em eventos de GRANDE PORTE: turnês nacionais/internacionais, festivais musicais grandes, shows muito comentados em redes sociais e com alta adesão do público jovem. Busque nas ticketeiras Ticketmaster, Eventim, Livepass, Sympla, Tickets For Fun, Clube do Ingresso, Guichê Web e Ticket Maker. NÃO inclua eventos pequenos ou locais." },
-              { role: "user", content: `Quais são os próximos grandes shows e concertos musicais em ${cityFilter} e região? Hoje é ${today}. Quero apenas eventos de grande porte, festivais famosos, turnês de artistas conhecidos e eventos virais nas redes sociais (como Retronejo, Oboe, etc). Liste os mais relevantes dos próximos 60 dias.` },
+              { role: "system", content: "Você é um especialista em shows e festivais musicais no Brasil. Busque APENAS eventos de GRANDE PORTE e ALTA REPERCUSSÃO: turnês nacionais/internacionais de artistas famosos, festivais virais nas redes sociais (como Retronejo, Oboe, Bossa, Mali Pé na Areia, etc.), shows com grande adesão do público jovem. Busque nas plataformas: Ticketmaster, Eventim, Livepass, Sympla, Tickets For Fun, Clube do Ingresso, Guichê Web, Ticket Maker. NÃO inclua eventos pequenos, bares, casas de show locais ou eventos corporativos." },
+              { role: "user", content: `Quais são os próximos GRANDES shows, festivais e eventos musicais mais comentados e virais em ${cityFilter} e região metropolitana? Hoje é ${today}. Quero APENAS eventos de grande porte com alta repercussão nas redes sociais e mídia, turnês famosas, festivais renomados como Retronejo, Oboe, Bossa, Festival de Verão, etc. Liste os mais relevantes dos próximos 90 dias com datas, locais e artistas.` },
             ],
             search_recency_filter: "month",
           }),
@@ -39,12 +38,11 @@ serve(async (req) => {
         if (pRes.ok) {
           const d = await pRes.json();
           webData = d.choices?.[0]?.message?.content || "";
-          console.log("Perplexity recommended data length:", webData.length);
+          console.log("Perplexity trending data length:", webData.length);
         }
       } catch (e) { console.error("Perplexity error:", e); }
     }
 
-    // Structure with Gemini
     const today = new Date().toISOString().split("T")[0];
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -52,14 +50,14 @@ serve(async (req) => {
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          { role: "system", content: `Você estrutura dados de grandes shows e eventos musicais reais no Brasil. Hoje é ${today}. Extraia APENAS shows/concertos/festivais musicais de GRANDE PORTE que existam nos dados fornecidos. Priorize eventos virais, com grande adesão do público jovem, turnês famosas e festivais renomados. IGNORE eventos pequenos ou não-musicais. Categorias: Shows, Festivais, Sertanejo, Rock & Pop, Pagode & Samba, Eletrônica. Use acentos corretos em português.` },
-          { role: "user", content: `Grandes shows em ${cityFilter}:\n\n${webData || "Sem dados de busca disponíveis."}\n\nExtraia até 6 grandes shows/eventos musicais reais dos próximos 60 dias. Apenas eventos de grande porte e alta repercussão.` },
+          { role: "system", content: `Você estrutura dados de grandes shows e eventos musicais reais e VIRAIS no Brasil. Hoje é ${today}. Extraia APENAS shows/concertos/festivais musicais de GRANDE PORTE que realmente existam e tenham alta repercussão. Priorize eventos virais com grande adesão do público jovem, turnês famosas e festivais renomados. IGNORE eventos pequenos ou não-musicais. Categorias possíveis: Sertanejo, Rock & Pop, Pagode & Samba, Eletrônica, MPB & Axé, Funk & Rap. Use acentos corretos em português.` },
+          { role: "user", content: `Grandes shows e festivais trending em ${cityFilter}:\n\n${webData || "Sem dados de busca disponíveis."}\n\nExtraia até 8 grandes shows/eventos musicais reais dos próximos 90 dias. APENAS eventos de grande porte, virais e com alta repercussão.` },
         ],
         tools: [{
           type: "function",
           function: {
             name: "return_events",
-            description: "Return recommended events",
+            description: "Return trending events",
             parameters: {
               type: "object",
               properties: {
@@ -73,7 +71,7 @@ serve(async (req) => {
                       time: { type: "string", description: "HH:MM" },
                       venue: { type: "string" },
                       city: { type: "string" },
-                      category: { type: "string", enum: ["Shows", "Festivais", "Sertanejo", "Rock & Pop", "Pagode & Samba", "Eletrônica"] },
+                      category: { type: "string", enum: ["Sertanejo", "Rock & Pop", "Pagode & Samba", "Eletrônica", "MPB & Axé", "Funk & Rap"] },
                     },
                     required: ["name", "date", "time", "venue", "city", "category"],
                   },
@@ -99,7 +97,7 @@ serve(async (req) => {
       ? JSON.parse(toolCall.function.arguments).events || []
       : [];
 
-    console.log("Recommended events:", events.length);
+    console.log("Trending events:", events.length);
 
     return new Response(JSON.stringify({ events, city: cityFilter }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
