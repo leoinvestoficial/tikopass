@@ -30,8 +30,8 @@ serve(async (req) => {
           body: JSON.stringify({
             model: "sonar",
             messages: [
-              { role: "system", content: "Você busca os próximos shows e concertos musicais populares em uma cidade brasileira. Foque APENAS em eventos de música: shows, turnês, festivais musicais. Busque nas ticketeiras Ticketmaster, Eventim, Livepass, Sympla, Tickets For Fun, Clube do Ingresso, Guichê Web e Ticket Maker." },
-              { role: "user", content: `Quais são os próximos shows e concertos musicais em ${cityFilter} e região? Hoje é ${today}. Liste os shows mais relevantes dos próximos 30 dias com nome do artista/banda, data, horário e local.` },
+              { role: "system", content: "Você busca os próximos grandes shows e concertos musicais em uma cidade brasileira. Foque APENAS em eventos de GRANDE PORTE: turnês nacionais/internacionais, festivais musicais grandes, shows muito comentados em redes sociais e com alta adesão do público jovem. Busque nas ticketeiras Ticketmaster, Eventim, Livepass, Sympla, Tickets For Fun, Clube do Ingresso, Guichê Web e Ticket Maker. NÃO inclua eventos pequenos ou locais." },
+              { role: "user", content: `Quais são os próximos grandes shows e concertos musicais em ${cityFilter} e região? Hoje é ${today}. Quero apenas eventos de grande porte, festivais famosos, turnês de artistas conhecidos e eventos virais nas redes sociais (como Retronejo, Oboe, etc). Liste os mais relevantes dos próximos 60 dias.` },
             ],
             search_recency_filter: "month",
           }),
