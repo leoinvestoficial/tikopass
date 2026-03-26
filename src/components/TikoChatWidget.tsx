@@ -44,15 +44,22 @@ export default function TikoChatWidget() {
 
   return (
     <>
-      {/* FAB */}
-      <button
-        onClick={() => setOpen(!open)}
-        className={`fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 ${
-          open ? "bg-foreground text-background rotate-90" : "bg-primary text-primary-foreground"
-        }`}
-      >
-        {open ? <X className="w-6 h-6" /> : <MessageCircle className="w-6 h-6" />}
-      </button>
+      {/* FAB with label */}
+      <div className="fixed bottom-6 right-6 z-50 flex flex-col items-center gap-1.5">
+        {!open && (
+          <span className="text-[11px] font-bold text-foreground bg-card border border-border rounded-full px-3 py-1 shadow-md whitespace-nowrap">
+            Fale com o Tiko
+          </span>
+        )}
+        <button
+          onClick={() => setOpen(!open)}
+          className={`w-16 h-16 rounded-full shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 overflow-hidden ${
+            open ? "bg-foreground text-background rotate-90" : ""
+          }`}
+        >
+          {open ? <X className="w-6 h-6" /> : <img src={tikoChatAvatar} alt="Fale com o Tiko" className="w-full h-full object-cover" />}
+        </button>
+      </div>
 
       {/* Chat panel */}
       {open && (
