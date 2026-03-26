@@ -277,44 +277,36 @@ export default function SellPage() {
           {/* ── Step: Confirm ── */}
           {step === "confirm" && editedEvent && (
             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-300">
-              <div className="space-y-1">
-                <h2 className="text-2xl font-bold text-foreground">Confirme o evento</h2>
-                <p className="text-sm text-muted-foreground">Corrija os dados se necessário antes de continuar.</p>
+              <h2 className="text-2xl font-bold text-foreground">Confirmar evento</h2>
+
+              {/* Event card preview */}
+              <div className="bg-card border border-border rounded-2xl p-6 space-y-2 shadow-sm">
+                <span className="text-xs px-2.5 py-1 rounded bg-muted text-muted-foreground font-medium uppercase">
+                  {editedEvent.category}
+                </span>
+                <h3 className="text-xl font-bold text-foreground">{editedEvent.name}</h3>
+                <p className="text-sm text-muted-foreground">{editedEvent.venue} · {editedEvent.city}</p>
+                <p className="text-sm text-muted-foreground">
+                  {new Date(editedEvent.date + "T00:00:00").toLocaleDateString("pt-BR", { day: "numeric", month: "long", year: "numeric" })}
+                </p>
               </div>
-              <div className="bg-card border border-border rounded-2xl p-6 space-y-5 shadow-sm">
-                <div className="space-y-2">
-                  <Label htmlFor="ev-name" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Nome do evento</Label>
-                  <Input id="ev-name" value={editedEvent.name} onChange={(e) => setEditedEvent({ ...editedEvent, name: e.target.value })} className="rounded-xl h-11" />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="ev-date" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Data</Label>
-                    <Input id="ev-date" type="date" value={editedEvent.date} onChange={(e) => setEditedEvent({ ...editedEvent, date: e.target.value })} className="rounded-xl h-11" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="ev-time" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Horário</Label>
-                    <Input id="ev-time" type="time" value={editedEvent.time !== "N/A" ? editedEvent.time : ""} onChange={(e) => setEditedEvent({ ...editedEvent, time: e.target.value })} className="rounded-xl h-11" />
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="ev-venue" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Local</Label>
-                    <Input id="ev-venue" value={editedEvent.venue} onChange={(e) => setEditedEvent({ ...editedEvent, venue: e.target.value })} className="rounded-xl h-11" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="ev-city" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Cidade</Label>
-                    <Input id="ev-city" value={editedEvent.city} onChange={(e) => setEditedEvent({ ...editedEvent, city: e.target.value })} className="rounded-xl h-11" />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="ev-category" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Categoria</Label>
-                  <Input id="ev-category" value={editedEvent.category} onChange={(e) => setEditedEvent({ ...editedEvent, category: e.target.value })} className="rounded-xl h-11" />
-                </div>
+
+              {/* Genre selection */}
+              <div className="space-y-3">
+                <h3 className="text-base font-bold text-foreground">Gênero musical</h3>
+                <CategoryGrid
+                  selectedCategory={editedEvent.category}
+                  onCategoryChange={(cat) => setEditedEvent({ ...editedEvent, category: cat })}
+                  variant="sell"
+                />
               </div>
+
               <div className="flex gap-3">
-                <Button variant="outline" onClick={() => setStep("search")} size="lg" className="flex-1 rounded-xl">Buscar outro</Button>
+                <Button variant="outline" onClick={() => setStep("search")} size="lg" className="rounded-xl gap-2">
+                  <ArrowLeft className="w-4 h-4" /> Voltar
+                </Button>
                 <Button onClick={handleConfirmEvent} size="lg" className="flex-1 gap-2 rounded-xl">
-                  Confirmar e continuar <ArrowRight className="w-4 h-4" />
+                  Confirmar <ArrowRight className="w-4 h-4" />
                 </Button>
               </div>
             </div>
