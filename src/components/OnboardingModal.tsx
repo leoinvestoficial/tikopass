@@ -201,9 +201,6 @@ export default function OnboardingModal() {
             <p className="text-sm font-medium text-foreground">
               {avatarPreview ? "Ficou ótima! Toque para trocar" : "Toque para adicionar sua foto"}
             </p>
-            <p className="text-xs text-muted-foreground">
-              Fotos grandes são comprimidas automaticamente 📸
-            </p>
           </div>
         </div>
       ),

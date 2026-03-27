@@ -77,6 +77,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (extra?.address_cep) updates.address_cep = extra.address_cep;
       if (extra?.address_street) updates.address_street = extra.address_street;
       if (extra?.address_number) updates.address_number = extra.address_number;
+      if (extra?.address_complement) updates.address_complement = extra.address_complement;
       if (extra?.address_neighborhood) updates.address_neighborhood = extra.address_neighborhood;
       if (extra?.address_city) updates.address_city = extra.address_city;
       if (extra?.address_state) updates.address_state = extra.address_state;
