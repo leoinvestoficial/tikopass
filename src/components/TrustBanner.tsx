@@ -35,7 +35,7 @@ export default function TrustBanner() {
       >
         <div className="text-center mb-12 space-y-3">
           <h2 className="text-2xl md:text-3xl font-display font-bold text-foreground">
-            Por que usar o TICKET4U?
+            Por que usar o Tiko Pass?
           </h2>
           <p className="text-muted-foreground max-w-lg mx-auto">
             Criado para quem quer comprar e vender ingressos com tranquilidade.
