@@ -130,6 +130,19 @@ export default function OnboardingModal() {
       if (userCity) updates.city = userCity;
       if (bio) updates.bio = bio;
 
+      // Upload avatar if selected
+      if (avatarFile) {
+        const filePath = `${user.id}/avatar.jpg`;
+        const { error: uploadErr } = await supabase.storage.from("avatars").upload(filePath, avatarFile, {
+          upsert: true,
+          contentType: "image/jpeg",
+        });
+        if (!uploadErr) {
+          const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(filePath);
+          updates.avatar_url = urlData.publicUrl;
+        }
+      }
+
       if (Object.keys(updates).length > 0) {
         await supabase.from("profiles").update(updates).eq("user_id", user.id);
       }
