@@ -69,7 +69,6 @@ export default function AuthPage() {
   const [loadingCep, setLoadingCep] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
   const [welcomeStep, setWelcomeStep] = useState(0);
-  const [loadingCep, setLoadingCep] = useState(false);
   const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
 
