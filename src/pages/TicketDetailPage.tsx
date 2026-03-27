@@ -16,6 +16,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useAuth } from "@/hooks/use-auth";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 import { createNegotiation, deleteTicket, sendMessage, updateTicket } from "@/lib/api";
 import { toast } from "sonner";
