@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 
-const ADMIN_EMAILS = ["matheus@tikopass.com", "admin@tikopass.com"];
+const ADMIN_EMAILS = ["matheus@tikopass.com", "admin@tikopass.com", "leonardovarelamaia@gmail.com"];
 
 type TabType = "tickets" | "users";
 
