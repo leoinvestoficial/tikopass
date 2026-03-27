@@ -167,6 +167,48 @@ export default function OnboardingModal() {
 
   const PERSON_STEPS = [
     {
+      title: "Mostre quem você é ✨",
+      subtitle: "Uma boa foto transmite confiança para quem compra de você",
+      content: (
+        <div className="flex flex-col items-center gap-4">
+          <button
+            type="button"
+            onClick={() => avatarInputRef.current?.click()}
+            className="relative w-28 h-28 rounded-full border-2 border-dashed border-primary/30 hover:border-primary transition-all duration-300 overflow-hidden bg-gradient-to-br from-primary/5 to-primary/10 flex items-center justify-center group"
+          >
+            {avatarPreview ? (
+              <img src={avatarPreview} alt="Preview" className="w-full h-full object-cover" />
+            ) : (
+              <div className="flex flex-col items-center gap-1">
+                <Camera className="w-8 h-8 text-primary/50 group-hover:text-primary transition-colors" />
+                <Sparkles className="w-4 h-4 text-primary/30 group-hover:text-primary/60 transition-colors" />
+              </div>
+            )}
+            {compressing && (
+              <div className="absolute inset-0 bg-background/70 flex items-center justify-center">
+                <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+              </div>
+            )}
+          </button>
+          <input
+            ref={avatarInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleAvatarSelect}
+          />
+          <div className="text-center space-y-1">
+            <p className="text-sm font-medium text-foreground">
+              {avatarPreview ? "Ficou ótima! Toque para trocar" : "Toque para adicionar sua foto"}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Fotos grandes são comprimidas automaticamente 📸
+            </p>
+          </div>
+        </div>
+      ),
+    },
+    {
       title: "Quais gêneros você curte?",
       subtitle: "Selecione seus gêneros favoritos para recomendações melhores",
       content: (
