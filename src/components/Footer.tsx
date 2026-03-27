@@ -28,15 +28,18 @@ export default function Footer() {
                 <Link to="/sell" className="block hover:text-foreground transition-colors">Vender</Link>
                 <Link to="/negotiations" className="block hover:text-foreground transition-colors">Negociações</Link>
                 <Link to="/my-tickets" className="block hover:text-foreground transition-colors">Meus Ingressos</Link>
+                <Link to="/wallet" className="block hover:text-foreground transition-colors">Carteira</Link>
               </div>
             </div>
             <div className="space-y-3">
               <h4 className="font-display font-semibold text-foreground">Gêneros</h4>
               <div className="space-y-2 text-muted-foreground">
-                <span className="block">Sertanejo</span>
-                <span className="block">Rock & Pop</span>
-                <span className="block">Pagode & Samba</span>
-                <span className="block">Eletrônica</span>
+                <Link to="/?category=Sertanejo" className="block hover:text-foreground transition-colors">Sertanejo</Link>
+                <Link to="/?category=Rock+%26+Pop" className="block hover:text-foreground transition-colors">Rock & Pop</Link>
+                <Link to="/?category=Pagode+%26+Samba" className="block hover:text-foreground transition-colors">Pagode & Samba</Link>
+                <Link to="/?category=Eletr%C3%B4nica" className="block hover:text-foreground transition-colors">Eletrônica</Link>
+                <Link to="/?category=MPB+%26+Ax%C3%A9" className="block hover:text-foreground transition-colors">MPB & Axé</Link>
+                <Link to="/?category=Funk+%26+Rap" className="block hover:text-foreground transition-colors">Funk & Rap</Link>
               </div>
             </div>
             <div className="space-y-3">
