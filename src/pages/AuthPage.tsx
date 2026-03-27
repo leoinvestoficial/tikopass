@@ -142,6 +142,25 @@ export default function AuthPage() {
           address_state: state,
         });
         if (error) throw error;
+
+        // Upload avatar if selected
+        if (avatarFile) {
+          // Need to get the newly created user
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session?.user) {
+            const ext = "jpg";
+            const filePath = `${session.user.id}/avatar.${ext}`;
+            const { error: uploadErr } = await supabase.storage.from("avatars").upload(filePath, avatarFile, {
+              upsert: true,
+              contentType: "image/jpeg",
+            });
+            if (!uploadErr) {
+              const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(filePath);
+              await supabase.from("profiles").update({ avatar_url: urlData.publicUrl }).eq("user_id", session.user.id);
+            }
+          }
+        }
+
         toast.success("Conta criada! Verifique seu email para confirmar.");
         navigate("/");
       }
