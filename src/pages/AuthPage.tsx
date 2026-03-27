@@ -215,36 +215,6 @@ export default function AuthPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {!isLogin && (
               <>
-                {/* Avatar upload */}
-                <div className="flex flex-col items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => avatarInputRef.current?.click()}
-                    className="relative w-20 h-20 rounded-full border-2 border-dashed border-border hover:border-primary/50 transition-colors overflow-hidden bg-muted/30 flex items-center justify-center group"
-                  >
-                    {avatarPreview ? (
-                      <img src={avatarPreview} alt="Preview" className="w-full h-full object-cover" />
-                    ) : (
-                      <Camera className="w-7 h-7 text-muted-foreground group-hover:text-primary transition-colors" />
-                    )}
-                    {compressing && (
-                      <div className="absolute inset-0 bg-background/70 flex items-center justify-center">
-                        <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                      </div>
-                    )}
-                  </button>
-                  <input
-                    ref={avatarInputRef}
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={handleAvatarSelect}
-                  />
-                  <span className="text-xs text-muted-foreground">
-                    {avatarPreview ? "Toque para trocar" : "Adicionar foto de perfil"}
-                  </span>
-                </div>
-
                 <div className="space-y-1.5">
                   <Label htmlFor="name" className="text-sm font-medium">Nome completo *</Label>
                   <div className="relative">
