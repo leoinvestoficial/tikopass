@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,11 +6,12 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Search, Ticket, MessageSquare, Shield, Wallet, ArrowRight, PartyPopper,
-  Music, MapPin, Camera, ChevronRight,
+  Music, MapPin, Camera, ChevronRight, Sparkles,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import imageCompression from "browser-image-compression";
 import tikoLogo from "@/assets/tiko-logo.png";
 
 const TUTORIAL_STEPS = [
@@ -64,6 +65,34 @@ export default function OnboardingModal() {
   const [userCity, setUserCity] = useState("");
   const [bio, setBio] = useState("");
   const [saving, setSaving] = useState(false);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [compressing, setCompressing] = useState(false);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+
+  const handleAvatarSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error("Selecione uma imagem (JPG, PNG, WEBP)");
+      return;
+    }
+    setCompressing(true);
+    try {
+      const compressed = await imageCompression(file, {
+        maxSizeMB: 0.5,
+        maxWidthOrHeight: 512,
+        useWebWorker: true,
+        fileType: "image/jpeg",
+      });
+      setAvatarFile(compressed);
+      setAvatarPreview(URL.createObjectURL(compressed));
+    } catch {
+      toast.error("Erro ao processar a imagem. Tente outra.");
+    } finally {
+      setCompressing(false);
+    }
+  };
 
   useEffect(() => {
     if (user && profile) {
@@ -101,6 +130,19 @@ export default function OnboardingModal() {
       if (userCity) updates.city = userCity;
       if (bio) updates.bio = bio;
 
+      // Upload avatar if selected
+      if (avatarFile) {
+        const filePath = `${user.id}/avatar.jpg`;
+        const { error: uploadErr } = await supabase.storage.from("avatars").upload(filePath, avatarFile, {
+          upsert: true,
+          contentType: "image/jpeg",
+        });
+        if (!uploadErr) {
+          const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(filePath);
+          updates.avatar_url = urlData.publicUrl;
+        }
+      }
+
       if (Object.keys(updates).length > 0) {
         await supabase.from("profiles").update(updates).eq("user_id", user.id);
       }
@@ -124,6 +166,48 @@ export default function OnboardingModal() {
   const Icon = current.icon;
 
   const PERSON_STEPS = [
+    {
+      title: "Mostre quem você é ✨",
+      subtitle: "Uma boa foto transmite confiança para quem compra de você",
+      content: (
+        <div className="flex flex-col items-center gap-4">
+          <button
+            type="button"
+            onClick={() => avatarInputRef.current?.click()}
+            className="relative w-28 h-28 rounded-full border-2 border-dashed border-primary/30 hover:border-primary transition-all duration-300 overflow-hidden bg-gradient-to-br from-primary/5 to-primary/10 flex items-center justify-center group"
+          >
+            {avatarPreview ? (
+              <img src={avatarPreview} alt="Preview" className="w-full h-full object-cover" />
+            ) : (
+              <div className="flex flex-col items-center gap-1">
+                <Camera className="w-8 h-8 text-primary/50 group-hover:text-primary transition-colors" />
+                <Sparkles className="w-4 h-4 text-primary/30 group-hover:text-primary/60 transition-colors" />
+              </div>
+            )}
+            {compressing && (
+              <div className="absolute inset-0 bg-background/70 flex items-center justify-center">
+                <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+              </div>
+            )}
+          </button>
+          <input
+            ref={avatarInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleAvatarSelect}
+          />
+          <div className="text-center space-y-1">
+            <p className="text-sm font-medium text-foreground">
+              {avatarPreview ? "Ficou ótima! Toque para trocar" : "Toque para adicionar sua foto"}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Fotos grandes são comprimidas automaticamente 📸
+            </p>
+          </div>
+        </div>
+      ),
+    },
     {
       title: "Quais gêneros você curte?",
       subtitle: "Selecione seus gêneros favoritos para recomendações melhores",
