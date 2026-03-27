@@ -262,13 +262,45 @@ export default function NegotiationsPage() {
                     {/* Chat header */}
                     <div className="p-5 border-b border-border bg-gradient-to-r from-card to-muted/30">
                       <div className="flex items-start justify-between flex-wrap gap-3">
-                        <div>
+                        <div className="space-y-3">
                           <h3 className="font-display font-bold text-base text-foreground">{activeNeg.tickets?.events?.name}</h3>
-                          <p className="text-xs text-muted-foreground mt-0.5">
+                          <p className="text-xs text-muted-foreground">
                             {activeNeg.tickets?.sector}
                           </p>
+
+                          {/* Participants with avatars */}
+                          <div className="flex items-center gap-4 flex-wrap">
+                            {/* Seller */}
+                            <a href={`/seller/${activeNeg.seller_id}`} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+                              <Avatar className="h-8 w-8">
+                                {activeNeg.seller_profile?.avatar_url && <AvatarImage src={activeNeg.seller_profile.avatar_url} />}
+                                <AvatarFallback className="bg-primary/10 text-primary text-[10px] font-bold">
+                                  {(activeNeg.seller_profile?.display_name || "V").split(" ").map((n: string) => n[0]).slice(0, 2).join("").toUpperCase()}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">Vendedor</span>
+                                <span className="text-xs font-medium text-foreground">{activeNeg.seller_profile?.display_name || "Vendedor"}</span>
+                              </div>
+                            </a>
+                            <span className="text-muted-foreground text-xs">×</span>
+                            {/* Buyer */}
+                            <div className="flex items-center gap-2">
+                              <Avatar className="h-8 w-8">
+                                {activeNeg.buyer_profile?.avatar_url && <AvatarImage src={activeNeg.buyer_profile.avatar_url} />}
+                                <AvatarFallback className="bg-accent/30 text-accent-foreground text-[10px] font-bold">
+                                  {(activeNeg.buyer_profile?.display_name || "C").split(" ").map((n: string) => n[0]).slice(0, 2).join("").toUpperCase()}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">Comprador</span>
+                                <span className="text-xs font-medium text-foreground">{activeNeg.buyer_profile?.display_name || "Comprador"}</span>
+                              </div>
+                            </div>
+                          </div>
+
                           {/* Price breakdown card */}
-                          <div className="mt-3 inline-flex items-center gap-4 bg-background rounded-xl px-4 py-2.5 border border-border text-sm">
+                          <div className="inline-flex items-center gap-4 bg-background rounded-xl px-4 py-2.5 border border-border text-sm">
                             <div>
                               <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">
                                 {activeNeg.status === "counter" ? "Contraproposta" : "Oferta"}
@@ -287,7 +319,7 @@ export default function NegotiationsPage() {
                               </div>
                             ) : (
                               <div>
-                                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">Total</span>
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">Total c/ taxa</span>
                                 <span className="font-bold text-foreground text-lg">
                                   R$ {buyerTotalAmount.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
                                 </span>
