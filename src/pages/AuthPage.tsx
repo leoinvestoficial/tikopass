@@ -173,19 +173,40 @@ export default function AuthPage() {
 
   return (
     <div className="min-h-screen flex bg-background">
-      {/* ── Left panel: dark with logo + text ── */}
-      <div className="hidden lg:flex lg:w-[480px] xl:w-[540px] bg-foreground">
-        <div className="flex flex-col items-center justify-center p-12 w-full text-center">
-          <div className="space-y-6">
+      {/* ── Left panel: rich visual ── */}
+      <div className="hidden lg:flex lg:w-[480px] xl:w-[540px] bg-foreground relative overflow-hidden">
+        {/* Decorative circles */}
+        <div className="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-primary/20 blur-3xl" />
+        <div className="absolute -bottom-32 -right-16 w-80 h-80 rounded-full bg-primary/10 blur-3xl" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 rounded-full bg-primary/5 blur-2xl" />
+
+        <div className="flex flex-col items-center justify-center p-12 w-full text-center relative z-10">
+          <div className="space-y-8">
             <Link to="/" className="inline-block">
               <img src={tikoLogo} alt="Tiko Pass" className="h-24 object-contain brightness-0 invert mx-auto" />
             </Link>
-            <h2 className="text-2xl font-display font-bold text-background leading-tight">
-              O marketplace de ingressos<br />feito para fãs de verdade
-            </h2>
-            <p className="text-background/50 text-sm leading-relaxed max-w-sm mx-auto">
-              Compre e venda ingressos para os melhores shows e festivais do Brasil com segurança e praticidade.
-            </p>
+            <div className="space-y-3">
+              <h2 className="text-2xl font-display font-bold text-background leading-tight">
+                O marketplace de ingressos<br />feito para fãs de verdade
+              </h2>
+              <p className="text-background/50 text-sm leading-relaxed max-w-sm mx-auto">
+                Compre e venda ingressos para os melhores shows e festivais do Brasil com segurança e praticidade.
+              </p>
+            </div>
+            <div className="flex flex-col gap-3 text-background/40 text-xs max-w-xs mx-auto">
+              <div className="flex items-center gap-3 bg-background/5 rounded-xl px-4 py-3">
+                <span className="text-lg">🔒</span>
+                <span className="text-left text-background/60">Pagamento protegido com escrow</span>
+              </div>
+              <div className="flex items-center gap-3 bg-background/5 rounded-xl px-4 py-3">
+                <span className="text-lg">🤖</span>
+                <span className="text-left text-background/60">Validação automática por IA</span>
+              </div>
+              <div className="flex items-center gap-3 bg-background/5 rounded-xl px-4 py-3">
+                <span className="text-lg">⚡</span>
+                <span className="text-left text-background/60">Negocie direto com vendedores</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -200,8 +221,34 @@ export default function AuthPage() {
             </Link>
           </div>
 
+          {/* ── Tab selector ── */}
+          <div className="flex bg-muted rounded-xl p-1">
+            <button
+              type="button"
+              onClick={() => setIsLogin(true)}
+              className={`flex-1 py-2.5 text-sm font-semibold rounded-lg transition-all duration-200 ${
+                isLogin
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Entrar
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsLogin(false)}
+              className={`flex-1 py-2.5 text-sm font-semibold rounded-lg transition-all duration-200 ${
+                !isLogin
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Criar conta
+            </button>
+          </div>
+
           {/* Heading */}
-          <div className="space-y-1">
+          <div className="space-y-1 text-center">
             <h1 className="text-2xl font-display font-bold text-foreground">
               {isLogin ? "Bem-vindo de volta" : "Crie sua conta"}
             </h1>
