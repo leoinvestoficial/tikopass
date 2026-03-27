@@ -1,12 +1,14 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Mail, Lock, User, ArrowRight, CreditCard, MapPin, ChevronDown, ChevronUp, Shield, Sparkles, Ticket } from "lucide-react";
+import { Mail, Lock, User, ArrowRight, CreditCard, MapPin, ChevronDown, ChevronUp, Camera } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/use-auth";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import tikoLogo from "@/assets/tiko-logo.png";
+import imageCompression from "browser-image-compression";
 
 function formatCpf(value: string): string {
   const digits = value.replace(/\D/g, "").slice(0, 11);
@@ -65,6 +67,10 @@ export default function AuthPage() {
   const [lgpdConsent, setLgpdConsent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loadingCep, setLoadingCep] = useState(false);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [compressing, setCompressing] = useState(false);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
   const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
 
@@ -72,6 +78,29 @@ export default function AuthPage() {
     navigate("/");
     return null;
   }
+  const handleAvatarSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error("Selecione uma imagem (JPG, PNG, WEBP)");
+      return;
+    }
+    setCompressing(true);
+    try {
+      const compressed = await imageCompression(file, {
+        maxSizeMB: 0.5,
+        maxWidthOrHeight: 512,
+        useWebWorker: true,
+        fileType: "image/jpeg",
+      });
+      setAvatarFile(compressed);
+      setAvatarPreview(URL.createObjectURL(compressed));
+    } catch {
+      toast.error("Erro ao processar a imagem. Tente outra.");
+    } finally {
+      setCompressing(false);
+    }
+  };
 
   const lookupCep = async (cepValue: string) => {
     const digits = cepValue.replace(/\D/g, "");
@@ -113,6 +142,25 @@ export default function AuthPage() {
           address_state: state,
         });
         if (error) throw error;
+
+        // Upload avatar if selected
+        if (avatarFile) {
+          // Need to get the newly created user
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session?.user) {
+            const ext = "jpg";
+            const filePath = `${session.user.id}/avatar.${ext}`;
+            const { error: uploadErr } = await supabase.storage.from("avatars").upload(filePath, avatarFile, {
+              upsert: true,
+              contentType: "image/jpeg",
+            });
+            if (!uploadErr) {
+              const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(filePath);
+              await supabase.from("profiles").update({ avatar_url: urlData.publicUrl }).eq("user_id", session.user.id);
+            }
+          }
+        }
+
         toast.success("Conta criada! Verifique seu email para confirmar.");
         navigate("/");
       }
@@ -165,6 +213,36 @@ export default function AuthPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {!isLogin && (
               <>
+                {/* Avatar upload */}
+                <div className="flex flex-col items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => avatarInputRef.current?.click()}
+                    className="relative w-20 h-20 rounded-full border-2 border-dashed border-border hover:border-primary/50 transition-colors overflow-hidden bg-muted/30 flex items-center justify-center group"
+                  >
+                    {avatarPreview ? (
+                      <img src={avatarPreview} alt="Preview" className="w-full h-full object-cover" />
+                    ) : (
+                      <Camera className="w-7 h-7 text-muted-foreground group-hover:text-primary transition-colors" />
+                    )}
+                    {compressing && (
+                      <div className="absolute inset-0 bg-background/70 flex items-center justify-center">
+                        <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                      </div>
+                    )}
+                  </button>
+                  <input
+                    ref={avatarInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleAvatarSelect}
+                  />
+                  <span className="text-xs text-muted-foreground">
+                    {avatarPreview ? "Toque para trocar" : "Adicionar foto de perfil"}
+                  </span>
+                </div>
+
                 <div className="space-y-1.5">
                   <Label htmlFor="name" className="text-sm font-medium">Nome completo *</Label>
                   <div className="relative">
