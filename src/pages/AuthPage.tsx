@@ -199,9 +199,9 @@ export default function AuthPage() {
                       id="phone"
                       placeholder="(71) 99999-9999"
                       value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
+                      onChange={(e) => setPhone(formatPhone(e.target.value))}
                       className="pl-12 rounded-xl h-11"
-                      maxLength={15}
+                      maxLength={16}
                     />
                   </div>
                 </div>
