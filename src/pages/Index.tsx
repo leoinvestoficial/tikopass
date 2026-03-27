@@ -8,6 +8,7 @@ import CityFilter from "@/components/CityFilter";
 import CategoryGrid from "@/components/CategoryGrid";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import OnboardingModal from "@/components/OnboardingModal";
 import HowItWorks from "@/components/HowItWorks";
 import PopularEvents, { type PopularEventItem } from "@/components/PopularEvents";
 import TrustBanner from "@/components/TrustBanner";
