@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Mail, Lock, User, ArrowRight, CreditCard, MapPin, ChevronDown, ChevronUp } from "lucide-react";
+import { Mail, Lock, User, ArrowRight, CreditCard, MapPin } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
@@ -62,7 +62,7 @@ export default function AuthPage() {
   const [neighborhood, setNeighborhood] = useState("");
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
-  const [showAddress, setShowAddress] = useState(false);
+  
   const [confirmPassword, setConfirmPassword] = useState("");
   const [lgpdConsent, setLgpdConsent] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -105,9 +105,19 @@ export default function AuthPage() {
         if (password !== confirmPassword) { toast.error("As senhas não coincidem"); setLoading(false); return; }
         const cpfDigits = cpf.replace(/\D/g, "");
         if (!validateCpf(cpfDigits)) { toast.error("CPF inválido"); setLoading(false); return; }
+        const phoneDigits = phone.replace(/\D/g, "");
+        if (phoneDigits.length < 10) { toast.error("Informe um telefone válido"); setLoading(false); return; }
+        const cepDigits = cep.replace(/\D/g, "");
+        if (cepDigits.length !== 8) { toast.error("Informe um CEP válido"); setLoading(false); return; }
+        if (!street.trim()) { toast.error("Informe a rua"); setLoading(false); return; }
+        if (!addressNumber.trim()) { toast.error("Informe o número do endereço"); setLoading(false); return; }
+        if (!neighborhood.trim()) { toast.error("Informe o bairro"); setLoading(false); return; }
+        if (!city.trim()) { toast.error("Informe a cidade"); setLoading(false); return; }
+        if (!state) { toast.error("Selecione o estado"); setLoading(false); return; }
+        if (!lgpdConsent) { toast.error("Você deve aceitar os termos para continuar"); setLoading(false); return; }
         const { error } = await signUp(email, password, name, cpfDigits, {
-          phone,
-          address_cep: cep.replace(/\D/g, ""),
+          phone: phoneDigits,
+          address_cep: cepDigits,
           address_street: street,
           address_number: addressNumber,
           address_neighborhood: neighborhood,
@@ -242,7 +252,7 @@ export default function AuthPage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="phone" className="text-sm font-medium">Telefone</Label>
+                  <Label htmlFor="phone" className="text-sm font-medium">Telefone *</Label>
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">+55</span>
                     <Input
@@ -252,26 +262,20 @@ export default function AuthPage() {
                       onChange={(e) => setPhone(formatPhone(e.target.value))}
                       className="pl-12 rounded-xl h-11"
                       maxLength={16}
+                      required
                     />
                   </div>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => setShowAddress(!showAddress)}
-                  className="w-full flex items-center justify-between px-4 py-3 rounded-xl border border-border bg-muted/30 hover:bg-muted/50 transition-colors text-sm"
-                >
-                  <span className="flex items-center gap-2 text-muted-foreground">
-                    <MapPin className="w-4 h-4" />
-                    Endereço {!showAddress && <span className="text-xs">(recomendado)</span>}
-                  </span>
-                  {showAddress ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
-                </button>
+                <div className="space-y-1.5">
+                  <Label className="text-sm font-medium flex items-center gap-2">
+                    <MapPin className="w-4 h-4" /> Endereço *
+                  </Label>
+                </div>
 
-                {showAddress && (
-                  <div className="space-y-3 p-4 bg-muted/20 rounded-xl border border-border animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="space-y-3 p-4 bg-muted/20 rounded-xl border border-border">
                     <div className="space-y-1.5">
-                      <Label htmlFor="cep" className="text-xs font-medium">CEP</Label>
+                      <Label htmlFor="cep" className="text-xs font-medium">CEP *</Label>
                       <Input
                         id="cep"
                         placeholder="00000-000"
@@ -283,34 +287,36 @@ export default function AuthPage() {
                         }}
                         className="rounded-xl h-10 text-sm"
                         maxLength={9}
+                        required
                       />
                       {loadingCep && <p className="text-xs text-primary">Buscando endereço...</p>}
                     </div>
                     <div className="grid grid-cols-3 gap-2">
                       <div className="col-span-2 space-y-1">
-                        <Label className="text-xs font-medium">Rua</Label>
-                        <Input value={street} onChange={(e) => setStreet(e.target.value)} className="rounded-xl h-10 text-sm" />
+                        <Label className="text-xs font-medium">Rua *</Label>
+                        <Input value={street} onChange={(e) => setStreet(e.target.value)} className="rounded-xl h-10 text-sm" required />
                       </div>
                       <div className="space-y-1">
-                        <Label className="text-xs font-medium">Nº</Label>
-                        <Input value={addressNumber} onChange={(e) => setAddressNumber(e.target.value)} className="rounded-xl h-10 text-sm" />
+                        <Label className="text-xs font-medium">Nº *</Label>
+                        <Input value={addressNumber} onChange={(e) => setAddressNumber(e.target.value)} className="rounded-xl h-10 text-sm" required />
                       </div>
                     </div>
                     <div className="space-y-1">
-                      <Label className="text-xs font-medium">Bairro</Label>
-                      <Input value={neighborhood} onChange={(e) => setNeighborhood(e.target.value)} className="rounded-xl h-10 text-sm" />
+                      <Label className="text-xs font-medium">Bairro *</Label>
+                      <Input value={neighborhood} onChange={(e) => setNeighborhood(e.target.value)} className="rounded-xl h-10 text-sm" required />
                     </div>
                     <div className="grid grid-cols-3 gap-2">
                       <div className="col-span-2 space-y-1">
-                        <Label className="text-xs font-medium">Cidade</Label>
-                        <Input value={city} onChange={(e) => setCity(e.target.value)} className="rounded-xl h-10 text-sm" />
+                        <Label className="text-xs font-medium">Cidade *</Label>
+                        <Input value={city} onChange={(e) => setCity(e.target.value)} className="rounded-xl h-10 text-sm" required />
                       </div>
                       <div className="space-y-1">
-                        <Label className="text-xs font-medium">UF</Label>
+                        <Label className="text-xs font-medium">UF *</Label>
                         <select
                           value={state}
                           onChange={(e) => setState(e.target.value)}
                           className="w-full h-10 rounded-xl border border-input bg-background px-3 text-sm"
+                          required
                         >
                           <option value="">--</option>
                           {STATES.map((s) => <option key={s} value={s}>{s}</option>)}
@@ -318,7 +324,6 @@ export default function AuthPage() {
                       </div>
                     </div>
                   </div>
-                )}
               </>
             )}
 
