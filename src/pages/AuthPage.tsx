@@ -67,11 +67,11 @@ export default function AuthPage() {
   const [lgpdConsent, setLgpdConsent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loadingCep, setLoadingCep] = useState(false);
+  const [complement, setComplement] = useState("");
   const [showWelcome, setShowWelcome] = useState(false);
   const [welcomeStep, setWelcomeStep] = useState(0);
   const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
-
 
   // Welcome celebration animation after signup
   useEffect(() => {
@@ -83,10 +83,12 @@ export default function AuthPage() {
     }
   }, [showWelcome]);
 
-  if (user && !showWelcome) {
-    navigate("/");
-    return null;
-  }
+  // Redirect logged-in users ONLY if not showing welcome
+  useEffect(() => {
+    if (user && !showWelcome) {
+      navigate("/");
+    }
+  }, [user, showWelcome, navigate]);
 
   const lookupCep = async (cepValue: string) => {
     const digits = cepValue.replace(/\D/g, "");
