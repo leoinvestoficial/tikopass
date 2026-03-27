@@ -67,10 +67,6 @@ export default function AuthPage() {
   const [lgpdConsent, setLgpdConsent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loadingCep, setLoadingCep] = useState(false);
-  const [avatarFile, setAvatarFile] = useState<File | null>(null);
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
-  const [compressing, setCompressing] = useState(false);
-  const avatarInputRef = useRef<HTMLInputElement>(null);
   const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
 
