@@ -72,7 +72,7 @@ serve(async (req) => {
             currency: "brl",
             product_data: {
               name: `${eventName} - ${sector}`,
-              description: `Ingresso via TICKET4U (taxa de ${PLATFORM_FEE_PERCENT}% inclusa)`,
+              description: `Ingresso via Tiko Pass (taxa de ${PLATFORM_FEE_PERCENT}% inclusa)`,
             },
             unit_amount: totalAmount,
           },
