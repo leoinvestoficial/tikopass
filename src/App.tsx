@@ -51,6 +51,7 @@ const App = () => (
             <Route path="/welcome" element={<WelcomePage />} />
             <Route path="/privacy" element={<PrivacyPage />} />
             <Route path="/terms" element={<TermsPage />} />
+            <Route path="/faq" element={<FaqPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <TikoChatWidgetWrapper />

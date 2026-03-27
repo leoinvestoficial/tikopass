@@ -108,6 +108,7 @@ export default function Index() {
     <div className="min-h-screen flex flex-col bg-background font-sans">
       
       <Navbar />
+      <OnboardingModal />
 
       {/* ── HERO ─────────────────────────────────────────────────────────────── */}
       <section className="relative overflow-hidden min-h-[420px]">
