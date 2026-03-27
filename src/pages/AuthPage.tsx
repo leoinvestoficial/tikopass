@@ -67,11 +67,11 @@ export default function AuthPage() {
   const [lgpdConsent, setLgpdConsent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loadingCep, setLoadingCep] = useState(false);
+  const [complement, setComplement] = useState("");
   const [showWelcome, setShowWelcome] = useState(false);
   const [welcomeStep, setWelcomeStep] = useState(0);
   const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
-
 
   // Welcome celebration animation after signup
   useEffect(() => {
@@ -83,10 +83,12 @@ export default function AuthPage() {
     }
   }, [showWelcome]);
 
-  if (user && !showWelcome) {
-    navigate("/");
-    return null;
-  }
+  // Redirect logged-in users ONLY if not showing welcome
+  useEffect(() => {
+    if (user && !showWelcome) {
+      navigate("/");
+    }
+  }, [user, showWelcome, navigate]);
 
   const lookupCep = async (cepValue: string) => {
     const digits = cepValue.replace(/\D/g, "");
@@ -133,6 +135,7 @@ export default function AuthPage() {
           address_cep: cepDigits,
           address_street: street,
           address_number: addressNumber,
+          address_complement: complement,
           address_neighborhood: neighborhood,
           address_city: city,
           address_state: state,
@@ -426,9 +429,15 @@ export default function AuthPage() {
                         <Input value={addressNumber} onChange={(e) => setAddressNumber(e.target.value)} className="rounded-xl h-10 text-sm" required />
                       </div>
                     </div>
-                    <div className="space-y-1">
-                      <Label className="text-xs font-medium">Bairro *</Label>
-                      <Input value={neighborhood} onChange={(e) => setNeighborhood(e.target.value)} className="rounded-xl h-10 text-sm" required />
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="space-y-1">
+                        <Label className="text-xs font-medium">Bairro *</Label>
+                        <Input value={neighborhood} onChange={(e) => setNeighborhood(e.target.value)} className="rounded-xl h-10 text-sm" required />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs font-medium">Complemento</Label>
+                        <Input placeholder="Apto, bloco..." value={complement} onChange={(e) => setComplement(e.target.value)} className="rounded-xl h-10 text-sm" />
+                      </div>
                     </div>
                     <div className="grid grid-cols-3 gap-2">
                       <div className="col-span-2 space-y-1">
