@@ -8,7 +8,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import tikoLogo from "@/assets/tiko-logo.png";
-import imageCompression from "browser-image-compression";
+
 
 function formatCpf(value: string): string {
   const digits = value.replace(/\D/g, "").slice(0, 11);
