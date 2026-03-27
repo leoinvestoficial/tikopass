@@ -135,6 +135,7 @@ export default function AuthPage() {
           address_cep: cepDigits,
           address_street: street,
           address_number: addressNumber,
+          address_complement: complement,
           address_neighborhood: neighborhood,
           address_city: city,
           address_state: state,
