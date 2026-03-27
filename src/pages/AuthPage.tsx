@@ -22,6 +22,13 @@ function formatCep(value: string): string {
   return `${digits.slice(0, 5)}-${digits.slice(5)}`;
 }
 
+function formatPhone(value: string): string {
+  const digits = value.replace(/\D/g, "").slice(0, 11);
+  if (digits.length <= 2) return digits;
+  if (digits.length <= 7) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+  return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+}
+
 function validateCpf(cpf: string): boolean {
   const digits = cpf.replace(/\D/g, "");
   if (digits.length !== 11) return false;
@@ -192,9 +199,9 @@ export default function AuthPage() {
                       id="phone"
                       placeholder="(71) 99999-9999"
                       value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
+                      onChange={(e) => setPhone(formatPhone(e.target.value))}
                       className="pl-12 rounded-xl h-11"
-                      maxLength={15}
+                      maxLength={16}
                     />
                   </div>
                 </div>
