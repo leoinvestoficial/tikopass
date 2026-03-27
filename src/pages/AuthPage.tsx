@@ -102,7 +102,7 @@ export default function AuthPage() {
     }
   };
 
-
+  const lookupCep = async (cepValue: string) => {
     const digits = cepValue.replace(/\D/g, "");
     if (digits.length !== 8) return;
     setLoadingCep(true);
