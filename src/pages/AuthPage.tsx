@@ -105,9 +105,19 @@ export default function AuthPage() {
         if (password !== confirmPassword) { toast.error("As senhas não coincidem"); setLoading(false); return; }
         const cpfDigits = cpf.replace(/\D/g, "");
         if (!validateCpf(cpfDigits)) { toast.error("CPF inválido"); setLoading(false); return; }
+        const phoneDigits = phone.replace(/\D/g, "");
+        if (phoneDigits.length < 10) { toast.error("Informe um telefone válido"); setLoading(false); return; }
+        const cepDigits = cep.replace(/\D/g, "");
+        if (cepDigits.length !== 8) { toast.error("Informe um CEP válido"); setLoading(false); return; }
+        if (!street.trim()) { toast.error("Informe a rua"); setLoading(false); return; }
+        if (!addressNumber.trim()) { toast.error("Informe o número do endereço"); setLoading(false); return; }
+        if (!neighborhood.trim()) { toast.error("Informe o bairro"); setLoading(false); return; }
+        if (!city.trim()) { toast.error("Informe a cidade"); setLoading(false); return; }
+        if (!state) { toast.error("Selecione o estado"); setLoading(false); return; }
+        if (!lgpdConsent) { toast.error("Você deve aceitar os termos para continuar"); setLoading(false); return; }
         const { error } = await signUp(email, password, name, cpfDigits, {
-          phone,
-          address_cep: cep.replace(/\D/g, ""),
+          phone: phoneDigits,
+          address_cep: cepDigits,
           address_street: street,
           address_number: addressNumber,
           address_neighborhood: neighborhood,
