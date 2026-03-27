@@ -16,6 +16,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useAuth } from "@/hooks/use-auth";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 import { createNegotiation, deleteTicket, sendMessage, updateTicket } from "@/lib/api";
 import { toast } from "sonner";
@@ -352,9 +353,12 @@ export default function TicketDetailPage() {
                       to={`/seller/${ticket.seller_id}`}
                       className="mt-2 inline-flex items-center gap-3 rounded-xl transition-opacity hover:opacity-80"
                     >
-                      <span className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 text-primary">
-                        <User className="h-5 w-5" />
-                      </span>
+                      <Avatar className="h-12 w-12">
+                        {ticket.seller_profile?.avatar_url && <AvatarImage src={ticket.seller_profile.avatar_url} alt={ticket.seller_profile?.display_name || "Vendedor"} />}
+                        <AvatarFallback className="bg-primary/10 text-primary font-bold">
+                          {(ticket.seller_profile?.display_name || "V").split(" ").map((n: string) => n[0]).slice(0, 2).join("").toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
                       <span>
                         <span className="block font-medium text-foreground">
                           {ticket.seller_profile?.display_name || "Vendedor"}

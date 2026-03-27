@@ -47,7 +47,7 @@ serve(async (req) => {
 
     const ticketPrice = negotiation.offer_price;
     const platformFee = Math.round(ticketPrice * PLATFORM_FEE_PERCENT) / 100;
-    const totalAmount = Math.round((ticketPrice + platformFee) * 100); // centavos
+    const totalAmount = Math.round((ticketPrice + ticketPrice * PLATFORM_FEE_PERCENT / 100) * 100); // buyer pays ticket + 10% fee
 
     const eventName = negotiation.tickets?.events?.name || "Ingresso";
     const sector = negotiation.tickets?.sector || "";

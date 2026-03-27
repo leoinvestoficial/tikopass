@@ -3,7 +3,8 @@ import Footer from "@/components/Footer";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send, Clock, CheckCircle2, XCircle, MessageSquare, Loader2, CreditCard, ShieldCheck, ArrowLeftRight, Trophy, Zap, TrendingUp } from "lucide-react";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Send, Clock, CheckCircle2, XCircle, MessageSquare, Loader2, CreditCard, ShieldCheck, ArrowLeftRight, Trophy, Zap, TrendingUp, User } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { fetchUserNegotiations, fetchMessages, sendMessage, updateNegotiationStatus } from "@/lib/api";
@@ -134,7 +135,7 @@ export default function NegotiationsPage() {
   const activePrice = activeNeg?.status === "counter" && activeNeg?.counter_offer_price
     ? activeNeg.counter_offer_price
     : activeNeg?.offer_price;
-  const sellerNetAmount = activePrice ? activePrice * (1 - PLATFORM_FEE) : 0;
+  const sellerNetAmount = activePrice || 0; // Seller receives 100%
   const buyerTotalAmount = activePrice ? activePrice * (1 + PLATFORM_FEE) : 0;
 
   // Stats
@@ -208,7 +209,9 @@ export default function NegotiationsPage() {
                   const status = statusConfig[neg.status] || statusConfig.pending;
                   const StatusIcon = status.icon;
                   const eventName = neg.tickets?.events?.name || "Evento";
-                  const otherName = neg.buyer_id === user?.id ? neg.seller_profile?.display_name : neg.buyer_profile?.display_name;
+                  const otherProfile = neg.buyer_id === user?.id ? neg.seller_profile : neg.buyer_profile;
+                  const otherName = otherProfile?.display_name || "Usuário";
+                  const otherAvatar = otherProfile?.avatar_url;
                   const displayPrice = neg.status === "counter" && neg.counter_offer_price ? neg.counter_offer_price : neg.offer_price;
                   const isSelected = selectedNeg === neg.id;
                   return (
@@ -221,16 +224,24 @@ export default function NegotiationsPage() {
                           : "border-transparent bg-card hover:border-border hover:shadow-sm"
                       }`}
                     >
-                      <div className="flex items-start justify-between gap-2 mb-2">
-                        <div className="min-w-0">
-                          <span className="font-display font-bold text-sm text-foreground line-clamp-1 block">{eventName}</span>
-                          {otherName && <span className="text-xs text-muted-foreground">com {otherName}</span>}
+                      <div className="flex items-start gap-3 mb-2">
+                        <Avatar className="h-10 w-10 shrink-0 mt-0.5">
+                          {otherAvatar && <AvatarImage src={otherAvatar} alt={otherName} />}
+                          <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
+                            {otherName.split(" ").map((n: string) => n[0]).slice(0, 2).join("").toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="font-display font-bold text-sm text-foreground line-clamp-1">{eventName}</span>
+                            <Badge className={`shrink-0 text-[10px] gap-1 ${status.className}`}>
+                              <StatusIcon className="w-3 h-3" />{status.label}
+                            </Badge>
+                          </div>
+                          <span className="text-xs text-muted-foreground">com {otherName}</span>
                         </div>
-                        <Badge className={`shrink-0 text-[10px] gap-1 ${status.className}`}>
-                          <StatusIcon className="w-3 h-3" />{status.label}
-                        </Badge>
                       </div>
-                      <div className="flex items-center justify-between mt-2">
+                      <div className="flex items-center justify-between mt-1 pl-13">
                         <span className="text-xs text-muted-foreground">{neg.tickets?.sector}</span>
                         <span className="font-bold text-sm text-foreground">
                           R$ {displayPrice?.toLocaleString("pt-BR")}
@@ -251,13 +262,45 @@ export default function NegotiationsPage() {
                     {/* Chat header */}
                     <div className="p-5 border-b border-border bg-gradient-to-r from-card to-muted/30">
                       <div className="flex items-start justify-between flex-wrap gap-3">
-                        <div>
+                        <div className="space-y-3">
                           <h3 className="font-display font-bold text-base text-foreground">{activeNeg.tickets?.events?.name}</h3>
-                          <p className="text-xs text-muted-foreground mt-0.5">
+                          <p className="text-xs text-muted-foreground">
                             {activeNeg.tickets?.sector}
                           </p>
+
+                          {/* Participants with avatars */}
+                          <div className="flex items-center gap-4 flex-wrap">
+                            {/* Seller */}
+                            <a href={`/seller/${activeNeg.seller_id}`} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+                              <Avatar className="h-8 w-8">
+                                {activeNeg.seller_profile?.avatar_url && <AvatarImage src={activeNeg.seller_profile.avatar_url} />}
+                                <AvatarFallback className="bg-primary/10 text-primary text-[10px] font-bold">
+                                  {(activeNeg.seller_profile?.display_name || "V").split(" ").map((n: string) => n[0]).slice(0, 2).join("").toUpperCase()}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">Vendedor</span>
+                                <span className="text-xs font-medium text-foreground">{activeNeg.seller_profile?.display_name || "Vendedor"}</span>
+                              </div>
+                            </a>
+                            <span className="text-muted-foreground text-xs">×</span>
+                            {/* Buyer */}
+                            <div className="flex items-center gap-2">
+                              <Avatar className="h-8 w-8">
+                                {activeNeg.buyer_profile?.avatar_url && <AvatarImage src={activeNeg.buyer_profile.avatar_url} />}
+                                <AvatarFallback className="bg-accent/30 text-accent-foreground text-[10px] font-bold">
+                                  {(activeNeg.buyer_profile?.display_name || "C").split(" ").map((n: string) => n[0]).slice(0, 2).join("").toUpperCase()}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">Comprador</span>
+                                <span className="text-xs font-medium text-foreground">{activeNeg.buyer_profile?.display_name || "Comprador"}</span>
+                              </div>
+                            </div>
+                          </div>
+
                           {/* Price breakdown card */}
-                          <div className="mt-3 inline-flex items-center gap-4 bg-background rounded-xl px-4 py-2.5 border border-border text-sm">
+                          <div className="inline-flex items-center gap-4 bg-background rounded-xl px-4 py-2.5 border border-border text-sm">
                             <div>
                               <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">
                                 {activeNeg.status === "counter" ? "Contraproposta" : "Oferta"}
@@ -276,7 +319,7 @@ export default function NegotiationsPage() {
                               </div>
                             ) : (
                               <div>
-                                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">Total</span>
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">Total c/ taxa</span>
                                 <span className="font-bold text-foreground text-lg">
                                   R$ {buyerTotalAmount.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
                                 </span>
@@ -349,15 +392,22 @@ export default function NegotiationsPage() {
                       )}
                       {messages.map((msg: any) => {
                         const isMe = msg.sender_id === user?.id;
+                        const senderName = msg.sender_profile?.display_name || "Usuário";
+                        const senderAvatar = msg.sender_profile?.avatar_url;
+                        const initials = senderName.split(" ").map((n: string) => n[0]).slice(0, 2).join("").toUpperCase();
                         return (
-                          <div key={msg.id} className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
+                          <div key={msg.id} className={`flex items-end gap-2 ${isMe ? "justify-end flex-row-reverse" : "justify-start"}`}>
+                            <Avatar className="h-7 w-7 shrink-0">
+                              {senderAvatar && <AvatarImage src={senderAvatar} />}
+                              <AvatarFallback className="text-[9px] font-bold bg-muted">{initials}</AvatarFallback>
+                            </Avatar>
                             <div className={`max-w-[70%] px-4 py-3 text-sm shadow-sm ${
                               isMe
                                 ? "bg-primary text-primary-foreground rounded-2xl rounded-br-sm"
                                 : "bg-card border border-border text-foreground rounded-2xl rounded-bl-sm"
                             }`}>
                               <div className={`text-[10px] font-bold uppercase tracking-wider mb-1 ${isMe ? "text-primary-foreground/60" : "text-muted-foreground"}`}>
-                                {msg.sender_profile?.display_name || "Usuário"}
+                                {senderName}
                               </div>
                               {msg.content}
                             </div>
@@ -409,8 +459,8 @@ export default function NegotiationsPage() {
                 <span className="font-bold">R$ {activeNeg?.offer_price?.toLocaleString("pt-BR")}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Você receberia</span>
-                <span className="font-bold text-success">R$ {((activeNeg?.offer_price || 0) * (1 - PLATFORM_FEE)).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
+                <span className="text-muted-foreground">Você recebe</span>
+                <span className="font-bold text-success">R$ {(activeNeg?.offer_price || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
               </div>
             </div>
             <div className="space-y-2">
@@ -426,8 +476,9 @@ export default function NegotiationsPage() {
                 <div className="bg-success/10 rounded-xl px-4 py-2.5 text-center">
                   <span className="text-xs text-muted-foreground">Você recebe </span>
                   <span className="font-bold text-success">
-                    R$ {(parseFloat(counterPrice) * (1 - PLATFORM_FEE)).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                    R$ {parseFloat(counterPrice).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
                   </span>
+                  <span className="text-xs text-muted-foreground ml-1">— comprador paga +10%</span>
                 </div>
               )}
             </div>

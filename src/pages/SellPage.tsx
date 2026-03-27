@@ -342,12 +342,15 @@ export default function SellPage() {
                     <Label htmlFor="price" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Preço (R$) *</Label>
                     <Input id="price" type="number" placeholder="Ex: 500" value={ticketForm.price} onChange={(e) => setTicketForm({ ...ticketForm, price: e.target.value })} className="rounded-xl h-11" />
                     {ticketForm.price && parseFloat(ticketForm.price) > 0 && (
-                      <div className="bg-muted/50 rounded-lg px-3 py-2 text-sm">
-                        Você receberá{" "}
-                        <span className="font-bold text-foreground">
-                          R$ {(parseFloat(ticketForm.price) * 0.9).toFixed(2).replace(".", ",")}
-                        </span>{" "}
-                        <span className="text-xs text-muted-foreground">(taxa de 10%)</span>
+                      <div className="bg-success/10 rounded-lg px-3 py-2.5 text-sm flex items-center gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-success shrink-0" />
+                        <span>
+                          Você recebe{" "}
+                          <span className="font-bold text-success">
+                            R$ {parseFloat(ticketForm.price).toFixed(2).replace(".", ",")}
+                          </span>{" "}
+                          <span className="text-xs text-muted-foreground">— o comprador paga a taxa de 10%</span>
+                        </span>
                       </div>
                     )}
                   </div>
