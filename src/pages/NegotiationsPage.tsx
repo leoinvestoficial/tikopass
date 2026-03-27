@@ -392,15 +392,22 @@ export default function NegotiationsPage() {
                       )}
                       {messages.map((msg: any) => {
                         const isMe = msg.sender_id === user?.id;
+                        const senderName = msg.sender_profile?.display_name || "Usuário";
+                        const senderAvatar = msg.sender_profile?.avatar_url;
+                        const initials = senderName.split(" ").map((n: string) => n[0]).slice(0, 2).join("").toUpperCase();
                         return (
-                          <div key={msg.id} className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
+                          <div key={msg.id} className={`flex items-end gap-2 ${isMe ? "justify-end flex-row-reverse" : "justify-start"}`}>
+                            <Avatar className="h-7 w-7 shrink-0">
+                              {senderAvatar && <AvatarImage src={senderAvatar} />}
+                              <AvatarFallback className="text-[9px] font-bold bg-muted">{initials}</AvatarFallback>
+                            </Avatar>
                             <div className={`max-w-[70%] px-4 py-3 text-sm shadow-sm ${
                               isMe
                                 ? "bg-primary text-primary-foreground rounded-2xl rounded-br-sm"
                                 : "bg-card border border-border text-foreground rounded-2xl rounded-bl-sm"
                             }`}>
                               <div className={`text-[10px] font-bold uppercase tracking-wider mb-1 ${isMe ? "text-primary-foreground/60" : "text-muted-foreground"}`}>
-                                {msg.sender_profile?.display_name || "Usuário"}
+                                {senderName}
                               </div>
                               {msg.content}
                             </div>
