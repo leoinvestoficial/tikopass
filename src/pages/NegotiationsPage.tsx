@@ -134,7 +134,7 @@ export default function NegotiationsPage() {
   const activePrice = activeNeg?.status === "counter" && activeNeg?.counter_offer_price
     ? activeNeg.counter_offer_price
     : activeNeg?.offer_price;
-  const sellerNetAmount = activePrice ? activePrice * (1 - PLATFORM_FEE) : 0;
+  const sellerNetAmount = activePrice || 0; // Seller receives 100%
   const buyerTotalAmount = activePrice ? activePrice * (1 + PLATFORM_FEE) : 0;
 
   // Stats
