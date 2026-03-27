@@ -209,7 +209,9 @@ export default function NegotiationsPage() {
                   const status = statusConfig[neg.status] || statusConfig.pending;
                   const StatusIcon = status.icon;
                   const eventName = neg.tickets?.events?.name || "Evento";
-                  const otherName = neg.buyer_id === user?.id ? neg.seller_profile?.display_name : neg.buyer_profile?.display_name;
+                  const otherProfile = neg.buyer_id === user?.id ? neg.seller_profile : neg.buyer_profile;
+                  const otherName = otherProfile?.display_name || "Usuário";
+                  const otherAvatar = otherProfile?.avatar_url;
                   const displayPrice = neg.status === "counter" && neg.counter_offer_price ? neg.counter_offer_price : neg.offer_price;
                   const isSelected = selectedNeg === neg.id;
                   return (
@@ -222,16 +224,24 @@ export default function NegotiationsPage() {
                           : "border-transparent bg-card hover:border-border hover:shadow-sm"
                       }`}
                     >
-                      <div className="flex items-start justify-between gap-2 mb-2">
-                        <div className="min-w-0">
-                          <span className="font-display font-bold text-sm text-foreground line-clamp-1 block">{eventName}</span>
-                          {otherName && <span className="text-xs text-muted-foreground">com {otherName}</span>}
+                      <div className="flex items-start gap-3 mb-2">
+                        <Avatar className="h-10 w-10 shrink-0 mt-0.5">
+                          {otherAvatar && <AvatarImage src={otherAvatar} alt={otherName} />}
+                          <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
+                            {otherName.split(" ").map((n: string) => n[0]).slice(0, 2).join("").toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="font-display font-bold text-sm text-foreground line-clamp-1">{eventName}</span>
+                            <Badge className={`shrink-0 text-[10px] gap-1 ${status.className}`}>
+                              <StatusIcon className="w-3 h-3" />{status.label}
+                            </Badge>
+                          </div>
+                          <span className="text-xs text-muted-foreground">com {otherName}</span>
                         </div>
-                        <Badge className={`shrink-0 text-[10px] gap-1 ${status.className}`}>
-                          <StatusIcon className="w-3 h-3" />{status.label}
-                        </Badge>
                       </div>
-                      <div className="flex items-center justify-between mt-2">
+                      <div className="flex items-center justify-between mt-1 pl-13">
                         <span className="text-xs text-muted-foreground">{neg.tickets?.sector}</span>
                         <span className="font-bold text-sm text-foreground">
                           R$ {displayPrice?.toLocaleString("pt-BR")}
