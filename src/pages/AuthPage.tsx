@@ -464,13 +464,6 @@ export default function AuthPage() {
               {!loading && <ArrowRight className="w-4 h-4" />}
             </Button>
           </form>
-
-          <p className="text-center text-sm text-muted-foreground">
-            {isLogin ? "Não tem conta? " : "Já tem conta? "}
-            <button onClick={() => setIsLogin(!isLogin)} className="text-primary font-medium hover:underline underline-offset-4">
-              {isLogin ? "Cadastre-se" : "Fazer login"}
-            </button>
-          </p>
         </div>
       </div>
     </div>
