@@ -19,6 +19,7 @@ import WalletPage from "./pages/WalletPage.tsx";
 import WelcomePage from "./pages/WelcomePage.tsx";
 import PrivacyPage from "./pages/PrivacyPage.tsx";
 import TermsPage from "./pages/TermsPage.tsx";
+import FaqPage from "./pages/FaqPage.tsx";
 import NotFound from "./pages/NotFound.tsx";
 function TikoChatWidgetWrapper() {
   const location = useLocation();
@@ -50,6 +51,7 @@ const App = () => (
             <Route path="/welcome" element={<WelcomePage />} />
             <Route path="/privacy" element={<PrivacyPage />} />
             <Route path="/terms" element={<TermsPage />} />
+            <Route path="/faq" element={<FaqPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <TikoChatWidgetWrapper />

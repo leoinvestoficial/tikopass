@@ -8,6 +8,7 @@ import CityFilter from "@/components/CityFilter";
 import CategoryGrid from "@/components/CategoryGrid";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import OnboardingModal from "@/components/OnboardingModal";
 import HowItWorks from "@/components/HowItWorks";
 import PopularEvents, { type PopularEventItem } from "@/components/PopularEvents";
 import TrustBanner from "@/components/TrustBanner";
@@ -107,6 +108,7 @@ export default function Index() {
     <div className="min-h-screen flex flex-col bg-background font-sans">
       
       <Navbar />
+      <OnboardingModal />
 
       {/* ── HERO ─────────────────────────────────────────────────────────────── */}
       <section className="relative overflow-hidden min-h-[420px]">
