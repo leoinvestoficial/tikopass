@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Mail, Lock, User, ArrowRight, CreditCard, MapPin } from "lucide-react";
+import { Mail, Lock, User, ArrowRight, CreditCard, MapPin, PartyPopper, Sparkles, Star } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
@@ -67,10 +67,23 @@ export default function AuthPage() {
   const [lgpdConsent, setLgpdConsent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loadingCep, setLoadingCep] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(false);
+  const [welcomeStep, setWelcomeStep] = useState(0);
   const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
 
-  if (user) {
+
+  // Welcome celebration animation after signup
+  useEffect(() => {
+    if (showWelcome) {
+      const t1 = setTimeout(() => setWelcomeStep(1), 400);
+      const t2 = setTimeout(() => setWelcomeStep(2), 1200);
+      const t3 = setTimeout(() => setWelcomeStep(3), 2000);
+      return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
+    }
+  }, [showWelcome]);
+
+  if (user && !showWelcome) {
     navigate("/");
     return null;
   }
@@ -127,7 +140,7 @@ export default function AuthPage() {
         if (error) throw error;
 
         toast.success("Conta criada! Verifique seu email para confirmar.");
-        navigate("/");
+        setShowWelcome(true);
       }
     } catch (err: any) {
       toast.error(err.message || "Erro ao autenticar");
@@ -135,6 +148,118 @@ export default function AuthPage() {
       setLoading(false);
     }
   };
+
+
+
+  if (showWelcome) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background relative overflow-hidden">
+        {/* Animated background particles */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {Array.from({ length: 20 }).map((_, i) => (
+            <div
+              key={i}
+              className="absolute rounded-full bg-primary/20"
+              style={{
+                width: `${Math.random() * 12 + 4}px`,
+                height: `${Math.random() * 12 + 4}px`,
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                animation: `float-particle ${3 + Math.random() * 4}s ease-in-out infinite`,
+                animationDelay: `${Math.random() * 2}s`,
+              }}
+            />
+          ))}
+        </div>
+
+        <div className="text-center space-y-8 relative z-10 px-6 max-w-md">
+          {/* Logo with bounce */}
+          <div
+            className="transition-all duration-700 ease-out"
+            style={{
+              opacity: welcomeStep >= 0 ? 1 : 0,
+              transform: welcomeStep >= 0 ? "scale(1) translateY(0)" : "scale(0.3) translateY(40px)",
+            }}
+          >
+            <img src={tikoLogo} alt="Tiko Pass" className="h-20 object-contain mx-auto" />
+          </div>
+
+          {/* Party icon */}
+          <div
+            className="transition-all duration-700 ease-out"
+            style={{
+              opacity: welcomeStep >= 1 ? 1 : 0,
+              transform: welcomeStep >= 1 ? "scale(1) rotate(0deg)" : "scale(0) rotate(-180deg)",
+            }}
+          >
+            <div className="mx-auto w-20 h-20 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+              <PartyPopper className="w-10 h-10 text-primary" />
+            </div>
+          </div>
+
+          {/* Welcome text */}
+          <div
+            className="space-y-3 transition-all duration-700 ease-out"
+            style={{
+              opacity: welcomeStep >= 2 ? 1 : 0,
+              transform: welcomeStep >= 2 ? "translateY(0)" : "translateY(20px)",
+            }}
+          >
+            <h1 className="text-3xl font-display font-bold text-foreground">
+              Bem-vindo ao Tiko Pass! 🎉
+            </h1>
+            <p className="text-muted-foreground text-sm leading-relaxed">
+              Sua conta foi criada com sucesso!<br />
+              Confirme seu email e comece a explorar os melhores eventos.
+            </p>
+          </div>
+
+          {/* Badges */}
+          <div
+            className="flex flex-wrap justify-center gap-2 transition-all duration-700 ease-out"
+            style={{
+              opacity: welcomeStep >= 2 ? 1 : 0,
+              transform: welcomeStep >= 2 ? "translateY(0)" : "translateY(20px)",
+            }}
+          >
+            {["Pagamento seguro", "IA anti-fraude", "Negociação direta"].map((label, i) => (
+              <span
+                key={label}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-medium"
+                style={{ animationDelay: `${i * 150}ms` }}
+              >
+                <Sparkles className="w-3 h-3" /> {label}
+              </span>
+            ))}
+          </div>
+
+          {/* CTA */}
+          <div
+            className="transition-all duration-700 ease-out"
+            style={{
+              opacity: welcomeStep >= 3 ? 1 : 0,
+              transform: welcomeStep >= 3 ? "translateY(0) scale(1)" : "translateY(20px) scale(0.9)",
+            }}
+          >
+            <Button
+              onClick={() => navigate("/")}
+              size="lg"
+              className="rounded-xl px-8 gap-2 text-base shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-shadow"
+            >
+              Explorar eventos <Star className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+
+        <style>{`
+          @keyframes float-particle {
+            0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.3; }
+            50% { transform: translateY(-30px) rotate(180deg); opacity: 0.7; }
+          }
+        `}</style>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex bg-background">
