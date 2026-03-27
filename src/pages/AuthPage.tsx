@@ -252,7 +252,7 @@ export default function AuthPage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="phone" className="text-sm font-medium">Telefone</Label>
+                  <Label htmlFor="phone" className="text-sm font-medium">Telefone *</Label>
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">+55</span>
                     <Input
@@ -262,21 +262,16 @@ export default function AuthPage() {
                       onChange={(e) => setPhone(formatPhone(e.target.value))}
                       className="pl-12 rounded-xl h-11"
                       maxLength={16}
+                      required
                     />
                   </div>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => setShowAddress(!showAddress)}
-                  className="w-full flex items-center justify-between px-4 py-3 rounded-xl border border-border bg-muted/30 hover:bg-muted/50 transition-colors text-sm"
-                >
-                  <span className="flex items-center gap-2 text-muted-foreground">
-                    <MapPin className="w-4 h-4" />
-                    Endereço {!showAddress && <span className="text-xs">(recomendado)</span>}
-                  </span>
-                  {showAddress ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
-                </button>
+                <div className="space-y-1.5">
+                  <Label className="text-sm font-medium flex items-center gap-2">
+                    <MapPin className="w-4 h-4" /> Endereço *
+                  </Label>
+                </div>
 
                 {showAddress && (
                   <div className="space-y-3 p-4 bg-muted/20 rounded-xl border border-border animate-in fade-in slide-in-from-top-2 duration-200">
