@@ -426,8 +426,9 @@ export default function NegotiationsPage() {
                 <div className="bg-success/10 rounded-xl px-4 py-2.5 text-center">
                   <span className="text-xs text-muted-foreground">Você recebe </span>
                   <span className="font-bold text-success">
-                    R$ {(parseFloat(counterPrice) * (1 - PLATFORM_FEE)).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                    R$ {parseFloat(counterPrice).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
                   </span>
+                  <span className="text-xs text-muted-foreground ml-1">— comprador paga +10%</span>
                 </div>
               )}
             </div>
