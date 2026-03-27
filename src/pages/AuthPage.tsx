@@ -273,10 +273,9 @@ export default function AuthPage() {
                   </Label>
                 </div>
 
-                {showAddress && (
-                  <div className="space-y-3 p-4 bg-muted/20 rounded-xl border border-border animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="space-y-3 p-4 bg-muted/20 rounded-xl border border-border">
                     <div className="space-y-1.5">
-                      <Label htmlFor="cep" className="text-xs font-medium">CEP</Label>
+                      <Label htmlFor="cep" className="text-xs font-medium">CEP *</Label>
                       <Input
                         id="cep"
                         placeholder="00000-000"
@@ -288,34 +287,36 @@ export default function AuthPage() {
                         }}
                         className="rounded-xl h-10 text-sm"
                         maxLength={9}
+                        required
                       />
                       {loadingCep && <p className="text-xs text-primary">Buscando endereço...</p>}
                     </div>
                     <div className="grid grid-cols-3 gap-2">
                       <div className="col-span-2 space-y-1">
-                        <Label className="text-xs font-medium">Rua</Label>
-                        <Input value={street} onChange={(e) => setStreet(e.target.value)} className="rounded-xl h-10 text-sm" />
+                        <Label className="text-xs font-medium">Rua *</Label>
+                        <Input value={street} onChange={(e) => setStreet(e.target.value)} className="rounded-xl h-10 text-sm" required />
                       </div>
                       <div className="space-y-1">
-                        <Label className="text-xs font-medium">Nº</Label>
-                        <Input value={addressNumber} onChange={(e) => setAddressNumber(e.target.value)} className="rounded-xl h-10 text-sm" />
+                        <Label className="text-xs font-medium">Nº *</Label>
+                        <Input value={addressNumber} onChange={(e) => setAddressNumber(e.target.value)} className="rounded-xl h-10 text-sm" required />
                       </div>
                     </div>
                     <div className="space-y-1">
-                      <Label className="text-xs font-medium">Bairro</Label>
-                      <Input value={neighborhood} onChange={(e) => setNeighborhood(e.target.value)} className="rounded-xl h-10 text-sm" />
+                      <Label className="text-xs font-medium">Bairro *</Label>
+                      <Input value={neighborhood} onChange={(e) => setNeighborhood(e.target.value)} className="rounded-xl h-10 text-sm" required />
                     </div>
                     <div className="grid grid-cols-3 gap-2">
                       <div className="col-span-2 space-y-1">
-                        <Label className="text-xs font-medium">Cidade</Label>
-                        <Input value={city} onChange={(e) => setCity(e.target.value)} className="rounded-xl h-10 text-sm" />
+                        <Label className="text-xs font-medium">Cidade *</Label>
+                        <Input value={city} onChange={(e) => setCity(e.target.value)} className="rounded-xl h-10 text-sm" required />
                       </div>
                       <div className="space-y-1">
-                        <Label className="text-xs font-medium">UF</Label>
+                        <Label className="text-xs font-medium">UF *</Label>
                         <select
                           value={state}
                           onChange={(e) => setState(e.target.value)}
                           className="w-full h-10 rounded-xl border border-input bg-background px-3 text-sm"
+                          required
                         >
                           <option value="">--</option>
                           {STATES.map((s) => <option key={s} value={s}>{s}</option>)}
@@ -323,7 +324,6 @@ export default function AuthPage() {
                       </div>
                     </div>
                   </div>
-                )}
               </>
             )}
 
