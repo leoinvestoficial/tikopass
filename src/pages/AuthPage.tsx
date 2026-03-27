@@ -1,12 +1,14 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Mail, Lock, User, ArrowRight, CreditCard, MapPin, ChevronDown, ChevronUp, Shield, Sparkles, Ticket } from "lucide-react";
+import { Mail, Lock, User, ArrowRight, CreditCard, MapPin, ChevronDown, ChevronUp, Camera } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/use-auth";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import tikoLogo from "@/assets/tiko-logo.png";
+import imageCompression from "browser-image-compression";
 
 function formatCpf(value: string): string {
   const digits = value.replace(/\D/g, "").slice(0, 11);
