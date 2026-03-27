@@ -62,7 +62,7 @@ export default function AuthPage() {
   const [neighborhood, setNeighborhood] = useState("");
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
-  const [showAddress, setShowAddress] = useState(false);
+  
   const [confirmPassword, setConfirmPassword] = useState("");
   const [lgpdConsent, setLgpdConsent] = useState(false);
   const [loading, setLoading] = useState(false);
