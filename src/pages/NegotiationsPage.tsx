@@ -409,8 +409,8 @@ export default function NegotiationsPage() {
                 <span className="font-bold">R$ {activeNeg?.offer_price?.toLocaleString("pt-BR")}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Você receberia</span>
-                <span className="font-bold text-success">R$ {((activeNeg?.offer_price || 0) * (1 - PLATFORM_FEE)).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
+                <span className="text-muted-foreground">Você recebe</span>
+                <span className="font-bold text-success">R$ {(activeNeg?.offer_price || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
               </div>
             </div>
             <div className="space-y-2">
