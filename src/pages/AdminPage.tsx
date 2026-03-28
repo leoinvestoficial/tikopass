@@ -15,7 +15,7 @@ import AdminUsersTab from "@/components/admin/AdminUsersTab";
 import AdminFinancialTab from "@/components/admin/AdminFinancialTab";
 import AdminWalletsTab from "@/components/admin/AdminWalletsTab";
 
-const ADMIN_EMAILS = ["matheus@tikopass.com", "admin@tikopass.com", "leonardovarelamaia@gmail.com"];
+const ADMIN_EMAILS = ["matheus@tikopass.com", "admin@tikopass.com", "leonardo@bebaflow.com"];
 
 type TabType = "tickets" | "users" | "financial" | "wallets";
 
