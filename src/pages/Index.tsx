@@ -64,8 +64,24 @@ export default function Index() {
   const hasActiveSearch = normalizedSearch.length > 0;
   const hasFilters = selectedCity || selectedCategory || dateFilter;
 
+  const handleAISearch = async () => {
+    if (normalizedSearch.length < 2) return;
+    setAiSearching(true);
+    setAiEvents([]);
+    try {
+      const results = await searchEventsWithAI(normalizedSearch, selectedCity || userCity || "");
+      setAiEvents(results);
+      if (results.length === 0) toast.info("Nenhum evento encontrado pela busca inteligente.");
+    } catch (err: any) {
+      toast.error(err.message || "Erro na busca inteligente");
+    } finally {
+      setAiSearching(false);
+    }
+  };
+
   const loadTickets = async () => {
     setLoading(true);
+    setAiEvents([]);
     try {
       const dateRange = getDateRange(dateFilter);
       const data = await fetchTickets({
