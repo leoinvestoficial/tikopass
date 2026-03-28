@@ -49,6 +49,7 @@ function SkeletonCard() {
 // ─── Main page ─────────────────────────────────────────────────────────────────
 export default function Index() {
   const { city: userCity } = useUserCity();
+  const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [selectedCity, setSelectedCity] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
@@ -56,6 +57,8 @@ export default function Index() {
   const [tickets, setTickets] = useState<TicketType[]>([]);
   const [loading, setLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
+  const [aiSearching, setAiSearching] = useState(false);
+  const [aiEvents, setAiEvents] = useState<any[]>([]);
 
   const normalizedSearch = search.trim();
   const hasActiveSearch = normalizedSearch.length > 0;
