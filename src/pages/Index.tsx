@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { Search, ArrowRight, X, SlidersHorizontal, MapPin, Calendar, Guitar, Disc3, Drum, Headphones, Mic, Piano } from "lucide-react";
+import { Search, ArrowRight, X, SlidersHorizontal, MapPin, Calendar, Guitar, Disc3, Drum, Headphones, Mic, Piano, Sparkles, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import TicketCard from "@/components/TicketCard";
 import heroBg from "@/assets/hero-bg.jpg";
@@ -15,9 +15,10 @@ import TrustBanner from "@/components/TrustBanner";
 import RecommendedEvents from "@/components/RecommendedEvents";
 import SocialProof from "@/components/SocialProof";
 import QuickDateFilters, { getDateRange } from "@/components/QuickDateFilters";
-import { fetchTickets, type Ticket as TicketType } from "@/lib/api";
-import { Link } from "react-router-dom";
+import { fetchTickets, searchEventsWithAI, type Ticket as TicketType } from "@/lib/api";
+import { Link, useNavigate } from "react-router-dom";
 import { useUserCity } from "@/hooks/use-user-city";
+import { toast } from "sonner";
 
 type DateFilter = "" | "today" | "tomorrow" | "weekend";
 
@@ -48,6 +49,7 @@ function SkeletonCard() {
 // ─── Main page ─────────────────────────────────────────────────────────────────
 export default function Index() {
   const { city: userCity } = useUserCity();
+  const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [selectedCity, setSelectedCity] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
@@ -55,13 +57,31 @@ export default function Index() {
   const [tickets, setTickets] = useState<TicketType[]>([]);
   const [loading, setLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
+  const [aiSearching, setAiSearching] = useState(false);
+  const [aiEvents, setAiEvents] = useState<any[]>([]);
 
   const normalizedSearch = search.trim();
   const hasActiveSearch = normalizedSearch.length > 0;
   const hasFilters = selectedCity || selectedCategory || dateFilter;
 
+  const handleAISearch = async () => {
+    if (normalizedSearch.length < 2) return;
+    setAiSearching(true);
+    setAiEvents([]);
+    try {
+      const results = await searchEventsWithAI(normalizedSearch, selectedCity || userCity || "");
+      setAiEvents(results);
+      if (results.length === 0) toast.info("Nenhum evento encontrado pela busca inteligente.");
+    } catch (err: any) {
+      toast.error(err.message || "Erro na busca inteligente");
+    } finally {
+      setAiSearching(false);
+    }
+  };
+
   const loadTickets = async () => {
     setLoading(true);
+    setAiEvents([]);
     try {
       const dateRange = getDateRange(dateFilter);
       const data = await fetchTickets({
@@ -295,22 +315,32 @@ export default function Index() {
             ))}
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center py-24 space-y-4 text-center">
+          <div className="flex flex-col items-center justify-center py-16 space-y-4 text-center">
             <div className="w-20 h-20 rounded-3xl bg-muted flex items-center justify-center text-4xl">
               🎟️
             </div>
             <h3 className="font-bold text-xl text-foreground">
-              {hasActiveSearch ? "Nenhum ingresso encontrado" : dateFilter ? "Nenhum evento nesse período" : "Ainda sem ingressos"}
+              {hasActiveSearch ? "Nenhum ingresso encontrado na plataforma" : dateFilter ? "Nenhum evento nesse período" : "Ainda sem ingressos"}
             </h3>
-            <p className="text-muted-foreground text-sm max-w-xs">
+            <p className="text-muted-foreground text-sm max-w-sm">
               {hasActiveSearch
-                ? "Tente outro nome ou remova os filtros."
+                ? "Não encontramos ingressos à venda, mas podemos buscar se o evento existe."
                 : "Seja o primeiro a vender na plataforma!"}
             </p>
             {hasActiveSearch ? (
-              <Button variant="outline" className="rounded-full gap-2" onClick={() => setSearch("")}>
-                <X className="w-4 h-4" /> Limpar busca
-              </Button>
+              <div className="flex flex-col items-center gap-3">
+                <Button
+                  className="rounded-full gap-2 px-6"
+                  onClick={handleAISearch}
+                  disabled={aiSearching}
+                >
+                  {aiSearching ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                  {aiSearching ? "Buscando eventos reais..." : "Buscar evento com IA"}
+                </Button>
+                <Button variant="outline" className="rounded-full gap-2" onClick={() => { setSearch(""); setAiEvents([]); }}>
+                  <X className="w-4 h-4" /> Limpar busca
+                </Button>
+              </div>
             ) : (
               <Link to="/sell">
                 <Button className="rounded-full gap-2 px-6">
@@ -318,6 +348,38 @@ export default function Index() {
                 </Button>
               </Link>
             )}
+          </div>
+        )}
+
+        {/* AI-discovered events */}
+        {aiEvents.length > 0 && (
+          <div className="mt-8 space-y-4">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-primary" />
+              <h3 className="text-lg font-bold text-foreground">Eventos encontrados pela IA</h3>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Estes eventos existem mas ainda não têm ingressos à venda na Tiko Pass. Conhece alguém vendendo?
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {aiEvents.map((event, i) => (
+                <div key={i} className="bg-card rounded-2xl border border-border p-5 hover:border-primary/30 transition-colors space-y-3">
+                  <div>
+                    <h4 className="font-bold text-foreground">{event.name}</h4>
+                    <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
+                      <Calendar className="w-3.5 h-3.5" /> {event.date} · {event.time}
+                    </p>
+                    <p className="text-sm text-muted-foreground flex items-center gap-1">
+                      <MapPin className="w-3.5 h-3.5" /> {event.venue}, {event.city}
+                    </p>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs bg-primary/10 text-primary px-2.5 py-1 rounded-full font-medium">{event.category}</span>
+                    <span className="text-xs text-muted-foreground">Sem ingressos à venda</span>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </section>
