@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { Search, ArrowRight, X, SlidersHorizontal, MapPin, Calendar, Guitar, Disc3, Drum, Headphones, Mic, Piano } from "lucide-react";
+import { Search, ArrowRight, X, SlidersHorizontal, MapPin, Calendar, Guitar, Disc3, Drum, Headphones, Mic, Piano, Sparkles, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import TicketCard from "@/components/TicketCard";
 import heroBg from "@/assets/hero-bg.jpg";
@@ -15,9 +15,10 @@ import TrustBanner from "@/components/TrustBanner";
 import RecommendedEvents from "@/components/RecommendedEvents";
 import SocialProof from "@/components/SocialProof";
 import QuickDateFilters, { getDateRange } from "@/components/QuickDateFilters";
-import { fetchTickets, type Ticket as TicketType } from "@/lib/api";
-import { Link } from "react-router-dom";
+import { fetchTickets, searchEventsWithAI, type Ticket as TicketType } from "@/lib/api";
+import { Link, useNavigate } from "react-router-dom";
 import { useUserCity } from "@/hooks/use-user-city";
+import { toast } from "sonner";
 
 type DateFilter = "" | "today" | "tomorrow" | "weekend";
 
