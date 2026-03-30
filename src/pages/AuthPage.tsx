@@ -287,16 +287,16 @@ export default function AuthPage() {
             </div>
             <div className="flex flex-col gap-2.5 text-xs">
               <div className="flex items-center gap-3 bg-background/5 rounded-xl px-4 py-3">
-                <Shield className="w-5 h-5 text-primary/80 shrink-0" />
-                <span className="text-left text-background/70">Pagamento protegido com escrow</span>
+                <Shield className="w-5 h-5 text-background/50 shrink-0" />
+                <span className="text-left text-background/60">Pagamento protegido com escrow</span>
               </div>
               <div className="flex items-center gap-3 bg-background/5 rounded-xl px-4 py-3">
-                <ShieldCheck className="w-5 h-5 text-primary/80 shrink-0" />
-                <span className="text-left text-background/70">Validação automática por IA</span>
+                <ShieldCheck className="w-5 h-5 text-background/50 shrink-0" />
+                <span className="text-left text-background/60">Validação automática por IA</span>
               </div>
               <div className="flex items-center gap-3 bg-background/5 rounded-xl px-4 py-3">
-                <Zap className="w-5 h-5 text-primary/80 shrink-0" />
-                <span className="text-left text-background/70">Negocie direto com vendedores</span>
+                <Zap className="w-5 h-5 text-background/50 shrink-0" />
+                <span className="text-left text-background/60">Negocie direto com vendedores</span>
               </div>
             </div>
           </div>
