@@ -209,7 +209,7 @@ export default function AuthPage() {
             }}
           >
             <h1 className="text-3xl font-display font-bold text-foreground">
-              Bem-vindo ao Tiko Pass! 🎉
+              Bem-vindo ao Tiko Pass!
             </h1>
             <p className="text-muted-foreground text-sm leading-relaxed">
               Sua conta foi criada com sucesso!<br />
