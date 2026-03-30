@@ -266,39 +266,39 @@ export default function AuthPage() {
 
   return (
     <div className="min-h-screen flex bg-background">
-      {/* ── Left panel: rich visual ── */}
-      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden"
-        style={{
-          background: "linear-gradient(160deg, hsl(16 85% 45% / 0.8) 0%, hsl(var(--foreground)) 50%, hsl(var(--foreground)) 80%, hsl(16 85% 40% / 0.4) 100%)",
-        }}
-      >
-        {/* Decorative glows */}
-        <div className="absolute -top-20 -left-20 w-80 h-80 rounded-full bg-primary/30 blur-[100px]" />
-        <div className="absolute -bottom-32 -right-16 w-96 h-96 rounded-full bg-primary/15 blur-[80px]" />
+      {/* ── Left panel: sticky branding ── */}
+      <div className="hidden lg:block lg:w-[420px] xl:w-[460px] shrink-0">
+        <div className="sticky top-0 h-screen flex flex-col items-center justify-center relative overflow-hidden"
+          style={{
+            background: "linear-gradient(160deg, hsl(16 85% 45% / 0.8) 0%, hsl(var(--foreground)) 50%, hsl(var(--foreground)) 80%, hsl(16 85% 40% / 0.4) 100%)",
+          }}
+        >
+          {/* Decorative glows */}
+          <div className="absolute -top-20 -left-20 w-80 h-80 rounded-full bg-primary/30 blur-[100px]" />
+          <div className="absolute -bottom-32 -right-16 w-96 h-96 rounded-full bg-primary/15 blur-[80px]" />
 
-        <div className="flex flex-col items-center justify-center p-12 w-full text-center relative z-10">
-          <div className="space-y-10 max-w-sm">
+          <div className="relative z-10 text-center px-10 space-y-8 max-w-sm">
             <Link to="/" className="inline-block">
-              <img src={tikoLogo} alt="Tiko Pass" className="h-24 object-contain brightness-0 invert mx-auto" />
+              <img src={tikoLogo} alt="Tiko Pass" className="h-20 object-contain brightness-0 invert mx-auto" />
             </Link>
-            <div className="space-y-4">
-              <h2 className="text-3xl font-display font-bold text-background leading-tight">
-                O marketplace de ingressos<br />feito para fãs de verdade
+            <div className="space-y-3">
+              <h2 className="text-2xl font-display font-bold text-background leading-tight">
+                O marketplace de ingressos feito para fãs de verdade
               </h2>
               <p className="text-background/50 text-sm leading-relaxed">
                 Compre e venda ingressos para os melhores shows e festivais do Brasil com segurança e praticidade.
               </p>
             </div>
-            <div className="flex flex-col gap-3 text-xs">
-              <div className="flex items-center gap-3 bg-background/5 rounded-xl px-4 py-3.5">
+            <div className="flex flex-col gap-2.5 text-xs">
+              <div className="flex items-center gap-3 bg-background/5 rounded-xl px-4 py-3">
                 <Shield className="w-5 h-5 text-primary/80 shrink-0" />
                 <span className="text-left text-background/70">Pagamento protegido com escrow</span>
               </div>
-              <div className="flex items-center gap-3 bg-background/5 rounded-xl px-4 py-3.5">
+              <div className="flex items-center gap-3 bg-background/5 rounded-xl px-4 py-3">
                 <ShieldCheck className="w-5 h-5 text-primary/80 shrink-0" />
                 <span className="text-left text-background/70">Validação automática por IA</span>
               </div>
-              <div className="flex items-center gap-3 bg-background/5 rounded-xl px-4 py-3.5">
+              <div className="flex items-center gap-3 bg-background/5 rounded-xl px-4 py-3">
                 <Zap className="w-5 h-5 text-primary/80 shrink-0" />
                 <span className="text-left text-background/70">Negocie direto com vendedores</span>
               </div>
@@ -308,7 +308,8 @@ export default function AuthPage() {
       </div>
 
       {/* ── Right panel: form ── */}
-      <div className="flex-1 flex items-start lg:items-center justify-center p-6 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto">
+        <div className="min-h-screen flex items-center justify-center p-6 py-10">
         <div className="w-full max-w-md space-y-6">
           {/* Mobile logo */}
           <div className="lg:hidden flex items-center justify-center mb-2">
@@ -545,6 +546,7 @@ export default function AuthPage() {
               {!loading && <ArrowRight className="w-4 h-4" />}
             </Button>
           </form>
+        </div>
         </div>
       </div>
     </div>
