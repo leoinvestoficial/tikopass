@@ -267,37 +267,40 @@ export default function AuthPage() {
   return (
     <div className="min-h-screen flex bg-background">
       {/* ── Left panel: rich visual ── */}
-      <div className="hidden lg:flex lg:w-[480px] xl:w-[540px] bg-foreground relative overflow-hidden">
-        {/* Decorative circles */}
-        <div className="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-primary/20 blur-3xl" />
-        <div className="absolute -bottom-32 -right-16 w-80 h-80 rounded-full bg-primary/10 blur-3xl" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 rounded-full bg-primary/5 blur-2xl" />
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden"
+        style={{
+          background: "linear-gradient(160deg, hsl(16 85% 45% / 0.8) 0%, hsl(var(--foreground)) 50%, hsl(var(--foreground)) 80%, hsl(16 85% 40% / 0.4) 100%)",
+        }}
+      >
+        {/* Decorative glows */}
+        <div className="absolute -top-20 -left-20 w-80 h-80 rounded-full bg-primary/30 blur-[100px]" />
+        <div className="absolute -bottom-32 -right-16 w-96 h-96 rounded-full bg-primary/15 blur-[80px]" />
 
         <div className="flex flex-col items-center justify-center p-12 w-full text-center relative z-10">
-          <div className="space-y-8">
+          <div className="space-y-10 max-w-sm">
             <Link to="/" className="inline-block">
               <img src={tikoLogo} alt="Tiko Pass" className="h-24 object-contain brightness-0 invert mx-auto" />
             </Link>
-            <div className="space-y-3">
-              <h2 className="text-2xl font-display font-bold text-background leading-tight">
+            <div className="space-y-4">
+              <h2 className="text-3xl font-display font-bold text-background leading-tight">
                 O marketplace de ingressos<br />feito para fãs de verdade
               </h2>
-              <p className="text-background/50 text-sm leading-relaxed max-w-sm mx-auto">
+              <p className="text-background/50 text-sm leading-relaxed">
                 Compre e venda ingressos para os melhores shows e festivais do Brasil com segurança e praticidade.
               </p>
             </div>
-            <div className="flex flex-col gap-3 text-background/40 text-xs max-w-xs mx-auto">
-              <div className="flex items-center gap-3 bg-background/5 rounded-xl px-4 py-3">
-                <span className="text-lg">🔒</span>
-                <span className="text-left text-background/60">Pagamento protegido com escrow</span>
+            <div className="flex flex-col gap-3 text-xs">
+              <div className="flex items-center gap-3 bg-background/5 rounded-xl px-4 py-3.5">
+                <Shield className="w-5 h-5 text-primary/80 shrink-0" />
+                <span className="text-left text-background/70">Pagamento protegido com escrow</span>
               </div>
-              <div className="flex items-center gap-3 bg-background/5 rounded-xl px-4 py-3">
-                <span className="text-lg">🤖</span>
-                <span className="text-left text-background/60">Validação automática por IA</span>
+              <div className="flex items-center gap-3 bg-background/5 rounded-xl px-4 py-3.5">
+                <ShieldCheck className="w-5 h-5 text-primary/80 shrink-0" />
+                <span className="text-left text-background/70">Validação automática por IA</span>
               </div>
-              <div className="flex items-center gap-3 bg-background/5 rounded-xl px-4 py-3">
-                <span className="text-lg">⚡</span>
-                <span className="text-left text-background/60">Negocie direto com vendedores</span>
+              <div className="flex items-center gap-3 bg-background/5 rounded-xl px-4 py-3.5">
+                <Zap className="w-5 h-5 text-primary/80 shrink-0" />
+                <span className="text-left text-background/70">Negocie direto com vendedores</span>
               </div>
             </div>
           </div>
