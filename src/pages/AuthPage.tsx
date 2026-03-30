@@ -276,28 +276,28 @@ export default function AuthPage() {
 
           <div className="relative z-10 text-center px-10 space-y-8 max-w-sm">
             <Link to="/" className="inline-block">
-              <img src={tikoLogo} alt="Tiko Pass" className="h-20 object-contain mx-auto" />
+              <img src={tikoLogo} alt="Tiko Pass" className="h-20 object-contain brightness-0 invert mx-auto" />
             </Link>
             <div className="space-y-3">
-              <h2 className="text-2xl font-display font-bold text-foreground leading-tight">
+              <h2 className="text-2xl font-display font-bold text-background leading-tight">
                 O marketplace de ingressos feito para fãs de verdade
               </h2>
-              <p className="text-muted-foreground text-sm leading-relaxed">
+              <p className="text-background/50 text-sm leading-relaxed">
                 Compre e venda ingressos para os melhores shows e festivais do Brasil com segurança e praticidade.
               </p>
             </div>
             <div className="flex flex-col gap-2.5 text-xs">
-              <div className="flex items-center gap-3 bg-primary/10 rounded-xl px-4 py-3">
+              <div className="flex items-center gap-3 bg-primary/15 rounded-xl px-4 py-3">
                 <Shield className="w-5 h-5 text-primary shrink-0" />
-                <span className="text-left text-foreground/80">Pagamento protegido com escrow</span>
+                <span className="text-left text-background/70">Pagamento protegido com escrow</span>
               </div>
-              <div className="flex items-center gap-3 bg-primary/10 rounded-xl px-4 py-3">
+              <div className="flex items-center gap-3 bg-primary/15 rounded-xl px-4 py-3">
                 <ShieldCheck className="w-5 h-5 text-primary shrink-0" />
-                <span className="text-left text-foreground/80">Validação automática por IA</span>
+                <span className="text-left text-background/70">Validação automática por IA</span>
               </div>
-              <div className="flex items-center gap-3 bg-primary/10 rounded-xl px-4 py-3">
+              <div className="flex items-center gap-3 bg-primary/15 rounded-xl px-4 py-3">
                 <Zap className="w-5 h-5 text-primary shrink-0" />
-                <span className="text-left text-foreground/80">Negocie direto com vendedores</span>
+                <span className="text-left text-background/70">Negocie direto com vendedores</span>
               </div>
             </div>
           </div>
