@@ -208,13 +208,20 @@ export type Database = {
           address_number: string | null
           address_state: string | null
           address_street: string | null
+          avatar_status: string
           avatar_url: string | null
           bio: string | null
           city: string | null
           cpf: string | null
           created_at: string
+          date_of_birth: string | null
           display_name: string | null
           id: string
+          kyc_document_path: string | null
+          kyc_selfie_path: string | null
+          kyc_status: string
+          kyc_submitted_at: string | null
+          pending_avatar_url: string | null
           phone: string | null
           pix_key: string | null
           pix_key_type: string | null
@@ -229,13 +236,20 @@ export type Database = {
           address_number?: string | null
           address_state?: string | null
           address_street?: string | null
+          avatar_status?: string
           avatar_url?: string | null
           bio?: string | null
           city?: string | null
           cpf?: string | null
           created_at?: string
+          date_of_birth?: string | null
           display_name?: string | null
           id?: string
+          kyc_document_path?: string | null
+          kyc_selfie_path?: string | null
+          kyc_status?: string
+          kyc_submitted_at?: string | null
+          pending_avatar_url?: string | null
           phone?: string | null
           pix_key?: string | null
           pix_key_type?: string | null
@@ -250,13 +264,20 @@ export type Database = {
           address_number?: string | null
           address_state?: string | null
           address_street?: string | null
+          avatar_status?: string
           avatar_url?: string | null
           bio?: string | null
           city?: string | null
           cpf?: string | null
           created_at?: string
+          date_of_birth?: string | null
           display_name?: string | null
           id?: string
+          kyc_document_path?: string | null
+          kyc_selfie_path?: string | null
+          kyc_status?: string
+          kyc_submitted_at?: string | null
+          pending_avatar_url?: string | null
           phone?: string | null
           pix_key?: string | null
           pix_key_type?: string | null
