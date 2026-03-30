@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { toast } from "sonner";
-import { Camera, User, Save, Loader2, MapPin, Phone, FileText, Trash2 } from "lucide-react";
+import { Camera, User, Save, Loader2, MapPin, Phone, FileText, Trash2, Clock } from "lucide-react";
 import { Navigate, useNavigate } from "react-router-dom";
 import {
   AlertDialog,
@@ -74,7 +74,7 @@ export default function ProfilePage() {
     setUploading(true);
     try {
       const ext = file.name.split(".").pop();
-      const filePath = `${user.id}/avatar.${ext}`;
+      const filePath = `${user.id}/pending-avatar.${ext}`;
 
       const { error: uploadError } = await supabase.storage
         .from("avatars")
@@ -86,16 +86,19 @@ export default function ProfilePage() {
         .from("avatars")
         .getPublicUrl(filePath);
 
-      const avatarUrl = urlData.publicUrl + "?t=" + Date.now();
-      setAvatarPreview(avatarUrl);
+      const pendingUrl = urlData.publicUrl + "?t=" + Date.now();
 
       await supabase
         .from("profiles")
-        .update({ avatar_url: avatarUrl, updated_at: new Date().toISOString() })
+        .update({
+          pending_avatar_url: pendingUrl,
+          avatar_status: "pending",
+          updated_at: new Date().toISOString(),
+        })
         .eq("user_id", user.id);
 
       await refreshProfile();
-      toast.success("Foto atualizada!");
+      toast.success("Foto enviada para aprovação! Um moderador irá analisar em breve.");
     } catch (err: any) {
       console.error(err);
       toast.error("Erro ao enviar foto.");
@@ -187,9 +190,19 @@ export default function ProfilePage() {
                 {displayName || "Seu nome"}
               </p>
               <p className="text-sm text-muted-foreground">{user.email}</p>
+              {(profile as any)?.avatar_status === "pending" && (
+                <span className="inline-flex items-center gap-1 text-xs text-warning mt-1">
+                  <Clock className="w-3 h-3" /> Foto em análise
+                </span>
+              )}
+              {(profile as any)?.avatar_status === "rejected" && (
+                <span className="inline-flex items-center gap-1 text-xs text-destructive mt-1">
+                  Foto recusada
+                </span>
+              )}
               <button
                 onClick={() => fileInputRef.current?.click()}
-                className="text-sm text-primary hover:underline mt-1"
+                className="text-sm text-primary hover:underline mt-1 block"
               >
                 Alterar foto
               </button>
