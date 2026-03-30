@@ -268,7 +268,7 @@ export default function AuthPage() {
     <div className="min-h-screen flex bg-background">
       {/* ── Left panel: sticky branding ── */}
       <div className="hidden lg:block lg:w-[420px] xl:w-[460px] shrink-0">
-        <div className="sticky top-0 h-screen flex flex-col items-center justify-center relative overflow-hidden bg-primary/10">
+        <div className="sticky top-0 h-screen flex flex-col items-center justify-center relative overflow-hidden bg-foreground">
           {/* Orange decorative glows */}
           <div className="absolute -top-20 -left-20 w-72 h-72 rounded-full bg-primary/20 blur-[120px]" />
           <div className="absolute -bottom-32 -right-16 w-64 h-64 rounded-full bg-primary/15 blur-[100px]" />
