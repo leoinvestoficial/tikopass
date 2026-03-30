@@ -22,11 +22,11 @@ import TermsPage from "./pages/TermsPage.tsx";
 import FaqPage from "./pages/FaqPage.tsx";
 import AdminPage from "./pages/AdminPage.tsx";
 import NotFound from "./pages/NotFound.tsx";
-function TikoChatWidgetWrapper() {
+const TikoChatWidgetWrapper = () => {
   const location = useLocation();
   if (location.pathname === "/auth" || location.pathname === "/welcome") return null;
   return <TikoChatWidget />;
-}
+};
 
 const queryClient = new QueryClient();
 
