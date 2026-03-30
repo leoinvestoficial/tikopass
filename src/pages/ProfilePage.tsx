@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { toast } from "sonner";
-import { Camera, User, Save, Loader2, MapPin, Phone, FileText, Trash2 } from "lucide-react";
+import { Camera, User, Save, Loader2, MapPin, Phone, FileText, Trash2, Clock } from "lucide-react";
 import { Navigate, useNavigate } from "react-router-dom";
 import {
   AlertDialog,
