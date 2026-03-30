@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Ticket, Search, MessageSquare, Shield, Wallet, ArrowRight, PartyPopper } from "lucide-react";
+import { Ticket, Search, MessageSquare, Shield, Wallet, ArrowRight, Sparkles } from "lucide-react";
 import tikoLogo from "@/assets/tiko-logo.png";
 
 const STEPS = [
   {
-    icon: PartyPopper,
-    title: "Bem-vindo ao Tiko Pass! 🎉",
+    icon: Sparkles,
+    title: "Bem-vindo ao Tiko Pass!",
     description:
       "Sua conta foi criada com sucesso! Verifique seu e-mail para confirmar o cadastro. Enquanto isso, veja como funciona a plataforma.",
   },
@@ -51,8 +51,16 @@ export default function WelcomePage() {
   const isLast = step === STEPS.length - 1;
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-background p-6">
-      <div className="w-full max-w-lg space-y-8">
+    <div className="min-h-screen flex flex-col items-center justify-center p-6 relative overflow-hidden"
+      style={{
+        background: "linear-gradient(160deg, hsl(16 85% 45% / 0.7) 0%, hsl(var(--background)) 40%, hsl(var(--background)) 70%, hsl(16 85% 40% / 0.3) 100%)",
+      }}
+    >
+      {/* Ambient glow */}
+      <div className="absolute top-0 left-0 w-80 h-80 rounded-full bg-primary/20 blur-[100px] pointer-events-none" />
+      <div className="absolute bottom-0 right-0 w-64 h-64 rounded-full bg-primary/15 blur-[80px] pointer-events-none" />
+
+      <div className="w-full max-w-lg space-y-8 relative z-10">
         {/* Logo */}
         <div className="flex justify-center">
           <img src={tikoLogo} alt="Tiko Pass" className="h-16 object-contain" />
@@ -76,7 +84,7 @@ export default function WelcomePage() {
         </div>
 
         {/* Card */}
-        <div className="bg-card border border-border rounded-2xl p-8 text-center space-y-5 shadow-lg animate-in fade-in slide-in-from-bottom-4 duration-300" key={step}>
+        <div className="bg-card/80 backdrop-blur-sm border border-border/50 rounded-2xl p-8 text-center space-y-5 shadow-lg animate-in fade-in slide-in-from-bottom-4 duration-300" key={step}>
           <div className="mx-auto w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center">
             <Icon className="w-8 h-8 text-primary" />
           </div>
