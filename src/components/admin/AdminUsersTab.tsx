@@ -6,13 +6,22 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   Eye, Trash2, ChevronDown, ChevronUp, MapPin, DollarSign,
-  Users, Ticket, CheckCircle, User,
+  Users, Ticket, CheckCircle, ShieldCheck, Camera, XCircle, Clock, ImageIcon,
 } from "lucide-react";
 import { statusColor, statusLabel } from "./AdminTicketsTab";
 
 type Props = {
   users: any[];
   onRefresh: () => void;
+};
+
+const kycBadge = (status: string) => {
+  switch (status) {
+    case "approved": return <Badge className="bg-success/10 text-success border-success/20 text-xs gap-1"><CheckCircle className="w-3 h-3" />KYC Aprovado</Badge>;
+    case "submitted": return <Badge className="bg-warning/10 text-warning border-warning/20 text-xs gap-1"><Clock className="w-3 h-3" />KYC Pendente</Badge>;
+    case "rejected": return <Badge className="bg-destructive/10 text-destructive border-destructive/20 text-xs gap-1"><XCircle className="w-3 h-3" />KYC Recusado</Badge>;
+    default: return <Badge className="bg-muted text-muted-foreground text-xs">Sem KYC</Badge>;
+  }
 };
 
 export default function AdminUsersTab({ users, onRefresh }: Props) {
@@ -52,6 +61,28 @@ export default function AdminUsersTab({ users, onRefresh }: Props) {
     toast.success("Excluído");
   };
 
+  const handleKycAction = async (userId: string, action: "approved" | "rejected") => {
+    const { error } = await supabase.from("profiles").update({ kyc_status: action }).eq("user_id", userId);
+    if (error) { toast.error("Erro ao atualizar KYC"); return; }
+    toast.success(action === "approved" ? "KYC aprovado!" : "KYC recusado.");
+    onRefresh();
+  };
+
+  const handleAvatarAction = async (userId: string, action: "approved" | "rejected", pendingUrl?: string) => {
+    const updates: any = { avatar_status: action };
+    if (action === "approved" && pendingUrl) {
+      updates.avatar_url = pendingUrl;
+      updates.pending_avatar_url = null;
+    }
+    if (action === "rejected") {
+      updates.pending_avatar_url = null;
+    }
+    const { error } = await supabase.from("profiles").update(updates).eq("user_id", userId);
+    if (error) { toast.error("Erro ao moderar foto"); return; }
+    toast.success(action === "approved" ? "Foto aprovada!" : "Foto recusada.");
+    onRefresh();
+  };
+
   if (users.length === 0) return <p className="text-center py-8 text-muted-foreground">Nenhum usuário encontrado</p>;
 
   return (
@@ -59,14 +90,18 @@ export default function AdminUsersTab({ users, onRefresh }: Props) {
       {users.map((u) => (
         <div key={u.id} className="bg-card rounded-xl border border-border hover:border-primary/20 transition-colors overflow-hidden">
           <div className="flex items-center gap-4 p-4 cursor-pointer" onClick={() => toggleUser(u.user_id)}>
-            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden shrink-0">
+            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden shrink-0 relative">
               {u.avatar_url ? <img src={u.avatar_url} alt="" className="w-full h-full object-cover" /> : <Users className="w-5 h-5 text-primary/50" />}
+              {u.avatar_status === "pending" && (
+                <div className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-warning border-2 border-card" />
+              )}
             </div>
             <div className="flex-1 min-w-0">
               <p className="font-semibold text-sm truncate">{u.display_name || "Sem nome"}</p>
               <p className="text-xs text-muted-foreground">{u.address_city || u.city || "Cidade não informada"}{u.address_state ? ` - ${u.address_state}` : ""} · {u.phone || "Sem telefone"}</p>
             </div>
             <div className="flex items-center gap-1.5 shrink-0">
+              {kycBadge(u.kyc_status)}
               <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => { e.stopPropagation(); navigate(`/seller/${u.user_id}`); }} title="Ver perfil"><Eye className="w-4 h-4" /></Button>
               <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive/60 hover:text-destructive" onClick={(e) => { e.stopPropagation(); deleteUser(u.user_id); }} title="Remover"><Trash2 className="w-4 h-4" /></Button>
               {expandedUser === u.user_id ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
@@ -83,6 +118,79 @@ export default function AdminUsersTab({ users, onRefresh }: Props) {
                 <div><p className="text-xs text-muted-foreground font-medium">Cidade (perfil)</p><p>{u.city || "N/A"}</p></div>
                 <div><p className="text-xs text-muted-foreground font-medium">Bio</p><p className="truncate">{u.bio || "N/A"}</p></div>
               </div>
+
+              {/* Avatar Moderation */}
+              {u.avatar_status === "pending" && u.pending_avatar_url && (
+                <div className="bg-card rounded-lg p-3 border border-warning/20 space-y-3">
+                  <p className="text-xs text-muted-foreground font-medium flex items-center gap-1"><Camera className="w-3.5 h-3.5" /> Foto pendente de aprovação</p>
+                  <div className="flex items-center gap-4">
+                    <div className="flex gap-3">
+                      <div className="text-center">
+                        <p className="text-[10px] text-muted-foreground mb-1">Atual</p>
+                        <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-border bg-muted">
+                          {u.avatar_url ? <img src={u.avatar_url} alt="" className="w-full h-full object-cover" /> : <Users className="w-8 h-8 text-muted-foreground m-auto mt-3" />}
+                        </div>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-[10px] text-warning mb-1">Nova</p>
+                        <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-warning bg-muted">
+                          <img src={u.pending_avatar_url} alt="" className="w-full h-full object-cover" />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex gap-2 ml-auto">
+                      <Button size="sm" className="rounded-lg text-xs gap-1" onClick={() => handleAvatarAction(u.user_id, "approved", u.pending_avatar_url)}>
+                        <CheckCircle className="w-3.5 h-3.5" /> Aprovar
+                      </Button>
+                      <Button size="sm" variant="outline" className="rounded-lg text-xs gap-1 text-destructive" onClick={() => handleAvatarAction(u.user_id, "rejected")}>
+                        <XCircle className="w-3.5 h-3.5" /> Recusar
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* KYC Moderation */}
+              {u.kyc_status === "submitted" && (
+                <div className="bg-card rounded-lg p-3 border border-warning/20 space-y-3">
+                  <p className="text-xs text-muted-foreground font-medium flex items-center gap-1"><ShieldCheck className="w-3.5 h-3.5" /> Verificação KYC pendente</p>
+                  {u.date_of_birth && (
+                    <p className="text-sm">Data de nascimento: <strong>{new Date(u.date_of_birth).toLocaleDateString("pt-BR")}</strong></p>
+                  )}
+                  <div className="flex gap-3">
+                    {u.kyc_document_path && (
+                      <div className="space-y-1">
+                        <p className="text-[10px] text-muted-foreground">Documento</p>
+                        <img
+                          src={supabase.storage.from("avatars").getPublicUrl(u.kyc_document_path).data.publicUrl}
+                          alt="Documento"
+                          className="w-32 h-24 object-cover rounded-lg border border-border cursor-pointer"
+                          onClick={() => window.open(supabase.storage.from("avatars").getPublicUrl(u.kyc_document_path).data.publicUrl, "_blank")}
+                        />
+                      </div>
+                    )}
+                    {u.kyc_selfie_path && (
+                      <div className="space-y-1">
+                        <p className="text-[10px] text-muted-foreground">Selfie</p>
+                        <img
+                          src={supabase.storage.from("avatars").getPublicUrl(u.kyc_selfie_path).data.publicUrl}
+                          alt="Selfie"
+                          className="w-32 h-24 object-cover rounded-lg border border-border cursor-pointer"
+                          onClick={() => window.open(supabase.storage.from("avatars").getPublicUrl(u.kyc_selfie_path).data.publicUrl, "_blank")}
+                        />
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex gap-2">
+                    <Button size="sm" className="rounded-lg text-xs gap-1" onClick={() => handleKycAction(u.user_id, "approved")}>
+                      <CheckCircle className="w-3.5 h-3.5" /> Aprovar KYC
+                    </Button>
+                    <Button size="sm" variant="outline" className="rounded-lg text-xs gap-1 text-destructive" onClick={() => handleKycAction(u.user_id, "rejected")}>
+                      <XCircle className="w-3.5 h-3.5" /> Recusar KYC
+                    </Button>
+                  </div>
+                </div>
+              )}
 
               <div className="bg-card rounded-lg p-3 border border-border">
                 <p className="text-xs text-muted-foreground font-medium mb-2 flex items-center gap-1"><MapPin className="w-3.5 h-3.5" /> Endereço completo</p>
