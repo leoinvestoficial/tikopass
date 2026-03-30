@@ -268,14 +268,10 @@ export default function AuthPage() {
     <div className="min-h-screen flex bg-background">
       {/* ── Left panel: sticky branding ── */}
       <div className="hidden lg:block lg:w-[420px] xl:w-[460px] shrink-0">
-        <div className="sticky top-0 h-screen flex flex-col items-center justify-center relative overflow-hidden"
-          style={{
-            background: "linear-gradient(160deg, hsl(16 85% 45% / 0.8) 0%, hsl(var(--foreground)) 50%, hsl(var(--foreground)) 80%, hsl(16 85% 40% / 0.4) 100%)",
-          }}
-        >
-          {/* Decorative glows */}
-          <div className="absolute -top-20 -left-20 w-80 h-80 rounded-full bg-primary/30 blur-[100px]" />
-          <div className="absolute -bottom-32 -right-16 w-96 h-96 rounded-full bg-primary/15 blur-[80px]" />
+        <div className="sticky top-0 h-screen flex flex-col items-center justify-center relative overflow-hidden bg-foreground">
+          {/* Subtle decorative glows */}
+          <div className="absolute -top-20 -left-20 w-72 h-72 rounded-full bg-primary/10 blur-[120px]" />
+          <div className="absolute -bottom-32 -right-16 w-64 h-64 rounded-full bg-primary/8 blur-[100px]" />
 
           <div className="relative z-10 text-center px-10 space-y-8 max-w-sm">
             <Link to="/" className="inline-block">
