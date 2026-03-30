@@ -74,7 +74,7 @@ export default function ProfilePage() {
     setUploading(true);
     try {
       const ext = file.name.split(".").pop();
-      const filePath = `${user.id}/avatar.${ext}`;
+      const filePath = `${user.id}/pending-avatar.${ext}`;
 
       const { error: uploadError } = await supabase.storage
         .from("avatars")
@@ -86,16 +86,19 @@ export default function ProfilePage() {
         .from("avatars")
         .getPublicUrl(filePath);
 
-      const avatarUrl = urlData.publicUrl + "?t=" + Date.now();
-      setAvatarPreview(avatarUrl);
+      const pendingUrl = urlData.publicUrl + "?t=" + Date.now();
 
       await supabase
         .from("profiles")
-        .update({ avatar_url: avatarUrl, updated_at: new Date().toISOString() })
+        .update({
+          pending_avatar_url: pendingUrl,
+          avatar_status: "pending",
+          updated_at: new Date().toISOString(),
+        })
         .eq("user_id", user.id);
 
       await refreshProfile();
-      toast.success("Foto atualizada!");
+      toast.success("Foto enviada para aprovação! Um moderador irá analisar em breve.");
     } catch (err: any) {
       console.error(err);
       toast.error("Erro ao enviar foto.");
