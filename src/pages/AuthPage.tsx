@@ -500,26 +500,40 @@ export default function AuthPage() {
             )}
 
             {!isLogin && (
-              <div className="flex items-start gap-2 pt-1">
-                <input
-                  type="checkbox"
-                  id="lgpd-consent"
-                  checked={lgpdConsent}
-                  onChange={(e) => setLgpdConsent(e.target.checked)}
-                  className="mt-1 rounded border-border"
-                  required
-                />
-                <Label htmlFor="lgpd-consent" className="text-xs text-muted-foreground leading-relaxed cursor-pointer">
-                  Li e aceito a{" "}
-                  <Link to="/privacy" className="text-primary hover:underline underline-offset-2" target="_blank">
-                    Política de Privacidade
-                  </Link>{" "}
-                  e os{" "}
-                  <Link to="/terms" className="text-primary hover:underline underline-offset-2" target="_blank">
-                    Termos de Uso
-                  </Link>
-                  . Autorizo o tratamento dos meus dados pessoais conforme a LGPD.
-                </Label>
+              <div className="space-y-3 pt-1">
+                <div className="flex items-start gap-2">
+                  <input
+                    type="checkbox"
+                    id="age-consent"
+                    checked={lgpdConsent ? true : undefined}
+                    className="mt-1 rounded border-border"
+                    required
+                  />
+                  <Label htmlFor="age-consent" className="text-xs text-muted-foreground leading-relaxed cursor-pointer">
+                    Declaro que tenho <strong>18 anos ou mais</strong> e sou responsável pelas informações fornecidas.
+                  </Label>
+                </div>
+                <div className="flex items-start gap-2">
+                  <input
+                    type="checkbox"
+                    id="lgpd-consent"
+                    checked={lgpdConsent}
+                    onChange={(e) => setLgpdConsent(e.target.checked)}
+                    className="mt-1 rounded border-border"
+                    required
+                  />
+                  <Label htmlFor="lgpd-consent" className="text-xs text-muted-foreground leading-relaxed cursor-pointer">
+                    Li e aceito a{" "}
+                    <Link to="/privacy" className="text-primary hover:underline underline-offset-2" target="_blank">
+                      Política de Privacidade
+                    </Link>{" "}
+                    e os{" "}
+                    <Link to="/terms" className="text-primary hover:underline underline-offset-2" target="_blank">
+                      Termos de Uso
+                    </Link>
+                    . Autorizo o tratamento dos meus dados pessoais conforme a LGPD.
+                  </Label>
+                </div>
               </div>
             )}
 
