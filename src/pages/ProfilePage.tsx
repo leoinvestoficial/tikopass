@@ -190,9 +190,19 @@ export default function ProfilePage() {
                 {displayName || "Seu nome"}
               </p>
               <p className="text-sm text-muted-foreground">{user.email}</p>
+              {(profile as any)?.avatar_status === "pending" && (
+                <span className="inline-flex items-center gap-1 text-xs text-warning mt-1">
+                  <Clock className="w-3 h-3" /> Foto em análise
+                </span>
+              )}
+              {(profile as any)?.avatar_status === "rejected" && (
+                <span className="inline-flex items-center gap-1 text-xs text-destructive mt-1">
+                  Foto recusada
+                </span>
+              )}
               <button
                 onClick={() => fileInputRef.current?.click()}
-                className="text-sm text-primary hover:underline mt-1"
+                className="text-sm text-primary hover:underline mt-1 block"
               >
                 Alterar foto
               </button>
