@@ -308,7 +308,7 @@ export default function AuthPage() {
       </div>
 
       {/* ── Right panel: form ── */}
-      <div className="flex-1 flex items-center justify-center p-6 overflow-y-auto">
+      <div className="flex-1 flex items-start lg:items-center justify-center p-6 overflow-y-auto">
         <div className="w-full max-w-md space-y-6">
           {/* Mobile logo */}
           <div className="lg:hidden flex items-center justify-center mb-2">
