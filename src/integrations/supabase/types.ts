@@ -50,6 +50,13 @@ export type Database = {
             referencedRelation: "tickets"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "buyer_access_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "tickets_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       events: {
@@ -181,6 +188,13 @@ export type Database = {
             columns: ["ticket_id"]
             isOneToOne: false
             referencedRelation: "tickets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "negotiations_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "tickets_public"
             referencedColumns: ["id"]
           },
         ]
@@ -319,6 +333,13 @@ export type Database = {
             referencedRelation: "tickets"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "ticket_hashes_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "tickets_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       tickets: {
@@ -438,7 +459,86 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      profiles_public: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          city: string | null
+          created_at: string | null
+          display_name: string | null
+          id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          city?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          city?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          id?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      tickets_public: {
+        Row: {
+          created_at: string | null
+          event_id: string | null
+          id: string | null
+          original_price: number | null
+          price: number | null
+          row: string | null
+          seat: string | null
+          sector: string | null
+          seller_id: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          event_id?: string | null
+          id?: string | null
+          original_price?: number | null
+          price?: number | null
+          row?: string | null
+          seat?: string | null
+          sector?: string | null
+          seller_id?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          event_id?: string | null
+          id?: string | null
+          original_price?: number | null
+          price?: number | null
+          row?: string | null
+          seat?: string | null
+          sector?: string | null
+          seller_id?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tickets_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       [_ in never]: never
