@@ -14,9 +14,10 @@ type RecommendedEvent = {
 
 interface RecommendedEventsProps {
   userCity: string;
+  category?: string;
 }
 
-export default function RecommendedEvents({ userCity }: RecommendedEventsProps) {
+export default function RecommendedEvents({ userCity, category }: RecommendedEventsProps) {
   const [events, setEvents] = useState<RecommendedEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -30,7 +31,7 @@ export default function RecommendedEvents({ userCity }: RecommendedEventsProps) 
       setError(false);
       try {
         const { data, error: fnError } = await supabase.functions.invoke("recommend-events", {
-          body: { city: userCity },
+          body: { city: userCity, category: category || undefined },
         });
         if (cancelled) return;
         if (fnError || data?.error) { setError(true); return; }
@@ -43,7 +44,7 @@ export default function RecommendedEvents({ userCity }: RecommendedEventsProps) 
     };
     load();
     return () => { cancelled = true; };
-  }, [userCity]);
+  }, [userCity, category]);
 
   if (error || (!loading && events.length === 0)) return null;
 
@@ -53,7 +54,9 @@ export default function RecommendedEvents({ userCity }: RecommendedEventsProps) 
         <div className="flex items-center gap-2 mb-6">
           <Sparkles className="w-5 h-5 text-primary" />
           <h2 className="text-xl md:text-2xl font-bold text-foreground">
-            Acontecendo em {userCity}
+            {category
+              ? `${category} em ${userCity}`
+              : `Acontecendo em ${userCity}`}
           </h2>
         </div>
 

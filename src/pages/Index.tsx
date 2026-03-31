@@ -265,7 +265,7 @@ export default function Index() {
       )}
 
       {/* ── RECOMMENDED EVENTS (AI + geolocation) ───────────────────────────── */}
-      {!hasActiveSearch && userCity && <RecommendedEvents userCity={userCity} />}
+      {!hasActiveSearch && userCity && <RecommendedEvents userCity={userCity} category={selectedCategory} />}
 
       {/* ── POPULAR EVENTS ────────────────────────────────────────────────────── */}
       {!hasActiveSearch && <PopularEvents events={popularEvents} />}
