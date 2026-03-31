@@ -58,8 +58,8 @@ serve(async (req) => {
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          { role: "system", content: `Você estrutura dados de grandes shows e eventos musicais reais e VIRAIS no Brasil. Hoje é ${today}. Extraia APENAS shows/concertos/festivais musicais de GRANDE PORTE que realmente existam e tenham alta repercussão. Priorize eventos virais com grande adesão do público jovem, turnês famosas e festivais renomados. IGNORE eventos pequenos ou não-musicais. Categorias possíveis: Sertanejo, Rock & Pop, Pagode & Samba, Eletrônica, MPB & Axé, Funk & Rap. Use acentos corretos em português.` },
-          { role: "user", content: `Grandes shows e festivais trending em ${cityFilter}:\n\n${webData || "Sem dados de busca disponíveis."}\n\nExtraia até 8 grandes shows/eventos musicais reais dos próximos 90 dias. APENAS eventos de grande porte, virais e com alta repercussão.` },
+          { role: "system", content: `Você estrutura dados de grandes shows e eventos musicais reais e VIRAIS no Brasil. Hoje é ${today}. Extraia APENAS shows/concertos/festivais musicais de GRANDE PORTE que realmente existam e tenham alta repercussão.${categoryFilter ? ` Foque na categoria ${categoryFilter}.` : ""} Priorize eventos virais com grande adesão do público jovem, turnês famosas e festivais renomados. IGNORE eventos pequenos ou não-musicais. Categorias possíveis: Sertanejo, Rock & Pop, Pagode & Samba, Eletrônica, MPB & Axé, Funk & Rap. Use acentos corretos em português.` },
+          { role: "user", content: `Grandes shows e festivais trending em ${cityFilter}${categoryFilter ? ` na categoria ${categoryFilter}` : ""}:\n\n${webData || "Sem dados de busca disponíveis."}\n\nExtraia até 8 grandes shows/eventos musicais reais dos próximos 90 dias.${categoryFilter ? ` APENAS da categoria ${categoryFilter}.` : ""} APENAS eventos de grande porte, virais e com alta repercussão.` },
         ],
         tools: [{
           type: "function",
