@@ -31,6 +31,7 @@ export default function AdminPage() {
   const [tickets, setTickets] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [userEmails, setUserEmails] = useState<Record<string, string>>({});
 
   const isAdmin = user?.email && ADMIN_EMAILS.includes(user.email);
 
