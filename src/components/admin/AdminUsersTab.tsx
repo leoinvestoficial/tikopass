@@ -25,7 +25,7 @@ const kycBadge = (status: string) => {
   }
 };
 
-export default function AdminUsersTab({ users, onRefresh }: Props) {
+export default function AdminUsersTab({ users, onRefresh, userEmails = {} }: Props) {
   const navigate = useNavigate();
   const [expandedUser, setExpandedUser] = useState<string | null>(null);
   const [userTickets, setUserTickets] = useState<Record<string, any[]>>({});
