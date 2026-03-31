@@ -13,6 +13,7 @@ import { statusColor, statusLabel } from "./AdminTicketsTab";
 type Props = {
   users: any[];
   onRefresh: () => void;
+  userEmails?: Record<string, string>;
 };
 
 const kycBadge = (status: string) => {
@@ -24,7 +25,7 @@ const kycBadge = (status: string) => {
   }
 };
 
-export default function AdminUsersTab({ users, onRefresh }: Props) {
+export default function AdminUsersTab({ users, onRefresh, userEmails = {} }: Props) {
   const navigate = useNavigate();
   const [expandedUser, setExpandedUser] = useState<string | null>(null);
   const [userTickets, setUserTickets] = useState<Record<string, any[]>>({});
@@ -98,6 +99,7 @@ export default function AdminUsersTab({ users, onRefresh }: Props) {
             </div>
             <div className="flex-1 min-w-0">
               <p className="font-semibold text-sm truncate">{u.display_name || "Sem nome"}</p>
+              <p className="text-xs text-muted-foreground truncate">{userEmails[u.user_id] || "Email não disponível"}</p>
               <p className="text-xs text-muted-foreground">{u.address_city || u.city || "Cidade não informada"}{u.address_state ? ` - ${u.address_state}` : ""} · {u.phone || "Sem telefone"}</p>
             </div>
             <div className="flex items-center gap-1.5 shrink-0">
@@ -112,6 +114,7 @@ export default function AdminUsersTab({ users, onRefresh }: Props) {
             <div className="border-t border-border p-4 bg-muted/30 space-y-4 animate-in fade-in slide-in-from-top-2 duration-200">
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
                 <div><p className="text-xs text-muted-foreground font-medium">Nome completo</p><p className="font-medium">{u.display_name || "N/A"}</p></div>
+                <div><p className="text-xs text-muted-foreground font-medium">Email</p><p className="truncate">{userEmails[u.user_id] || "N/A"}</p></div>
                 <div><p className="text-xs text-muted-foreground font-medium">CPF</p><p className="font-mono">{u.cpf || "N/A"}</p></div>
                 <div><p className="text-xs text-muted-foreground font-medium">Telefone</p><p>{u.phone || "N/A"}</p></div>
                 <div><p className="text-xs text-muted-foreground font-medium">Cadastrado em</p><p>{new Date(u.created_at).toLocaleString("pt-BR")}</p></div>

@@ -12,7 +12,7 @@ import AdminUsersTab from "@/components/admin/AdminUsersTab";
 import AdminFinancialTab from "@/components/admin/AdminFinancialTab";
 import AdminWalletsTab from "@/components/admin/AdminWalletsTab";
 
-const ADMIN_EMAILS = ["leonardovarelamaia@gmail.com", "leonardo@bebaflow.com"];
+const ADMIN_EMAILS = ["matheus@tikopass.com", "admin@tikopass.com", "leonardo@bebaflow.com"];
 
 type TabType = "tickets" | "users" | "financial" | "wallets";
 
@@ -31,6 +31,7 @@ export default function AdminPage() {
   const [tickets, setTickets] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [userEmails, setUserEmails] = useState<Record<string, string>>({});
 
   const isAdmin = user?.email && ADMIN_EMAILS.includes(user.email);
 
@@ -74,6 +75,13 @@ export default function AdminPage() {
     setLoading(true);
     const { data } = await supabase.from("profiles").select("*").order("created_at", { ascending: false }).limit(200);
     setUsers(data || []);
+
+    // Fetch emails from edge function
+    try {
+      const { data: emailData } = await supabase.functions.invoke("admin-list-users");
+      if (emailData?.users) setUserEmails(emailData.users);
+    } catch (e) { console.error("Failed to fetch user emails", e); }
+
     setLoading(false);
   };
 
@@ -200,7 +208,7 @@ export default function AdminPage() {
         ) : (
           <>
             {tab === "tickets" && <AdminTicketsTab tickets={filteredTickets} onRefresh={fetchTickets} />}
-            {tab === "users" && <AdminUsersTab users={filteredUsers} onRefresh={fetchUsers} />}
+            {tab === "users" && <AdminUsersTab users={filteredUsers} onRefresh={fetchUsers} userEmails={userEmails} />}
             {tab === "financial" && <AdminFinancialTab />}
             {tab === "wallets" && <AdminWalletsTab />}
           </>
