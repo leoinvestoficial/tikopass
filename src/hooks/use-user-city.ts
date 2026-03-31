@@ -1,11 +1,20 @@
 import { useState, useEffect } from "react";
 
-const DEFAULT_CITY = "Salvador";
+const CACHE_KEY = "user_city";
+const CACHE_TS_KEY = "user_city_ts";
+const CACHE_TTL = 1000 * 60 * 60; // 1 hour
 
 export function useUserCity() {
   const [city, setCity] = useState<string>(() => {
     try {
-      return localStorage.getItem("user_city") || "";
+      const ts = localStorage.getItem(CACHE_TS_KEY);
+      if (ts && Date.now() - Number(ts) < CACHE_TTL) {
+        return localStorage.getItem(CACHE_KEY) || "";
+      }
+      // Cache expired, clear it
+      localStorage.removeItem(CACHE_KEY);
+      localStorage.removeItem(CACHE_TS_KEY);
+      return "";
     } catch {
       return "";
     }
@@ -19,20 +28,20 @@ export function useUserCity() {
 
     const detect = async () => {
       try {
-        // Try IP-based geolocation (no permission needed)
         const res = await fetch("https://ipapi.co/json/", { signal: AbortSignal.timeout(5000) });
         if (!res.ok) throw new Error("ipapi failed");
         const data = await res.json();
-        const detectedCity = data.city || DEFAULT_CITY;
-        if (!cancelled) {
+        const detectedCity = data.city || "";
+        if (!cancelled && detectedCity) {
           setCity(detectedCity);
-          try { localStorage.setItem("user_city", detectedCity); } catch {}
+          try {
+            localStorage.setItem(CACHE_KEY, detectedCity);
+            localStorage.setItem(CACHE_TS_KEY, String(Date.now()));
+          } catch {}
         }
       } catch {
-        if (!cancelled) {
-          setCity(DEFAULT_CITY);
-          try { localStorage.setItem("user_city", DEFAULT_CITY); } catch {}
-        }
+        // Don't default to any city - leave empty
+        if (!cancelled) setCity("");
       } finally {
         if (!cancelled) setDetecting(false);
       }
@@ -44,7 +53,10 @@ export function useUserCity() {
 
   const updateCity = (newCity: string) => {
     setCity(newCity);
-    try { localStorage.setItem("user_city", newCity); } catch {}
+    try {
+      localStorage.setItem(CACHE_KEY, newCity);
+      localStorage.setItem(CACHE_TS_KEY, String(Date.now()));
+    } catch {}
   };
 
   return { city, detecting, updateCity };

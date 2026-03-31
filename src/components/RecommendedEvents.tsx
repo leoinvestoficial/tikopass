@@ -31,7 +31,7 @@ export default function RecommendedEvents({ userCity, category }: RecommendedEve
       setError(false);
       try {
         const { data, error: fnError } = await supabase.functions.invoke("recommend-events", {
-          body: { city: userCity },
+          body: { city: userCity, category: category || undefined },
         });
         if (cancelled) return;
         if (fnError || data?.error) { setError(true); return; }
@@ -44,7 +44,7 @@ export default function RecommendedEvents({ userCity, category }: RecommendedEve
     };
     load();
     return () => { cancelled = true; };
-  }, [userCity]);
+  }, [userCity, category]);
 
   if (error || (!loading && events.length === 0)) return null;
 
