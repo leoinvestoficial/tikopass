@@ -99,6 +99,7 @@ export default function AdminUsersTab({ users, onRefresh, userEmails = {} }: Pro
             </div>
             <div className="flex-1 min-w-0">
               <p className="font-semibold text-sm truncate">{u.display_name || "Sem nome"}</p>
+              <p className="text-xs text-muted-foreground truncate">{userEmails[u.user_id] || "Email não disponível"}</p>
               <p className="text-xs text-muted-foreground">{u.address_city || u.city || "Cidade não informada"}{u.address_state ? ` - ${u.address_state}` : ""} · {u.phone || "Sem telefone"}</p>
             </div>
             <div className="flex items-center gap-1.5 shrink-0">
