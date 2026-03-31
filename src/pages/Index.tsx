@@ -25,11 +25,12 @@ type DateFilter = "" | "today" | "tomorrow" | "weekend";
 // ─── Music genre category tabs ────────────────────────────────────────────────
 const CATEGORIES = [
   { label: "Sertanejo", icon: Guitar },
-  { label: "Rock & Pop", icon: Disc3 },
-  { label: "Pagode & Samba", icon: Drum },
-  { label: "Eletrônica", icon: Headphones },
-  { label: "MPB & Axé", icon: Mic },
-  { label: "Funk & Rap", icon: Piano },
+  { label: "Rock", icon: Disc3 },
+  { label: "Pagode", icon: Drum },
+  { label: "Eletrônico", icon: Headphones },
+  { label: "Funk", icon: Mic },
+  { label: "Forró", icon: Piano },
+  { label: "Outro", icon: Sparkles },
 ];
 
 // ─── Skeleton card ─────────────────────────────────────────────────────────────
