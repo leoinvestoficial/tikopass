@@ -14,9 +14,10 @@ type RecommendedEvent = {
 
 interface RecommendedEventsProps {
   userCity: string;
+  category?: string;
 }
 
-export default function RecommendedEvents({ userCity }: RecommendedEventsProps) {
+export default function RecommendedEvents({ userCity, category }: RecommendedEventsProps) {
   const [events, setEvents] = useState<RecommendedEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
