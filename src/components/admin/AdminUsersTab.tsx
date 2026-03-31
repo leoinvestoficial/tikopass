@@ -13,6 +13,7 @@ import { statusColor, statusLabel } from "./AdminTicketsTab";
 type Props = {
   users: any[];
   onRefresh: () => void;
+  userEmails?: Record<string, string>;
 };
 
 const kycBadge = (status: string) => {
