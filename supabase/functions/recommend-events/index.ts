@@ -29,6 +29,7 @@ serve(async (req) => {
     let webData = "";
     if (PERPLEXITY_KEY) {
       try {
+        const categoryHint = categoryFilter ? ` Foque em eventos da categoria ${categoryFilter}.` : "";
         const today = new Date().toISOString().split("T")[0];
         const pRes = await fetch("https://api.perplexity.ai/chat/completions", {
           method: "POST",
@@ -36,8 +37,8 @@ serve(async (req) => {
           body: JSON.stringify({
             model: "sonar",
             messages: [
-              { role: "system", content: "Você é um especialista em shows e festivais musicais no Brasil. Busque APENAS eventos de GRANDE PORTE e ALTA REPERCUSSÃO: turnês nacionais/internacionais de artistas famosos, festivais virais nas redes sociais (como Retronejo, Oboe, Bossa, Mali Pé na Areia, etc.), shows com grande adesão do público jovem. Busque nas plataformas: Ticketmaster, Eventim, Livepass, Sympla, Tickets For Fun, Clube do Ingresso, Guichê Web, Ticket Maker. NÃO inclua eventos pequenos, bares, casas de show locais ou eventos corporativos." },
-              { role: "user", content: `Quais são os próximos GRANDES shows, festivais e eventos musicais mais comentados e virais em ${cityFilter} e região metropolitana? Hoje é ${today}. Quero APENAS eventos de grande porte com alta repercussão nas redes sociais e mídia, turnês famosas, festivais renomados como Retronejo, Oboe, Bossa, Festival de Verão, etc. Liste os mais relevantes dos próximos 90 dias com datas, locais e artistas.` },
+              { role: "system", content: `Você é um especialista em shows e festivais musicais no Brasil. Busque APENAS eventos de GRANDE PORTE e ALTA REPERCUSSÃO: turnês nacionais/internacionais de artistas famosos, festivais virais nas redes sociais (como Retronejo, Oboe, Bossa, Mali Pé na Areia, etc.), shows com grande adesão do público jovem.${categoryHint} Busque nas plataformas: Ticketmaster, Eventim, Livepass, Sympla, Tickets For Fun, Clube do Ingresso, Guichê Web, Ticket Maker. NÃO inclua eventos pequenos, bares, casas de show locais ou eventos corporativos.` },
+              { role: "user", content: `Quais são os próximos GRANDES shows, festivais e eventos musicais mais comentados e virais em ${cityFilter} e região metropolitana?${categoryFilter ? ` Foque na categoria ${categoryFilter}.` : ""} Hoje é ${today}. Quero APENAS eventos de grande porte com alta repercussão nas redes sociais e mídia, turnês famosas, festivais renomados. Liste os mais relevantes dos próximos 90 dias com datas, locais e artistas.` },
             ],
             search_recency_filter: "month",
           }),
