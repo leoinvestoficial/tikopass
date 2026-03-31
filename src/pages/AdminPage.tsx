@@ -75,6 +75,13 @@ export default function AdminPage() {
     setLoading(true);
     const { data } = await supabase.from("profiles").select("*").order("created_at", { ascending: false }).limit(200);
     setUsers(data || []);
+
+    // Fetch emails from edge function
+    try {
+      const { data: emailData } = await supabase.functions.invoke("admin-list-users");
+      if (emailData?.users) setUserEmails(emailData.users);
+    } catch (e) { console.error("Failed to fetch user emails", e); }
+
     setLoading(false);
   };
 
