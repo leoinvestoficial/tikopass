@@ -114,6 +114,7 @@ export default function AdminUsersTab({ users, onRefresh, userEmails = {} }: Pro
             <div className="border-t border-border p-4 bg-muted/30 space-y-4 animate-in fade-in slide-in-from-top-2 duration-200">
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
                 <div><p className="text-xs text-muted-foreground font-medium">Nome completo</p><p className="font-medium">{u.display_name || "N/A"}</p></div>
+                <div><p className="text-xs text-muted-foreground font-medium">Email</p><p className="truncate">{userEmails[u.user_id] || "N/A"}</p></div>
                 <div><p className="text-xs text-muted-foreground font-medium">CPF</p><p className="font-mono">{u.cpf || "N/A"}</p></div>
                 <div><p className="text-xs text-muted-foreground font-medium">Telefone</p><p>{u.phone || "N/A"}</p></div>
                 <div><p className="text-xs text-muted-foreground font-medium">Cadastrado em</p><p>{new Date(u.created_at).toLocaleString("pt-BR")}</p></div>
