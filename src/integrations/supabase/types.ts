@@ -59,6 +59,70 @@ export type Database = {
           },
         ]
       }
+      disputes: {
+        Row: {
+          buyer_id: string
+          created_at: string
+          id: string
+          negotiation_id: string
+          reason: string
+          resolution_notes: string | null
+          resolved_at: string | null
+          seller_id: string
+          status: string
+          ticket_id: string
+          updated_at: string
+        }
+        Insert: {
+          buyer_id: string
+          created_at?: string
+          id?: string
+          negotiation_id: string
+          reason: string
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          seller_id: string
+          status?: string
+          ticket_id: string
+          updated_at?: string
+        }
+        Update: {
+          buyer_id?: string
+          created_at?: string
+          id?: string
+          negotiation_id?: string
+          reason?: string
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          seller_id?: string
+          status?: string
+          ticket_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "disputes_negotiation_id_fkey"
+            columns: ["negotiation_id"]
+            isOneToOne: false
+            referencedRelation: "negotiations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "disputes_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "tickets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "disputes_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "tickets_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       events: {
         Row: {
           category: string
@@ -363,6 +427,76 @@ export type Database = {
           },
         ]
       }
+      ticket_transfers: {
+        Row: {
+          buyer_id: string
+          confirmed_at: string | null
+          created_at: string
+          guarantee_level: string
+          id: string
+          negotiation_id: string
+          platform: string | null
+          seller_id: string
+          status: string
+          ticket_id: string
+          transfer_instructions: string | null
+          transferred_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          buyer_id: string
+          confirmed_at?: string | null
+          created_at?: string
+          guarantee_level?: string
+          id?: string
+          negotiation_id: string
+          platform?: string | null
+          seller_id: string
+          status?: string
+          ticket_id: string
+          transfer_instructions?: string | null
+          transferred_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          buyer_id?: string
+          confirmed_at?: string | null
+          created_at?: string
+          guarantee_level?: string
+          id?: string
+          negotiation_id?: string
+          platform?: string | null
+          seller_id?: string
+          status?: string
+          ticket_id?: string
+          transfer_instructions?: string | null
+          transferred_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ticket_transfers_negotiation_id_fkey"
+            columns: ["negotiation_id"]
+            isOneToOne: false
+            referencedRelation: "negotiations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ticket_transfers_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "tickets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ticket_transfers_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "tickets_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tickets: {
         Row: {
           created_at: string
@@ -377,6 +511,7 @@ export type Database = {
           seat: string | null
           sector: string
           seller_id: string
+          source_platform: string | null
           status: string
           storage_path: string | null
           updated_at: string
@@ -396,6 +531,7 @@ export type Database = {
           seat?: string | null
           sector: string
           seller_id: string
+          source_platform?: string | null
           status?: string
           storage_path?: string | null
           updated_at?: string
@@ -415,6 +551,7 @@ export type Database = {
           seat?: string | null
           sector?: string
           seller_id?: string
+          source_platform?: string | null
           status?: string
           storage_path?: string | null
           updated_at?: string
