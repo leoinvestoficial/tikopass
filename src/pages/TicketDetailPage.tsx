@@ -87,9 +87,10 @@ export default function TicketDetailPage() {
       if (error) throw error;
 
       const sellerId = ticketData.seller_id;
-      const [profileRes, ratingsRes] = await Promise.all([
+      const [profileRes, ratingsRes, salesRes] = await Promise.all([
         supabase.from("profiles").select("*").eq("user_id", sellerId).maybeSingle(),
         supabase.from("seller_ratings" as never).select("rating").eq("seller_id", sellerId),
+        supabase.from("tickets").select("id").eq("seller_id", sellerId).in("status", ["sold", "completed"]),
       ]);
 
       const ratings = (ratingsRes.data || []) as Array<{ rating: number }>;
@@ -102,6 +103,7 @@ export default function TicketDetailPage() {
         seller_profile: profileRes.data ?? null,
         seller_avg_rating: sellerAvgRating,
         seller_rating_count: ratings.length,
+        seller_sales_count: (salesRes.data || []).length,
       });
     } catch (error) {
       console.error(error);
