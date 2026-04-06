@@ -35,11 +35,11 @@ export default function Footer() {
               <h4 className="font-display font-semibold text-foreground">Gêneros</h4>
               <div className="space-y-2 text-muted-foreground">
                 <Link to="/?category=Sertanejo" className="block hover:text-foreground transition-colors">Sertanejo</Link>
-                <Link to="/?category=Rock+%26+Pop" className="block hover:text-foreground transition-colors">Rock & Pop</Link>
-                <Link to="/?category=Pagode+%26+Samba" className="block hover:text-foreground transition-colors">Pagode & Samba</Link>
-                <Link to="/?category=Eletr%C3%B4nica" className="block hover:text-foreground transition-colors">Eletrônica</Link>
-                <Link to="/?category=MPB+%26+Ax%C3%A9" className="block hover:text-foreground transition-colors">MPB & Axé</Link>
-                <Link to="/?category=Funk+%26+Rap" className="block hover:text-foreground transition-colors">Funk & Rap</Link>
+                <Link to="/?category=Rock" className="block hover:text-foreground transition-colors">Rock</Link>
+                <Link to="/?category=Pagode" className="block hover:text-foreground transition-colors">Pagode</Link>
+                <Link to="/?category=Eletr%C3%B4nico" className="block hover:text-foreground transition-colors">Eletrônico</Link>
+                <Link to="/?category=Funk" className="block hover:text-foreground transition-colors">Funk</Link>
+                <Link to="/?category=Forr%C3%B3" className="block hover:text-foreground transition-colors">Forró</Link>
               </div>
             </div>
             <div className="space-y-3">
