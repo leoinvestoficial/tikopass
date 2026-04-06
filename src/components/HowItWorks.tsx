@@ -5,7 +5,7 @@ const steps = [
   {
     icon: Search,
     title: "Encontre o evento",
-    description: "Busque por shows, festivais e jogos na sua cidade. Filtre por categoria, data e preço.",
+    description: "Busque por shows, festivais e eventos musicais na sua cidade. Filtre por categoria, data e preço.",
     accent: "bg-primary/10 text-primary",
   },
   {
