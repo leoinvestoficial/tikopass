@@ -24,7 +24,7 @@ serve(async (req) => {
 
     // Find completed negotiations where event date has passed (2+ hours ago)
     // and payment hasn't been captured yet
-    const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString().split("T")[0];
+    // 24h after event date (contestation window per document)
 
     const { data: negotiations, error } = await supabaseAdmin
       .from("negotiations")
@@ -42,9 +42,9 @@ serve(async (req) => {
       const eventDate = (neg as any).tickets?.events?.date;
       if (!eventDate) continue;
 
-      // Only release if event date has passed by 2+ hours
+      // Only release if event date has passed by 24h (contestation window)
       const eventEnd = new Date(eventDate + "T23:59:59Z");
-      eventEnd.setHours(eventEnd.getHours() + 2);
+      eventEnd.setHours(eventEnd.getHours() + 24);
       if (new Date() < eventEnd) continue;
 
       try {

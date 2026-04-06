@@ -4,6 +4,7 @@ import type { Tables } from "@/integrations/supabase/types";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import SellerLevelBadge, { getSellerLevel } from "@/components/SellerLevelBadge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -41,6 +42,7 @@ type TicketRecord = Tables<"tickets"> & {
   seller_profile: Tables<"profiles"> | null;
   seller_avg_rating: number | null;
   seller_rating_count: number;
+  seller_sales_count: number;
 };
 
 const currencyFormatter = new Intl.NumberFormat("pt-BR", {
@@ -85,9 +87,10 @@ export default function TicketDetailPage() {
       if (error) throw error;
 
       const sellerId = ticketData.seller_id;
-      const [profileRes, ratingsRes] = await Promise.all([
+      const [profileRes, ratingsRes, salesRes] = await Promise.all([
         supabase.from("profiles").select("*").eq("user_id", sellerId).maybeSingle(),
         supabase.from("seller_ratings" as never).select("rating").eq("seller_id", sellerId),
+        supabase.from("tickets").select("id").eq("seller_id", sellerId).in("status", ["sold", "completed"]),
       ]);
 
       const ratings = (ratingsRes.data || []) as Array<{ rating: number }>;
@@ -100,6 +103,7 @@ export default function TicketDetailPage() {
         seller_profile: profileRes.data ?? null,
         seller_avg_rating: sellerAvgRating,
         seller_rating_count: ratings.length,
+        seller_sales_count: (salesRes.data || []).length,
       });
     } catch (error) {
       console.error(error);
@@ -360,10 +364,15 @@ export default function TicketDetailPage() {
                         </AvatarFallback>
                       </Avatar>
                       <span>
-                        <span className="block font-medium text-foreground">
+                        <span className="flex items-center gap-2 font-medium text-foreground">
                           {ticket.seller_profile?.display_name || "Vendedor"}
+                          <SellerLevelBadge
+                            level={getSellerLevel(ticket.seller_sales_count, ticket.seller_avg_rating)}
+                            compact
+                          />
                         </span>
                         {renderSellerRating()}
+                        <span className="text-xs text-muted-foreground">{ticket.seller_sales_count} venda{ticket.seller_sales_count !== 1 ? "s" : ""}</span>
                       </span>
                     </Link>
                   </div>

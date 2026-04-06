@@ -8,9 +8,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { Progress } from "@/components/ui/progress";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import GuaranteeBadge from "@/components/GuaranteeBadge";
 import {
   Ticket, Loader2, Calendar, MapPin, Tag, ArrowRight, Clock, Eye, ShoppingBag, Store,
-  CheckCircle2, XCircle, AlertCircle, Shield, Trash2, Ban,
+  CheckCircle2, XCircle, AlertCircle, Shield, Trash2, Ban, Star, Send, AlertTriangle,
 } from "lucide-react";
 
 type ValidationCheck = { id: string; label: string; passed: boolean; detail: string };
@@ -78,7 +84,6 @@ function SellingTicketCard({ ticket, today, onDelete }: { ticket: any; today: st
         </div>
       </Link>
 
-      {/* Pending validation indicator */}
       {ticket.status === "pending_validation" && (
         <div className="mt-3 flex items-center gap-2 text-xs text-warning bg-warning/5 rounded-lg px-3 py-2">
           <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -86,7 +91,6 @@ function SellingTicketCard({ ticket, today, onDelete }: { ticket: any; today: st
         </div>
       )}
 
-      {/* Rejection reason */}
       {isRejected && ticket.rejection_reason && (
         <div className="mt-3 flex items-start gap-2 text-xs text-destructive bg-destructive/5 rounded-lg px-3 py-2">
           <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
@@ -94,22 +98,17 @@ function SellingTicketCard({ ticket, today, onDelete }: { ticket: any; today: st
         </div>
       )}
 
-      {/* Validation checklist */}
       {(isRejected || ticket.status === "validated") && checks.length > 0 && (
         <ValidationChecklist checks={checks} />
       )}
 
-      {/* Delete button for rejected tickets */}
       {isRejected && onDelete && (
         <div className="mt-3 flex justify-end">
           <Button
             variant="destructive"
             size="sm"
             className="rounded-xl gap-1.5 text-xs"
-            onClick={(e) => {
-              e.preventDefault();
-              onDelete(ticket.id);
-            }}
+            onClick={(e) => { e.preventDefault(); onDelete(ticket.id); }}
           >
             <Trash2 className="w-3.5 h-3.5" /> Remover ingresso
           </Button>
@@ -119,21 +118,207 @@ function SellingTicketCard({ ticket, today, onDelete }: { ticket: any; today: st
   );
 }
 
+const transferStatusSteps = [
+  { key: "pending_transfer", label: "Aguardando transferência", progress: 25 },
+  { key: "transferred", label: "Transferido", progress: 60 },
+  { key: "confirmed", label: "Confirmado", progress: 100 },
+  { key: "disputed", label: "Em contestação", progress: 60 },
+];
+
+function PurchasedTicketCard({
+  access,
+  transfer,
+  onConfirmReceipt,
+  onOpenDispute,
+  onRate,
+  existingRating,
+}: {
+  access: any;
+  transfer: any;
+  onConfirmReceipt: (transferId: string) => void;
+  onOpenDispute: (transfer: any) => void;
+  onRate: (negotiation: any) => void;
+  existingRating: boolean;
+}) {
+  const ticket = access.tickets;
+  const event = ticket?.events;
+  if (!event) return null;
+
+  const isExpired = access.invalidated_at || new Date(access.expires_at) < new Date();
+  const eventDate = new Date(event.date + "T23:59:59Z");
+  const contestDeadline = new Date(eventDate.getTime() + 24 * 60 * 60 * 1000);
+  const isPastEvent = new Date() > eventDate;
+  const canContest = isPastEvent && new Date() < contestDeadline && transfer?.status !== "disputed";
+  const isCompleted = transfer?.status === "confirmed" || (isPastEvent && !canContest && transfer?.status !== "disputed");
+
+  const currentStep = transferStatusSteps.find(s => s.key === transfer?.status) || transferStatusSteps[0];
+  const progressValue = transfer?.status === "confirmed" ? 100 : currentStep.progress;
+
+  const handleViewTicket = () => {
+    if (access.invalidated_at) return;
+    window.open(
+      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-ticket?token=${access.token}`,
+      "_blank"
+    );
+  };
+
+  return (
+    <div className={`bg-card rounded-xl border border-border p-5 transition-all ${isExpired && !transfer ? "opacity-60" : ""}`}>
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+        <div className="space-y-2 flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h3 className="font-display font-semibold text-foreground">{event.name}</h3>
+            {transfer?.guarantee_level && (
+              <GuaranteeBadge level={transfer.guarantee_level} compact />
+            )}
+            {transfer?.status === "disputed" && (
+              <Badge className="bg-destructive/10 text-destructive border-destructive/20 text-xs gap-1">
+                <AlertTriangle className="w-3 h-3" /> Em contestação
+              </Badge>
+            )}
+            {isCompleted && transfer?.status !== "disputed" && (
+              <Badge className="bg-success/10 text-success border-success/20 text-xs gap-1">
+                <CheckCircle2 className="w-3 h-3" /> Concluído
+              </Badge>
+            )}
+          </div>
+          <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
+            <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5" />{new Date(event.date).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" })} · {event.time}</span>
+            <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5" />{event.venue}</span>
+            <span className="flex items-center gap-1"><Tag className="w-3.5 h-3.5" />{ticket.sector}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Transfer progress */}
+      {transfer && (
+        <div className="mt-4 space-y-2">
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-muted-foreground font-medium">Status da transferência</span>
+            <span className={`font-bold ${transfer.status === "disputed" ? "text-destructive" : transfer.status === "confirmed" ? "text-success" : "text-primary"}`}>
+              {currentStep.label}
+            </span>
+          </div>
+          <Progress value={progressValue} className="h-2" />
+
+          {/* Step indicators */}
+          <div className="flex justify-between text-[10px] text-muted-foreground">
+            <span className={transfer.status !== "pending_transfer" ? "text-success font-medium" : "text-primary font-medium"}>Pago</span>
+            <span className={["transferred", "confirmed"].includes(transfer.status) ? "text-success font-medium" : ""}>Transferido</span>
+            <span className={transfer.status === "confirmed" ? "text-success font-medium" : ""}>Confirmado</span>
+          </div>
+        </div>
+      )}
+
+      {/* Transfer instructions for buyer */}
+      {transfer?.status === "pending_transfer" && transfer.guarantee_level !== "yellow" && (
+        <div className="mt-3 bg-primary/5 rounded-xl px-4 py-3 text-xs text-muted-foreground">
+          <p className="font-semibold text-foreground mb-1 flex items-center gap-1.5">
+            <Clock className="w-3.5 h-3.5 text-primary" /> Aguardando transferência do vendedor
+          </p>
+          <p>O vendedor foi notificado e precisa transferir o ingresso pela plataforma de origem. Você receberá uma atualização quando a transferência for realizada.</p>
+        </div>
+      )}
+
+      {transfer?.status === "transferred" && (
+        <div className="mt-3 bg-success/5 rounded-xl px-4 py-3 text-xs text-muted-foreground">
+          <p className="font-semibold text-foreground mb-1 flex items-center gap-1.5">
+            <CheckCircle2 className="w-3.5 h-3.5 text-success" /> Ingresso transferido!
+          </p>
+          {transfer.guarantee_level === "yellow" ? (
+            <p>O arquivo do ingresso está disponível. Clique em "Ver ingresso" para acessá-lo.</p>
+          ) : (
+            <p>Verifique na plataforma de origem se recebeu o ingresso e confirme o recebimento abaixo.</p>
+          )}
+        </div>
+      )}
+
+      {/* Action buttons */}
+      <div className="mt-4 flex flex-wrap gap-2">
+        {!isExpired && (
+          <Button className="rounded-xl gap-2 text-xs" size="sm" onClick={handleViewTicket}>
+            <Eye className="w-3.5 h-3.5" /> Ver ingresso
+          </Button>
+        )}
+
+        {transfer?.status === "transferred" && (
+          <Button
+            className="rounded-xl gap-2 text-xs bg-success hover:bg-success/90 text-white"
+            size="sm"
+            onClick={() => onConfirmReceipt(transfer.id)}
+          >
+            <CheckCircle2 className="w-3.5 h-3.5" /> Confirmar recebimento
+          </Button>
+        )}
+
+        {canContest && (
+          <Button
+            variant="outline"
+            className="rounded-xl gap-2 text-xs text-destructive hover:text-destructive"
+            size="sm"
+            onClick={() => onOpenDispute(transfer)}
+          >
+            <AlertTriangle className="w-3.5 h-3.5" /> Abrir contestação
+          </Button>
+        )}
+
+        {isPastEvent && canContest && (
+          <p className="w-full text-[10px] text-muted-foreground mt-1">
+            <Clock className="w-3 h-3 inline mr-1" />
+            Prazo para contestação: {contestDeadline.toLocaleDateString("pt-BR")} às {contestDeadline.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+          </p>
+        )}
+
+        {isCompleted && !existingRating && transfer?.status !== "disputed" && (
+          <Button
+            variant="outline"
+            className="rounded-xl gap-2 text-xs"
+            size="sm"
+            onClick={() => onRate(transfer)}
+          >
+            <Star className="w-3.5 h-3.5" /> Avaliar vendedor
+          </Button>
+        )}
+
+        {isExpired && !transfer && (
+          <Button variant="outline" className="rounded-xl text-xs" size="sm" disabled>
+            Acesso encerrado
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function MyTicketsPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [sellingTickets, setSellingTickets] = useState<any[]>([]);
   const [purchasedTickets, setPurchasedTickets] = useState<any[]>([]);
+  const [transfers, setTransfers] = useState<any[]>([]);
+  const [existingRatings, setExistingRatings] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<"selling" | "rejected" | "purchased">("selling");
   const [deleting, setDeleting] = useState<string | null>(null);
+
+  // Dispute dialog
+  const [disputeDialog, setDisputeDialog] = useState(false);
+  const [disputeTransfer, setDisputeTransfer] = useState<any>(null);
+  const [disputeReason, setDisputeReason] = useState("");
+  const [disputeSubmitting, setDisputeSubmitting] = useState(false);
+
+  // Rating dialog
+  const [ratingDialog, setRatingDialog] = useState(false);
+  const [ratingTransfer, setRatingTransfer] = useState<any>(null);
+  const [ratingValue, setRatingValue] = useState(5);
+  const [ratingComment, setRatingComment] = useState("");
+  const [ratingSubmitting, setRatingSubmitting] = useState(false);
 
   useEffect(() => {
     if (!user) { navigate("/auth"); return; }
     loadData();
   }, [user]);
 
-  // Auto-refresh while there are pending tickets
   useEffect(() => {
     const hasPending = sellingTickets.some(t => t.status === "pending_validation");
     if (!hasPending || !user) return;
@@ -151,12 +336,27 @@ export default function MyTicketsPage() {
     try {
       const selling = await fetchMyTickets(user.id);
       setSellingTickets(selling);
-      const { data: accessData } = await supabase
-        .from("buyer_access")
-        .select("*, tickets:ticket_id(*, events:event_id(*))")
-        .eq("buyer_id", user.id)
-        .order("created_at", { ascending: false });
-      setPurchasedTickets((accessData as any[]) || []);
+
+      const [accessRes, transfersRes, ratingsRes] = await Promise.all([
+        supabase
+          .from("buyer_access")
+          .select("*, tickets:ticket_id(*, events:event_id(*))")
+          .eq("buyer_id", user.id)
+          .order("created_at", { ascending: false }),
+        supabase
+          .from("ticket_transfers" as any)
+          .select("*")
+          .eq("buyer_id", user.id)
+          .order("created_at", { ascending: false }),
+        supabase
+          .from("seller_ratings" as any)
+          .select("negotiation_id")
+          .eq("buyer_id", user.id),
+      ]);
+
+      setPurchasedTickets((accessRes.data as any[]) || []);
+      setTransfers((transfersRes.data as any[]) || []);
+      setExistingRatings(new Set((ratingsRes.data as any[] || []).map((r: any) => r.negotiation_id)));
     } catch (err) {
       console.error(err);
     } finally {
@@ -168,7 +368,6 @@ export default function MyTicketsPage() {
     if (deleting) return;
     setDeleting(ticketId);
     try {
-      // Delete the ticket (hashes are cleaned up by DB trigger)
       const { error } = await supabase.from("tickets").delete().eq("id", ticketId);
       if (error) throw error;
       setSellingTickets(prev => prev.filter(t => t.id !== ticketId));
@@ -180,14 +379,90 @@ export default function MyTicketsPage() {
     }
   };
 
-  const today = new Date().toISOString().split("T")[0];
-
-  const expiredOrRejected = (t: any) => {
-    if (t.status === "rejected") return true;
-    const event = t.events;
-    if (event && event.date < today) return true;
-    return false;
+  const handleConfirmReceipt = async (transferId: string) => {
+    try {
+      const { error } = await supabase
+        .from("ticket_transfers" as any)
+        .update({ status: "confirmed", confirmed_at: new Date().toISOString() } as any)
+        .eq("id", transferId);
+      if (error) throw error;
+      toast.success("Recebimento confirmado! Obrigado.");
+      loadData();
+    } catch (err: any) {
+      toast.error(err.message || "Erro ao confirmar recebimento");
+    }
   };
+
+  const handleOpenDispute = (transfer: any) => {
+    setDisputeTransfer(transfer);
+    setDisputeReason("");
+    setDisputeDialog(true);
+  };
+
+  const handleSubmitDispute = async () => {
+    if (!disputeTransfer || !disputeReason.trim() || !user) return;
+    setDisputeSubmitting(true);
+    try {
+      const { error: disputeError } = await supabase
+        .from("disputes" as any)
+        .insert({
+          negotiation_id: disputeTransfer.negotiation_id,
+          ticket_id: disputeTransfer.ticket_id,
+          buyer_id: user.id,
+          seller_id: disputeTransfer.seller_id,
+          reason: disputeReason.trim(),
+        } as any);
+      if (disputeError) throw disputeError;
+
+      // Update transfer status
+      await supabase
+        .from("ticket_transfers" as any)
+        .update({ status: "disputed" } as any)
+        .eq("id", disputeTransfer.id);
+
+      toast.success("Contestação aberta. Nossa equipe vai analisar em até 48h.");
+      setDisputeDialog(false);
+      loadData();
+    } catch (err: any) {
+      toast.error(err.message || "Erro ao abrir contestação");
+    } finally {
+      setDisputeSubmitting(false);
+    }
+  };
+
+  const handleRate = (transfer: any) => {
+    setRatingTransfer(transfer);
+    setRatingValue(5);
+    setRatingComment("");
+    setRatingDialog(true);
+  };
+
+  const handleSubmitRating = async () => {
+    if (!ratingTransfer || !user) return;
+    setRatingSubmitting(true);
+    try {
+      const { error } = await supabase
+        .from("seller_ratings" as any)
+        .insert({
+          negotiation_id: ratingTransfer.negotiation_id,
+          buyer_id: user.id,
+          seller_id: ratingTransfer.seller_id,
+          rating: ratingValue,
+          comment: ratingComment.trim() || null,
+        } as any);
+      if (error) throw error;
+      toast.success("Avaliação enviada! Obrigado pelo feedback.");
+      setRatingDialog(false);
+      loadData();
+    } catch (err: any) {
+      toast.error(err.message || "Erro ao enviar avaliação");
+    } finally {
+      setRatingSubmitting(false);
+    }
+  };
+
+  const today = new Date().toISOString().split("T")[0];
+  const expiredOrRejected = (t: any) => t.status === "rejected" || (t.events && t.events.date < today);
   const activeTickets = sellingTickets.filter(t => !expiredOrRejected(t));
   const rejectedTickets = sellingTickets.filter(t => expiredOrRejected(t));
 
@@ -197,12 +472,8 @@ export default function MyTicketsPage() {
     { key: "purchased" as const, label: "Comprados", count: purchasedTickets.length, icon: ShoppingBag },
   ];
 
-  const handleViewTicket = async (access: any) => {
-    if (access.invalidated_at) return;
-    window.open(
-      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-ticket?token=${access.token}`,
-      "_blank"
-    );
+  const getTransferForAccess = (access: any) => {
+    return transfers.find((t: any) => t.ticket_id === access.ticket_id);
   };
 
   return (
@@ -215,7 +486,6 @@ export default function MyTicketsPage() {
         </div>
 
         <div className="container pb-12">
-          {/* Tabs */}
           <div className="flex gap-2 mb-6">
             {tabs.map(t => (
               <button
@@ -286,54 +556,113 @@ export default function MyTicketsPage() {
               </div>
             ) : (
               <div className="space-y-3">
-                {purchasedTickets.map((access: any) => {
-                  const ticket = access.tickets;
-                  const event = ticket?.events;
-                  if (!event) return null;
-                  const isExpired = access.invalidated_at || new Date(access.expires_at) < new Date();
-
-                  return (
-                    <div key={access.id} className={`bg-card rounded-xl border border-border p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all ${isExpired ? "opacity-60" : ""}`}>
-                      <div className="space-y-2 flex-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <h3 className="font-display font-semibold text-foreground">{event.name}</h3>
-                          {isExpired ? (
-                            <Badge variant="outline" className="text-xs text-muted-foreground border-muted">Expirado</Badge>
-                          ) : (
-                            <Badge className="bg-success/10 text-success border-success/20 text-xs">Ativo</Badge>
-                          )}
-                        </div>
-                        <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
-                          <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5" />{new Date(event.date).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" })} · {event.time}</span>
-                          <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5" />{event.venue}</span>
-                          <span className="flex items-center gap-1"><Tag className="w-3.5 h-3.5" />{ticket.sector}</span>
-                        </div>
-                        {!isExpired && (
-                          <p className="text-xs text-muted-foreground flex items-center gap-1">
-                            <Clock className="w-3 h-3" />
-                            Acesso expira em {new Date(access.expires_at).toLocaleDateString("pt-BR")}
-                          </p>
-                        )}
-                      </div>
-                      <div className="shrink-0">
-                        {!isExpired ? (
-                          <Button className="rounded-xl gap-2" onClick={() => handleViewTicket(access)}>
-                            <Eye className="w-4 h-4" /> Ver ingresso
-                          </Button>
-                        ) : (
-                          <Button variant="outline" className="rounded-xl" disabled>
-                            Acesso encerrado
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
+                {purchasedTickets.map((access: any) => (
+                  <PurchasedTicketCard
+                    key={access.id}
+                    access={access}
+                    transfer={getTransferForAccess(access)}
+                    onConfirmReceipt={handleConfirmReceipt}
+                    onOpenDispute={handleOpenDispute}
+                    onRate={handleRate}
+                    existingRating={existingRatings.has(getTransferForAccess(access)?.negotiation_id)}
+                  />
+                ))}
               </div>
             )
           )}
         </div>
       </div>
+
+      {/* Dispute dialog */}
+      <Dialog open={disputeDialog} onOpenChange={setDisputeDialog}>
+        <DialogContent className="rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="font-display flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-destructive" /> Abrir contestação
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <p className="text-sm text-muted-foreground">
+              Use a contestação se você teve problema na entrada do evento ou se o ingresso não funcionou.
+              Nossa equipe analisará o caso em até 48 horas.
+            </p>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Descreva o problema</label>
+              <Textarea
+                value={disputeReason}
+                onChange={(e) => setDisputeReason(e.target.value)}
+                placeholder="Ex: O QR code não funcionou na entrada do evento..."
+                className="rounded-xl min-h-[100px]"
+              />
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setDisputeDialog(false)} className="rounded-xl">Cancelar</Button>
+            <Button
+              variant="destructive"
+              onClick={handleSubmitDispute}
+              disabled={!disputeReason.trim() || disputeSubmitting}
+              className="rounded-xl gap-2"
+            >
+              {disputeSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+              Enviar contestação
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Rating dialog */}
+      <Dialog open={ratingDialog} onOpenChange={setRatingDialog}>
+        <DialogContent className="rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="font-display flex items-center gap-2">
+              <Star className="w-5 h-5 text-warning" /> Avaliar vendedor
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <p className="text-sm text-muted-foreground">
+              Como foi sua experiência com este vendedor? Sua avaliação ajuda outros compradores.
+            </p>
+            <div className="flex justify-center gap-2">
+              {[1, 2, 3, 4, 5].map((value) => (
+                <button
+                  key={value}
+                  onClick={() => setRatingValue(value)}
+                  className="transition-transform hover:scale-110 active:scale-95"
+                >
+                  <Star
+                    className={`w-10 h-10 ${value <= ratingValue ? "fill-warning text-warning" : "text-muted-foreground/30"}`}
+                  />
+                </button>
+              ))}
+            </div>
+            <p className="text-center text-sm font-medium text-foreground">
+              {ratingValue === 1 ? "Péssimo" : ratingValue === 2 ? "Ruim" : ratingValue === 3 ? "Regular" : ratingValue === 4 ? "Bom" : "Excelente"}
+            </p>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Comentário (opcional)</label>
+              <Textarea
+                value={ratingComment}
+                onChange={(e) => setRatingComment(e.target.value)}
+                placeholder="Conte como foi a experiência..."
+                className="rounded-xl"
+              />
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setRatingDialog(false)} className="rounded-xl">Cancelar</Button>
+            <Button
+              onClick={handleSubmitRating}
+              disabled={ratingSubmitting}
+              className="rounded-xl gap-2"
+            >
+              {ratingSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Star className="w-4 h-4" />}
+              Enviar avaliação
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <Footer />
     </div>
   );

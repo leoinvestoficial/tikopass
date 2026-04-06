@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
-import { MapPin, Calendar, Tag, TrendingDown } from "lucide-react";
+import { MapPin, Calendar, Tag, TrendingDown, Star } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import SellerLevelBadge, { getSellerLevel } from "@/components/SellerLevelBadge";
 
 interface TicketCardEvent {
   id: string;
@@ -26,6 +27,9 @@ interface TicketCardProps {
     sellerName?: string;
     event?: TicketCardEvent;
     events?: TicketCardEvent;
+    seller_avg_rating?: number | null;
+    seller_rating_count?: number;
+    seller_sales_count?: number;
   };
   index?: number;
 }
@@ -100,11 +104,18 @@ export default function TicketCard({ ticket, index = 0 }: TicketCardProps) {
                 R$ {ticket.price.toLocaleString("pt-BR")}
               </span>
             </div>
-            {ticket.sellerName && (
-              <span className="text-xs text-muted-foreground">
-                por {ticket.sellerName}
-              </span>
-            )}
+            <div className="flex flex-col items-end gap-1">
+              {ticket.seller_avg_rating != null && (ticket.seller_rating_count || 0) > 0 && (
+                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <Star className="w-3 h-3 fill-warning text-warning" />
+                  <span>{ticket.seller_avg_rating.toFixed(1)}</span>
+                </div>
+              )}
+              <SellerLevelBadge
+                level={getSellerLevel(ticket.seller_sales_count || 0, ticket.seller_avg_rating ?? null)}
+                compact
+              />
+            </div>
           </div>
         </div>
       </div>
