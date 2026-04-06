@@ -77,12 +77,13 @@ export async function fetchTicketsByEvent(eventId: string) {
     .order("price", { ascending: true });
   if (error) throw error;
 
-  // Fetch seller profiles and ratings
+  // Fetch seller profiles, ratings, and sales counts
   if (data && data.length > 0) {
     const sellerIds = [...new Set(data.map(t => t.seller_id))];
-    const [profilesRes, ratingsRes] = await Promise.all([
+    const [profilesRes, ratingsRes, salesRes] = await Promise.all([
       supabase.from("profiles").select("*").in("user_id", sellerIds),
       supabase.from("seller_ratings" as any).select("seller_id, rating").in("seller_id", sellerIds),
+      supabase.from("tickets").select("seller_id").in("seller_id", sellerIds).in("status", ["sold", "completed"]),
     ]);
     const profileMap = new Map((profilesRes.data || []).map((p: any) => [p.user_id, p]));
     
@@ -95,6 +96,12 @@ export async function fetchTicketsByEvent(eventId: string) {
       ratingMap.set(r.seller_id, existing);
     }
 
+    // Calculate sales count per seller
+    const salesMap = new Map<string, number>();
+    for (const s of (salesRes.data || []) as any[]) {
+      salesMap.set(s.seller_id, (salesMap.get(s.seller_id) || 0) + 1);
+    }
+
     return data.map(t => ({
       ...t,
       seller_profile: profileMap.get(t.seller_id) || null,
@@ -102,6 +109,7 @@ export async function fetchTicketsByEvent(eventId: string) {
         ? ratingMap.get(t.seller_id)!.total / ratingMap.get(t.seller_id)!.count
         : null,
       seller_rating_count: ratingMap.get(t.seller_id)?.count || 0,
+      seller_sales_count: salesMap.get(t.seller_id) || 0,
     }));
   }
   return data;
