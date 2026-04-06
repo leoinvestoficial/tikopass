@@ -364,10 +364,15 @@ export default function TicketDetailPage() {
                         </AvatarFallback>
                       </Avatar>
                       <span>
-                        <span className="block font-medium text-foreground">
+                        <span className="flex items-center gap-2 font-medium text-foreground">
                           {ticket.seller_profile?.display_name || "Vendedor"}
+                          <SellerLevelBadge
+                            level={getSellerLevel(ticket.seller_sales_count, ticket.seller_avg_rating)}
+                            compact
+                          />
                         </span>
                         {renderSellerRating()}
+                        <span className="text-xs text-muted-foreground">{ticket.seller_sales_count} venda{ticket.seller_sales_count !== 1 ? "s" : ""}</span>
                       </span>
                     </Link>
                   </div>
