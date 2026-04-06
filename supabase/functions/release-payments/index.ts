@@ -35,10 +35,24 @@ serve(async (req) => {
 
     if (error) throw error;
 
+    // Fetch open disputes to skip those negotiations
+    const { data: openDisputes } = await supabaseAdmin
+      .from("disputes")
+      .select("negotiation_id")
+      .eq("status", "open");
+    const disputedNegIds = new Set((openDisputes || []).map((d: any) => d.negotiation_id));
+
     let released = 0;
     let errors = 0;
+    let skippedDisputed = 0;
 
     for (const neg of (negotiations || [])) {
+      // Skip negotiations with open disputes
+      if (disputedNegIds.has(neg.id)) {
+        skippedDisputed++;
+        continue;
+      }
+
       const eventDate = (neg as any).tickets?.events?.date;
       if (!eventDate) continue;
 
@@ -87,7 +101,7 @@ serve(async (req) => {
     }
 
     return new Response(
-      JSON.stringify({ success: true, released, errors, total: (negotiations || []).length }),
+      JSON.stringify({ success: true, released, errors, skippedDisputed, total: (negotiations || []).length }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {
