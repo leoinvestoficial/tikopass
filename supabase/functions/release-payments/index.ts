@@ -101,7 +101,7 @@ serve(async (req) => {
     }
 
     return new Response(
-      JSON.stringify({ success: true, released, errors, total: (negotiations || []).length }),
+      JSON.stringify({ success: true, released, errors, skippedDisputed, total: (negotiations || []).length }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {
