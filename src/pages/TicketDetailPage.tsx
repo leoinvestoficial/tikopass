@@ -42,6 +42,7 @@ type TicketRecord = Tables<"tickets"> & {
   seller_profile: Tables<"profiles"> | null;
   seller_avg_rating: number | null;
   seller_rating_count: number;
+  seller_sales_count: number;
 };
 
 const currencyFormatter = new Intl.NumberFormat("pt-BR", {
