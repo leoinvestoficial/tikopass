@@ -62,6 +62,24 @@ serve(async (req) => {
           .update({ status: "sold" })
           .eq("id", neg.ticket_id);
 
+        // Get ticket details for platform info
+        const { data: ticketData } = await supabaseAdmin
+          .from("tickets")
+          .select("source_platform")
+          .eq("id", neg.ticket_id)
+          .single();
+
+        // Determine guarantee level based on platform
+        const platform = ticketData?.source_platform?.toLowerCase() || "";
+        let guaranteeLevel = "yellow";
+        const greenPlatforms = ["sympla", "eventim", "ticket360", "ticketmaster", "quentro", "ingresse", "bilheteria digital", "guiche web", "blueticket", "uhuu", "ingresso digital", "articket"];
+        const orangePlatforms = ["ticket maker", "ticketmaker"];
+        if (greenPlatforms.some(p => platform.includes(p))) guaranteeLevel = "green";
+        else if (orangePlatforms.some(p => platform.includes(p))) guaranteeLevel = "orange";
+
+        // Generate transfer instructions based on platform
+        const transferInstructions = getTransferInstructions(platform, guaranteeLevel);
+
         // Create wallet transaction for seller (pending until event passes)
         const sellerAmount = neg.offer_price - (neg.platform_fee || 0);
         await supabaseAdmin
@@ -86,6 +104,22 @@ serve(async (req) => {
             buyer_id: neg.buyer_id,
             token,
             expires_at: expiresAt,
+          });
+
+        // Create ticket_transfer record for tracking
+        await supabaseAdmin
+          .from("ticket_transfers")
+          .insert({
+            negotiation_id: negotiation_id,
+            ticket_id: neg.ticket_id,
+            seller_id: neg.seller_id,
+            buyer_id: neg.buyer_id,
+            status: guaranteeLevel === "yellow" ? "transferred" : "pending_transfer",
+            platform: ticketData?.source_platform || "unknown",
+            guarantee_level: guaranteeLevel,
+            transfer_instructions: transferInstructions,
+            // Yellow level = custody, auto-delivered, so mark as transferred
+            transferred_at: guaranteeLevel === "yellow" ? new Date().toISOString() : null,
           });
       }
 
