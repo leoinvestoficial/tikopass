@@ -211,6 +211,7 @@ export default function AdminPage() {
           <>
             {tab === "tickets" && <AdminTicketsTab tickets={filteredTickets} onRefresh={fetchTickets} />}
             {tab === "users" && <AdminUsersTab users={filteredUsers} onRefresh={fetchUsers} userEmails={userEmails} />}
+            {tab === "disputes" && <AdminDisputesTab />}
             {tab === "financial" && <AdminFinancialTab />}
             {tab === "wallets" && <AdminWalletsTab />}
           </>
