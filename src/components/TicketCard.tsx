@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
-import { MapPin, Calendar, Tag, TrendingDown } from "lucide-react";
+import { MapPin, Calendar, Tag, TrendingDown, Star } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import SellerLevelBadge, { getSellerLevel } from "@/components/SellerLevelBadge";
 
 interface TicketCardEvent {
   id: string;
@@ -26,6 +27,9 @@ interface TicketCardProps {
     sellerName?: string;
     event?: TicketCardEvent;
     events?: TicketCardEvent;
+    seller_avg_rating?: number | null;
+    seller_rating_count?: number;
+    seller_sales_count?: number;
   };
   index?: number;
 }
