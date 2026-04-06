@@ -5,20 +5,22 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Shield, Search, ArrowLeft, Users, Ticket, RefreshCw, BarChart3, Wallet } from "lucide-react";
+import { Shield, Search, ArrowLeft, Users, Ticket, RefreshCw, BarChart3, Wallet, AlertTriangle } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import AdminTicketsTab from "@/components/admin/AdminTicketsTab";
 import AdminUsersTab from "@/components/admin/AdminUsersTab";
 import AdminFinancialTab from "@/components/admin/AdminFinancialTab";
 import AdminWalletsTab from "@/components/admin/AdminWalletsTab";
+import AdminDisputesTab from "@/components/admin/AdminDisputesTab";
 
 const ADMIN_EMAILS = ["matheus@tikopass.com", "admin@tikopass.com", "leonardo@bebaflow.com"];
 
-type TabType = "tickets" | "users" | "financial" | "wallets";
+type TabType = "tickets" | "users" | "financial" | "wallets" | "disputes";
 
 const TABS: { id: TabType; label: string; icon: any }[] = [
   { id: "tickets", label: "Ingressos", icon: Ticket },
   { id: "users", label: "Usuários", icon: Users },
+  { id: "disputes", label: "Contestações", icon: AlertTriangle },
   { id: "financial", label: "Financeiro", icon: BarChart3 },
   { id: "wallets", label: "Carteiras", icon: Wallet },
 ];
