@@ -7,6 +7,21 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+function getTransferInstructions(platform: string, level: string): string {
+  const p = platform.toLowerCase();
+  if (p.includes("sympla")) return "Acesse o app Sympla → Meus Ingressos → Transferir → insira o e-mail do comprador. Se o ingresso não for transferível, acesse pelo site, tire print do QR e envie pelo chat.";
+  if (p.includes("eventim")) return "Acesse eventim.com.br → encontre o ingresso → clique em 'Transferir Ingresso' → copie o link gerado → envie ao comprador pelo chat.";
+  if (p.includes("ticket360")) return "Acesse o app Ticket360 → Meus Ingressos → transfira para o e-mail do comprador. Limite: 2 ingressos por CPF. Bloqueio 2h após abertura.";
+  if (p.includes("ticket maker") || p.includes("ticketmaker")) return "Acesse ticketmaker.com.br ou o app → localize o ingresso → use a opção de transferência de titularidade → insira o e-mail do comprador. A transferência é única e invalida o original.";
+  if (p.includes("ticketmaster") || p.includes("quentro")) return "Abra o app Quentro → localize o ingresso → toque em Transferir → insira o e-mail do comprador. O comprador precisa ter conta no Quentro.";
+  if (p.includes("ingresse")) return "Acesse o app Ingresse → Meus Ingressos → Transferir → insira o e-mail do comprador.";
+  if (p.includes("bilheteria digital")) return "Acesse o app Bilheteria Digital → Meus Ingressos → Transferir → insira o e-mail do comprador. Transferência única.";
+  if (p.includes("livepass")) return "Ingresso em custódia — entregue automaticamente ao comprador após confirmação do pagamento. Nenhuma ação necessária.";
+  if (p.includes("tickets for fun") || p.includes("t4f")) return "Envie o PDF pelo chat da Tiko Pass após confirmação do pagamento. Mantenha a compra ativa na T4F até o evento.";
+  if (level === "yellow") return "O arquivo do ingresso está em custódia e será entregue automaticamente ao comprador. Nenhuma ação necessária.";
+  return "Transfira o ingresso para o comprador seguindo as instruções da plataforma de origem e confirme a transferência pelo chat.";
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
