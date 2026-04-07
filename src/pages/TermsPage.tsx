@@ -168,14 +168,14 @@ export default function TermsPage() {
         <h2>13. Legislação Aplicável e Foro</h2>
         <p>Estes termos são regidos pela legislação brasileira. Fica eleito o foro da comarca de Salvador/BA para dirimir eventuais controvérsias, com renúncia a qualquer outro, por mais privilegiado que seja.</p>
 
-        <h2>13. Disposições Gerais</h2>
+        <h2>14. Disposições Gerais</h2>
         <ul>
           <li>A eventual invalidade de qualquer cláusula não afeta as demais</li>
           <li>A tolerância quanto ao descumprimento de qualquer obrigação não implica renúncia ao direito de exigir seu cumprimento</li>
           <li>Estes termos constituem o acordo integral entre as partes</li>
         </ul>
 
-        <h2>14. Contato</h2>
+        <h2>15. Contato</h2>
         <p>Para dúvidas sobre estes termos:</p>
         <ul>
           <li><strong>E-mail:</strong> suporte@tiko.com.br</li>
