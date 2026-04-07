@@ -249,33 +249,75 @@ export default function WalletPage() {
                     const config = statusConfig[tx.status] || statusConfig.pending;
                     const StatusIcon = config.icon;
                     return (
-                      <div key={tx.id} className="bg-card border border-border rounded-xl p-4 flex items-center justify-between gap-4">
-                        <div className="flex items-center gap-3">
-                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${tx.type === "sale" ? "bg-success/10" : "bg-destructive/10"}`}>
-                            {tx.type === "sale" ? (
-                              <ArrowDownCircle className="w-5 h-5 text-success" />
-                            ) : (
-                              <ArrowUpCircle className="w-5 h-5 text-destructive" />
+                      <div key={tx.id} className="bg-card border border-border rounded-xl p-4 space-y-3">
+                        <div className="flex items-center justify-between gap-4">
+                          <div className="flex items-center gap-3">
+                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${tx.type === "sale" ? "bg-success/10" : "bg-destructive/10"}`}>
+                              {tx.type === "sale" ? (
+                                <ArrowDownCircle className="w-5 h-5 text-success" />
+                              ) : (
+                                <ArrowUpCircle className="w-5 h-5 text-destructive" />
+                              )}
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-foreground">{tx.event_name || tx.description || "Transação"}</p>
+                              <p className="text-xs text-muted-foreground">
+                                {new Date(tx.created_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" })}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <Badge className={`text-xs gap-1 ${config.className}`}>
+                              <StatusIcon className="w-3 h-3" />
+                              {config.label}
+                            </Badge>
+                            <span className={`font-display font-bold text-lg ${tx.type === "sale" ? "text-success" : "text-destructive"}`}>
+                              {tx.type === "sale" ? "+" : "-"}R$ {tx.amount.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Detailed breakdown for sale transactions */}
+                        {tx.type === "sale" && (tx.platform_fee || tx.released_at || tx.estimated_release) && (
+                          <div className="bg-muted/30 rounded-lg px-3 py-2 text-xs text-muted-foreground space-y-1 ml-13">
+                            {tx.platform_fee != null && (
+                              <div className="flex justify-between">
+                                <span>Valor bruto (comprador pagou)</span>
+                                <span>R$ {(tx.amount + tx.platform_fee).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
+                              </div>
+                            )}
+                            {tx.platform_fee != null && (
+                              <div className="flex justify-between">
+                                <span>Taxa Tiko Pass</span>
+                                <span>- R$ {tx.platform_fee.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
+                              </div>
+                            )}
+                            {tx.platform_fee != null && (
+                              <div className="flex justify-between font-medium text-foreground border-t border-border pt-1">
+                                <span>Valor líquido</span>
+                                <span>R$ {tx.amount.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
+                              </div>
+                            )}
+                            {tx.released_at && (
+                              <div className="flex justify-between pt-1">
+                                <span>Liberado em</span>
+                                <span>{new Date(tx.released_at).toLocaleDateString("pt-BR")}</span>
+                              </div>
+                            )}
+                            {tx.withdrawn_at && (
+                              <div className="flex justify-between">
+                                <span>Sacado em</span>
+                                <span>{new Date(tx.withdrawn_at).toLocaleDateString("pt-BR")}</span>
+                              </div>
+                            )}
+                            {!tx.released_at && tx.estimated_release && tx.status === "pending" && (
+                              <div className="flex justify-between">
+                                <span>Liberação prevista</span>
+                                <span>{new Date(tx.estimated_release).toLocaleDateString("pt-BR")}</span>
+                              </div>
                             )}
                           </div>
-                          <div>
-                            <p className="text-sm font-medium text-foreground">{tx.description || "Transação"}</p>
-                            <p className="text-xs text-muted-foreground">
-                              {new Date(tx.created_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" })}
-                              {tx.released_at && ` · Liberado em ${new Date(tx.released_at).toLocaleDateString("pt-BR")}`}
-                              {tx.withdrawn_at && ` · Sacado em ${new Date(tx.withdrawn_at).toLocaleDateString("pt-BR")}`}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <Badge className={`text-xs gap-1 ${config.className}`}>
-                            <StatusIcon className="w-3 h-3" />
-                            {config.label}
-                          </Badge>
-                          <span className={`font-display font-bold text-lg ${tx.type === "sale" ? "text-success" : "text-destructive"}`}>
-                            {tx.type === "sale" ? "+" : "-"}R$ {tx.amount.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-                          </span>
-                        </div>
+                        )}
                       </div>
                     );
                   })}
