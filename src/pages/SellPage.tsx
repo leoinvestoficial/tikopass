@@ -31,7 +31,7 @@ export default function SellPage() {
   const [searching, setSearching] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [ticketForm, setTicketForm] = useState({ sector: "", row: "", seat: "", price: "" });
+  const [ticketForm, setTicketForm] = useState({ sector: "", row: "", seat: "", price: "", originalPrice: "" });
   const [editedEvent, setEditedEvent] = useState<AIEvent | null>(null);
   const [ticketFile, setTicketFile] = useState<File | null>(null);
   const [validationStatus, setValidationStatus] = useState<string>("pending_validation");
