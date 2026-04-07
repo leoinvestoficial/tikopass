@@ -154,7 +154,7 @@ export default function TermsPage() {
           <li>Reportar atividades ilegais às autoridades competentes</li>
         </ul>
 
-        <h2>10. Exclusão de Conta</h2>
+        <h2>11. Exclusão de Conta</h2>
         <ul>
           <li>O usuário pode solicitar a exclusão da conta a qualquer momento pelo Perfil</li>
           <li>Transações em andamento devem ser finalizadas antes da exclusão</li>
