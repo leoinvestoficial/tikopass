@@ -85,21 +85,52 @@ export default function TermsPage() {
         <h2>6. Pagamentos e Taxas</h2>
         <h3>6.1. Taxa de Serviço</h3>
         <ul>
-          <li>A plataforma cobra uma taxa de <strong>10% sobre o valor da venda</strong>, descontada do valor repassado ao vendedor</li>
+          <li>A plataforma cobra uma taxa de <strong>10% sobre o valor do ingresso, paga pelo comprador</strong></li>
+          <li>O vendedor recebe 100% do valor que definiu para o ingresso, sem descontos</li>
+          <li>A taxa é exibida de forma destacada antes da confirmação do pagamento, conforme determinação do STJ</li>
+          <li>Exemplo: Ingresso R$ 180,00 + Taxa Tiko Pass R$ 18,00 = <strong>Total: R$ 198,00</strong></li>
           <li>Essa taxa cobre: validação por IA, intermediação, processamento de pagamento e suporte</li>
         </ul>
 
         <h3>6.2. Pagamento Protegido (Escrow)</h3>
         <ul>
           <li>O valor pago pelo comprador fica <strong>retido pela plataforma</strong> durante o período de proteção</li>
-          <li>O valor é liberado ao vendedor na <strong>Carteira Tiko</strong> após o evento</li>
-          <li>O vendedor pode solicitar saque do saldo disponível na carteira a qualquer momento</li>
+          <li>O valor é liberado ao vendedor na <strong>Carteira Tiko</strong> automaticamente 24 horas após a realização do evento, desde que não haja contestação aberta</li>
+          <li>O vendedor pode solicitar saque do saldo disponível na carteira a qualquer momento via Pix</li>
         </ul>
 
         <h3>6.3. Reembolsos</h3>
         <ul>
           <li>Em caso de ingresso comprovadamente inválido, o comprador será reembolsado integralmente</li>
           <li>Cancelamentos de eventos pelo organizador não são de responsabilidade da Tiko Pass — o comprador deve buscar reembolso junto ao organizador</li>
+        </ul>
+
+        <h2>7. Política de Contestação</h2>
+        <h3>7.1. Prazo</h3>
+        <ul>
+          <li>O comprador tem até <strong>24 horas após a realização do evento</strong> para abrir uma contestação</li>
+          <li>Após esse prazo, o pagamento é automaticamente liberado ao vendedor</li>
+        </ul>
+
+        <h3>7.2. Como abrir uma contestação</h3>
+        <ul>
+          <li>Acesse "Meus Ingressos" na aba "Comprados"</li>
+          <li>Clique em "Abrir contestação" no ingresso em questão</li>
+          <li>Descreva o problema detalhadamente (ingresso inválido, não recebido, dados incorretos, etc.)</li>
+        </ul>
+
+        <h3>7.3. Análise e resolução</h3>
+        <ul>
+          <li>A equipe Tiko Pass analisará as evidências de ambas as partes (comprador e vendedor)</li>
+          <li>O prazo de resolução é de até <strong>48 horas úteis</strong> após a abertura da contestação</li>
+          <li>Durante a análise, o pagamento permanece retido</li>
+        </ul>
+
+        <h3>7.4. Possíveis resultados</h3>
+        <ul>
+          <li><strong>Reembolso ao comprador:</strong> se comprovada a invalidade do ingresso ou descumprimento por parte do vendedor</li>
+          <li><strong>Liberação ao vendedor:</strong> se a contestação for considerada improcedente</li>
+          <li>A decisão da plataforma é final nos casos que envolvam o pagamento retido</li>
         </ul>
 
         <h2>7. Propriedade Intelectual</h2>
