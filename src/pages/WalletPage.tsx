@@ -67,7 +67,38 @@ export default function WalletPage() {
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
       if (error) throw error;
-      setTransactions((data as WalletTransaction[]) || []);
+
+      // Enrich transactions with negotiation/event data
+      const txs = (data || []) as WalletTransaction[];
+      const negIds = [...new Set(txs.filter(t => t.negotiation_id).map(t => t.negotiation_id!))];
+      
+      if (negIds.length > 0) {
+        const { data: negs } = await supabase
+          .from("negotiations")
+          .select("id, offer_price, platform_fee, ticket_id, tickets(event_id, events(name, date))")
+          .in("id", negIds);
+        
+        const negMap = new Map((negs || []).map((n: any) => [n.id, n]));
+        
+        txs.forEach(tx => {
+          if (tx.negotiation_id && negMap.has(tx.negotiation_id)) {
+            const neg = negMap.get(tx.negotiation_id)!;
+            const event = (neg as any).tickets?.events;
+            tx.event_name = event?.name || undefined;
+            tx.event_date = event?.date || undefined;
+            tx.platform_fee = (neg as any).platform_fee || (neg as any).offer_price * 0.10;
+            tx.net_amount = tx.amount;
+            // Estimate release: 24h after event date
+            if (event?.date && tx.status === "pending") {
+              const eventDate = new Date(event.date);
+              eventDate.setHours(eventDate.getHours() + 24);
+              tx.estimated_release = eventDate.toISOString();
+            }
+          }
+        });
+      }
+
+      setTransactions(txs);
     } catch (err) {
       console.error(err);
     } finally {
