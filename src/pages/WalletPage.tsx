@@ -24,6 +24,11 @@ type WalletTransaction = {
   created_at: string;
   released_at: string | null;
   withdrawn_at: string | null;
+  event_name?: string;
+  event_date?: string;
+  platform_fee?: number;
+  net_amount?: number;
+  estimated_release?: string;
 };
 
 const statusConfig: Record<string, { label: string; icon: any; className: string }> = {
