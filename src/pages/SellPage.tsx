@@ -364,7 +364,6 @@ export default function SellPage() {
                     </div>
                   )}
                 </div>
-                </div>
               </div>
 
               {/* File upload */}
