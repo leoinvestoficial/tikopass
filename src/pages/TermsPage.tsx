@@ -145,7 +145,7 @@ export default function TermsPage() {
           <li>O uso de ingressos adquiridos está sujeito às regras do organizador do evento</li>
         </ul>
 
-        <h2>9. Penalidades e Suspensão</h2>
+        <h2>10. Penalidades e Suspensão</h2>
         <p>A Tiko Pass pode, a seu exclusivo critério:</p>
         <ul>
           <li>Suspender ou encerrar contas que violem estes termos</li>
