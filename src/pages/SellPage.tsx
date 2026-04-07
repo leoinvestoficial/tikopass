@@ -108,7 +108,7 @@ export default function SellPage() {
     if (!savedEventId || !user || !ticketFile) return;
     setSubmitting(true);
     try {
-      const ticket = await createTicket({ event_id: savedEventId, seller_id: user.id, sector: ticketForm.sector, row: ticketForm.row || undefined, seat: ticketForm.seat || undefined, price: parseFloat(ticketForm.price) });
+      const ticket = await createTicket({ event_id: savedEventId, seller_id: user.id, sector: ticketForm.sector, row: ticketForm.row || undefined, seat: ticketForm.seat || undefined, price: parseFloat(ticketForm.price), original_price: ticketForm.originalPrice ? parseFloat(ticketForm.originalPrice) : undefined });
       setSavedTicketId(ticket.id);
       setUploading(true);
       const formData = new FormData();
