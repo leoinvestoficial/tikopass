@@ -85,15 +85,18 @@ export default function TermsPage() {
         <h2>6. Pagamentos e Taxas</h2>
         <h3>6.1. Taxa de Serviço</h3>
         <ul>
-          <li>A plataforma cobra uma taxa de <strong>10% sobre o valor da venda</strong>, descontada do valor repassado ao vendedor</li>
+          <li>A plataforma cobra uma taxa de <strong>10% sobre o valor do ingresso, paga pelo comprador</strong></li>
+          <li>O vendedor recebe 100% do valor que definiu para o ingresso, sem descontos</li>
+          <li>A taxa é exibida de forma destacada antes da confirmação do pagamento, conforme determinação do STJ</li>
+          <li>Exemplo: Ingresso R$ 180,00 + Taxa Tiko Pass R$ 18,00 = <strong>Total: R$ 198,00</strong></li>
           <li>Essa taxa cobre: validação por IA, intermediação, processamento de pagamento e suporte</li>
         </ul>
 
         <h3>6.2. Pagamento Protegido (Escrow)</h3>
         <ul>
           <li>O valor pago pelo comprador fica <strong>retido pela plataforma</strong> durante o período de proteção</li>
-          <li>O valor é liberado ao vendedor na <strong>Carteira Tiko</strong> após o evento</li>
-          <li>O vendedor pode solicitar saque do saldo disponível na carteira a qualquer momento</li>
+          <li>O valor é liberado ao vendedor na <strong>Carteira Tiko</strong> automaticamente 24 horas após a realização do evento, desde que não haja contestação aberta</li>
+          <li>O vendedor pode solicitar saque do saldo disponível na carteira a qualquer momento via Pix</li>
         </ul>
 
         <h3>6.3. Reembolsos</h3>
@@ -102,10 +105,39 @@ export default function TermsPage() {
           <li>Cancelamentos de eventos pelo organizador não são de responsabilidade da Tiko Pass — o comprador deve buscar reembolso junto ao organizador</li>
         </ul>
 
-        <h2>7. Propriedade Intelectual</h2>
+        <h2>7. Política de Contestação</h2>
+        <h3>7.1. Prazo</h3>
+        <ul>
+          <li>O comprador tem até <strong>24 horas após a realização do evento</strong> para abrir uma contestação</li>
+          <li>Após esse prazo, o pagamento é automaticamente liberado ao vendedor</li>
+        </ul>
+
+        <h3>7.2. Como abrir uma contestação</h3>
+        <ul>
+          <li>Acesse "Meus Ingressos" na aba "Comprados"</li>
+          <li>Clique em "Abrir contestação" no ingresso em questão</li>
+          <li>Descreva o problema detalhadamente (ingresso inválido, não recebido, dados incorretos, etc.)</li>
+        </ul>
+
+        <h3>7.3. Análise e resolução</h3>
+        <ul>
+          <li>A equipe Tiko Pass analisará as evidências de ambas as partes (comprador e vendedor)</li>
+          <li>O prazo de resolução é de até <strong>48 horas úteis</strong> após a abertura da contestação</li>
+          <li>Durante a análise, o pagamento permanece retido</li>
+        </ul>
+
+        <h3>7.4. Possíveis resultados</h3>
+        <ul>
+          <li><strong>Reembolso ao comprador:</strong> se comprovada a invalidade do ingresso ou descumprimento por parte do vendedor</li>
+          <li><strong>Liberação ao vendedor:</strong> se a contestação for considerada improcedente</li>
+          <li>A decisão da plataforma é final nos casos que envolvam o pagamento retido</li>
+        </ul>
+
+        <h2>8. Propriedade Intelectual</h2>
         <p>Todo o conteúdo da plataforma (marca, logotipo, design, código, textos) é de propriedade da Tiko Pass e protegido pela legislação de propriedade intelectual. É proibida a reprodução sem autorização prévia.</p>
 
-        <h2>8. Limitação de Responsabilidade</h2>
+        <h2>9. Limitação de Responsabilidade</h2>
+        <p><strong>A Tiko Pass é um marketplace — intermediamos a revenda entre pessoas físicas. Não somos revendedores de ingressos.</strong></p>
         <ul>
           <li>A Tiko Pass <strong>não garante a realização dos eventos</strong> listados na plataforma</li>
           <li>Não nos responsabilizamos por eventos cancelados, adiados ou alterados pelos organizadores</li>
@@ -113,7 +145,7 @@ export default function TermsPage() {
           <li>O uso de ingressos adquiridos está sujeito às regras do organizador do evento</li>
         </ul>
 
-        <h2>9. Penalidades e Suspensão</h2>
+        <h2>10. Penalidades e Suspensão</h2>
         <p>A Tiko Pass pode, a seu exclusivo critério:</p>
         <ul>
           <li>Suspender ou encerrar contas que violem estes termos</li>
@@ -122,7 +154,7 @@ export default function TermsPage() {
           <li>Reportar atividades ilegais às autoridades competentes</li>
         </ul>
 
-        <h2>10. Exclusão de Conta</h2>
+        <h2>11. Exclusão de Conta</h2>
         <ul>
           <li>O usuário pode solicitar a exclusão da conta a qualquer momento pelo Perfil</li>
           <li>Transações em andamento devem ser finalizadas antes da exclusão</li>
@@ -130,20 +162,20 @@ export default function TermsPage() {
           <li>Após a exclusão, os dados são removidos conforme a <a href="/privacy">Política de Privacidade</a></li>
         </ul>
 
-        <h2>11. Resolução de Conflitos</h2>
-        <p>Em caso de disputas entre compradores e vendedores, a Tiko Pass poderá atuar como mediadora, analisando as evidências e tomando decisão com base nas políticas da plataforma. A decisão da plataforma é final nos casos em que envolvam o pagamento retido.</p>
+        <h2>12. Resolução de Conflitos</h2>
+        <p>Em caso de disputas entre compradores e vendedores, a Tiko Pass atuará como mediadora conforme a Seção 7 (Política de Contestação). A decisão da plataforma é final nos casos que envolvam o pagamento retido.</p>
 
-        <h2>12. Legislação Aplicável e Foro</h2>
+        <h2>13. Legislação Aplicável e Foro</h2>
         <p>Estes termos são regidos pela legislação brasileira. Fica eleito o foro da comarca de Salvador/BA para dirimir eventuais controvérsias, com renúncia a qualquer outro, por mais privilegiado que seja.</p>
 
-        <h2>13. Disposições Gerais</h2>
+        <h2>14. Disposições Gerais</h2>
         <ul>
           <li>A eventual invalidade de qualquer cláusula não afeta as demais</li>
           <li>A tolerância quanto ao descumprimento de qualquer obrigação não implica renúncia ao direito de exigir seu cumprimento</li>
           <li>Estes termos constituem o acordo integral entre as partes</li>
         </ul>
 
-        <h2>14. Contato</h2>
+        <h2>15. Contato</h2>
         <p>Para dúvidas sobre estes termos:</p>
         <ul>
           <li><strong>E-mail:</strong> suporte@tiko.com.br</li>

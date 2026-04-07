@@ -94,15 +94,21 @@ export default function TicketCard({ ticket, index = 0 }: TicketCardProps) {
           </div>
 
           <div className="flex items-end justify-between pt-2 border-t border-border">
-            <div>
+            <div className="space-y-0.5">
               {origPrice && (
-                <span className="text-xs text-muted-foreground line-through block">
-                  R$ {origPrice.toLocaleString("pt-BR")}
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] text-muted-foreground">Original:</span>
+                  <span className="text-xs text-muted-foreground line-through">
+                    R$ {origPrice.toLocaleString("pt-BR")}
+                  </span>
+                </div>
               )}
-              <span className="font-display font-bold text-xl text-foreground">
-                R$ {ticket.price.toLocaleString("pt-BR")}
-              </span>
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-[11px] text-muted-foreground">{origPrice ? "Revenda:" : ""}</span>
+                <span className="font-display font-bold text-xl text-foreground">
+                  R$ {ticket.price.toLocaleString("pt-BR")}
+                </span>
+              </div>
             </div>
             <div className="flex flex-col items-end gap-1">
               {ticket.seller_avg_rating != null && (ticket.seller_rating_count || 0) > 0 && (

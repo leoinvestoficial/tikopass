@@ -1,47 +1,29 @@
+## Plano de implementação
 
-## Lacunas identificadas no fluxo do comprador
+### 1. Formulário /sell em 4 etapas (modelo VMI)
+- **Etapa 1**: Busca do evento pelo nome (autocomplete)
+- **Etapa 2**: Setor, fileira, assento e quantidade
+- **Etapa 3**: Preço livre (sem teto) + preço original para comparação
+- **Etapa 4**: Upload do ingresso + validação por IA com loading animado
+- Stepper visual com progresso entre etapas
+- Upload vai para o final (vendedor já está comprometido)
 
-### 🔴 Críticas (não implementadas)
+### 2. Taxa 10% transparente no checkout
+- Antes do pagamento, exibir com destaque:
+  - "Ingresso: R$180 + Taxa Tiko Pass: R$18 = Total: R$198"
+- Taxa paga pelo comprador, 0% do vendedor
+- Conformidade com STJ
 
-1. **Fluxo de transferência de ingresso (Seção 3.5 + 4.3 + 6)**
-   - Atualmente: comprador recebe apenas um token para ver o PDF. Não há rastreamento de transferência.
-   - Documento: status em tempo real no `/my-tickets` → "Aguardando transferência" → "Transferido" → "Confirmado"
-   - Documento: instruções automáticas por plataforma (Sympla, Eventim, Ticket Maker, etc.)
-   - Documento: comprador confirma recebimento na plataforma
-   - **Ação**: Criar tabela `ticket_transfers` com status tracking, UI de progresso no `/my-tickets`, instruções por plataforma
+### 3. Comparação de preços nos cards de ingresso
+- Exibir "Preço original: R$120" vs "Preço de revenda: R$180" nos TicketCards
+- Usar campo `original_price` já existente na tabela tickets
 
-2. **Níveis de garantia nos cards (Seção 5)**
-   - Não existe badge Verde/Amarelo/Laranja nos cards de ingresso
-   - Documento: comprador vê o nível ANTES de pagar
-   - **Ação**: Detectar plataforma de origem (já extraída pelo OCR) e exibir badge de garantia
+### 4. Histórico detalhado na carteira
+- Listar por transação: nome do evento, data da venda, valor bruto, taxa da plataforma, valor líquido, status (pendente/disponível/sacado), data prevista de liberação
+- Melhorar a WalletPage com tabela/cards detalhados
 
-3. **Janela de contestação (Seção 4.4)**
-   - Atualmente: `release-payments` libera automaticamente 2h após o evento
-   - Documento: comprador tem 24h após o evento para contestar
-   - **Ação**: Ajustar timer para 24h, adicionar botão "Abrir contestação" no `/my-tickets`
-
-4. **Confirmação de recebimento pelo comprador (Seção 3.6)**
-   - Atualmente: não existe
-   - Documento: comprador confirma que recebeu → abre janela de contestação → sem contestação = liberação
-   - **Ação**: Botão "Confirmar recebimento" que muda status e inicia contagem de contestação
-
-### 🟡 Importantes (parcialmente implementadas)
-
-5. **Níveis de vendedor (Seção 8.2)**
-   - Tabela `seller_ratings` existe mas não há cálculo de nível
-   - Documento: Novo → Iniciante → Confiável → Verificado → Top Seller
-   - **Ação**: Função que calcula nível + badge visual nos cards e perfil
-
-6. **Avaliação pós-compra (Seção 4.5)**
-   - Tabela existe, mas não há UI para o comprador avaliar após o evento
-   - **Ação**: Modal de avaliação no `/my-tickets` para negociações concluídas
-
-### 🟢 Menores
-
-7. **Badge de nível do vendedor nos cards de ingresso**
-8. **Número de vendas anteriores visível no perfil**
-
----
-
-### Sugestão de prioridade
-Implementar na ordem: 1 → 4 → 3 → 2 → 5 → 6 (fluxo de transferência primeiro, pois é o core da proposta de valor)
+### 5. Documentos legais (modelo base)
+- Gerar Termos de Uso adaptado ao modelo P2P
+- Gerar Política de Privacidade LGPD
+- Gerar Política de Contestação (24h pós-evento)
+- Implementar nas páginas /terms e /privacy existentes

@@ -300,31 +300,40 @@ export default function NegotiationsPage() {
                           </div>
 
                           {/* Price breakdown card */}
-                          <div className="inline-flex items-center gap-4 bg-background rounded-xl px-4 py-2.5 border border-border text-sm">
-                            <div>
-                              <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">
-                                {activeNeg.status === "counter" ? "Contraproposta" : "Oferta"}
+                          <div className="bg-background rounded-xl px-4 py-3 border border-border text-sm space-y-2">
+                            <div className="flex justify-between items-center">
+                              <span className="text-muted-foreground text-xs">
+                                Ingresso ({activeNeg.status === "counter" ? "contraproposta" : "oferta"})
                               </span>
-                              <span className="font-bold text-foreground text-lg">
-                                R$ {activePrice?.toLocaleString("pt-BR")}
+                              <span className="font-semibold text-foreground">
+                                R$ {activePrice?.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
                               </span>
                             </div>
-                            <div className="w-px h-8 bg-border" />
-                            {isSeller ? (
-                              <div>
-                                <span className="text-[10px] font-bold uppercase tracking-wider text-success block">Você recebe</span>
-                                <span className="font-bold text-success text-lg">
-                                  R$ {sellerNetAmount.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-                                </span>
-                              </div>
-                            ) : (
-                              <div>
-                                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">Total c/ taxa</span>
-                                <span className="font-bold text-foreground text-lg">
-                                  R$ {buyerTotalAmount.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                            {isBuyer && (
+                              <div className="flex justify-between items-center">
+                                <span className="text-muted-foreground text-xs">Taxa Tiko Pass (10%)</span>
+                                <span className="text-muted-foreground">
+                                  + R$ {((activePrice || 0) * PLATFORM_FEE).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
                                 </span>
                               </div>
                             )}
+                            <div className="border-t border-border pt-2 flex justify-between items-center">
+                              {isSeller ? (
+                                <>
+                                  <span className="text-[10px] font-bold uppercase tracking-wider text-success">Você recebe</span>
+                                  <span className="font-bold text-success text-lg">
+                                    R$ {sellerNetAmount.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                                  </span>
+                                </>
+                              ) : (
+                                <>
+                                  <span className="text-[10px] font-bold uppercase tracking-wider text-foreground">Total a pagar</span>
+                                  <span className="font-bold text-foreground text-lg">
+                                    R$ {buyerTotalAmount.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                                  </span>
+                                </>
+                              )}
+                            </div>
                           </div>
                         </div>
                         <div className="flex items-center gap-2 flex-wrap">

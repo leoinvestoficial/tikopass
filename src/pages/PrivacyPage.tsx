@@ -84,7 +84,7 @@ export default function PrivacyPage() {
         <p>Seus dados pessoais <strong>nunca são vendidos</strong>. O compartilhamento ocorre apenas nos seguintes casos:</p>
         <ul>
           <li><strong>Com outros usuários:</strong> durante negociações, compartilhamos apenas seu nome de exibição, foto de perfil, cidade e avaliações públicas. CPF e dados sensíveis <strong>nunca</strong> são compartilhados</li>
-          <li><strong>Com processadores de pagamento:</strong> dados necessários para processar transações financeiras de forma segura (Stripe)</li>
+          <li><strong>Com processadores de pagamento:</strong> dados necessários para processar transações financeiras de forma segura</li>
           <li><strong>Com autoridades competentes:</strong> quando exigido por lei, ordem judicial ou requisição de autoridade pública</li>
           <li><strong>Com prestadores de serviço:</strong> serviços de infraestrutura, hospedagem e inteligência artificial utilizados para o funcionamento da plataforma, sempre sob contratos de confidencialidade</li>
         </ul>

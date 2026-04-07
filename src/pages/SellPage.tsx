@@ -31,7 +31,7 @@ export default function SellPage() {
   const [searching, setSearching] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [ticketForm, setTicketForm] = useState({ sector: "", row: "", seat: "", price: "" });
+  const [ticketForm, setTicketForm] = useState({ sector: "", row: "", seat: "", price: "", originalPrice: "" });
   const [editedEvent, setEditedEvent] = useState<AIEvent | null>(null);
   const [ticketFile, setTicketFile] = useState<File | null>(null);
   const [validationStatus, setValidationStatus] = useState<string>("pending_validation");
@@ -108,7 +108,7 @@ export default function SellPage() {
     if (!savedEventId || !user || !ticketFile) return;
     setSubmitting(true);
     try {
-      const ticket = await createTicket({ event_id: savedEventId, seller_id: user.id, sector: ticketForm.sector, row: ticketForm.row || undefined, seat: ticketForm.seat || undefined, price: parseFloat(ticketForm.price) });
+      const ticket = await createTicket({ event_id: savedEventId, seller_id: user.id, sector: ticketForm.sector, row: ticketForm.row || undefined, seat: ticketForm.seat || undefined, price: parseFloat(ticketForm.price), original_price: ticketForm.originalPrice ? parseFloat(ticketForm.originalPrice) : undefined });
       setSavedTicketId(ticket.id);
       setUploading(true);
       const formData = new FormData();
@@ -135,7 +135,7 @@ export default function SellPage() {
 
   const resetForm = () => {
     setStep("search"); setSearchQuery(""); setAiResults([]); setSelectedEvent(null);
-    setSavedEventId(null); setSavedTicketId(null); setTicketForm({ sector: "", row: "", seat: "", price: "" });
+    setSavedEventId(null); setSavedTicketId(null); setTicketForm({ sector: "", row: "", seat: "", price: "", originalPrice: "" });
     setTicketFile(null); setValidationStatus("pending_validation"); setValidationMessage("");
     setValidationChecks([]);
   };
@@ -338,22 +338,31 @@ export default function SellPage() {
                     <Label htmlFor="seat" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Assento</Label>
                     <Input id="seat" placeholder="Ex: 12 (opcional)" value={ticketForm.seat} onChange={(e) => setTicketForm({ ...ticketForm, seat: e.target.value })} className="rounded-xl h-11" />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="price" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Preço (R$) *</Label>
-                    <Input id="price" type="number" placeholder="Ex: 500" value={ticketForm.price} onChange={(e) => setTicketForm({ ...ticketForm, price: e.target.value })} className="rounded-xl h-11" />
-                    {ticketForm.price && parseFloat(ticketForm.price) > 0 && (
-                      <div className="bg-success/10 rounded-lg px-3 py-2.5 text-sm flex items-center gap-2">
-                        <CheckCircle2 className="w-4 h-4 text-success shrink-0" />
-                        <span>
-                          Você recebe{" "}
-                          <span className="font-bold text-success">
-                            R$ {parseFloat(ticketForm.price).toFixed(2).replace(".", ",")}
-                          </span>{" "}
-                          <span className="text-xs text-muted-foreground">— o comprador paga a taxa de 10%</span>
-                        </span>
-                      </div>
-                    )}
+                   <div className="space-y-2">
+                    <Label htmlFor="originalPrice" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Preço original (R$)</Label>
+                    <Input id="originalPrice" type="number" placeholder="Valor de face do ingresso" value={ticketForm.originalPrice} onChange={(e) => setTicketForm({ ...ticketForm, originalPrice: e.target.value })} className="rounded-xl h-11" />
+                    <p className="text-[11px] text-muted-foreground">Informe o valor que você pagou originalmente</p>
                   </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="price" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Preço de revenda (R$) *</Label>
+                  <Input id="price" type="number" placeholder="Quanto você quer receber" value={ticketForm.price} onChange={(e) => setTicketForm({ ...ticketForm, price: e.target.value })} className="rounded-xl h-11" />
+                  {ticketForm.price && parseFloat(ticketForm.price) > 0 && (
+                    <div className="bg-card border border-border rounded-xl p-3 space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Você recebe</span>
+                        <span className="font-bold text-success">R$ {parseFloat(ticketForm.price).toFixed(2).replace(".", ",")}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Taxa Tiko Pass (10%)</span>
+                        <span className="text-muted-foreground">+ R$ {(parseFloat(ticketForm.price) * 0.10).toFixed(2).replace(".", ",")}</span>
+                      </div>
+                      <div className="border-t border-border pt-2 flex justify-between text-sm">
+                        <span className="font-semibold text-foreground">Comprador paga</span>
+                        <span className="font-bold text-foreground">R$ {(parseFloat(ticketForm.price) * 1.10).toFixed(2).replace(".", ",")}</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
