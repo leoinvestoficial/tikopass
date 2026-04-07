@@ -133,10 +133,11 @@ export default function TermsPage() {
           <li>A decisão da plataforma é final nos casos que envolvam o pagamento retido</li>
         </ul>
 
-        <h2>7. Propriedade Intelectual</h2>
+        <h2>8. Propriedade Intelectual</h2>
         <p>Todo o conteúdo da plataforma (marca, logotipo, design, código, textos) é de propriedade da Tiko Pass e protegido pela legislação de propriedade intelectual. É proibida a reprodução sem autorização prévia.</p>
 
-        <h2>8. Limitação de Responsabilidade</h2>
+        <h2>9. Limitação de Responsabilidade</h2>
+        <p><strong>A Tiko Pass é um marketplace — intermediamos a revenda entre pessoas físicas. Não somos revendedores de ingressos.</strong></p>
         <ul>
           <li>A Tiko Pass <strong>não garante a realização dos eventos</strong> listados na plataforma</li>
           <li>Não nos responsabilizamos por eventos cancelados, adiados ou alterados pelos organizadores</li>
