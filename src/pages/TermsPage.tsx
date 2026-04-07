@@ -162,10 +162,10 @@ export default function TermsPage() {
           <li>Após a exclusão, os dados são removidos conforme a <a href="/privacy">Política de Privacidade</a></li>
         </ul>
 
-        <h2>11. Resolução de Conflitos</h2>
-        <p>Em caso de disputas entre compradores e vendedores, a Tiko Pass poderá atuar como mediadora, analisando as evidências e tomando decisão com base nas políticas da plataforma. A decisão da plataforma é final nos casos em que envolvam o pagamento retido.</p>
+        <h2>12. Resolução de Conflitos</h2>
+        <p>Em caso de disputas entre compradores e vendedores, a Tiko Pass atuará como mediadora conforme a Seção 7 (Política de Contestação). A decisão da plataforma é final nos casos que envolvam o pagamento retido.</p>
 
-        <h2>12. Legislação Aplicável e Foro</h2>
+        <h2>13. Legislação Aplicável e Foro</h2>
         <p>Estes termos são regidos pela legislação brasileira. Fica eleito o foro da comarca de Salvador/BA para dirimir eventuais controvérsias, com renúncia a qualquer outro, por mais privilegiado que seja.</p>
 
         <h2>13. Disposições Gerais</h2>
