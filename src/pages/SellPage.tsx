@@ -135,7 +135,7 @@ export default function SellPage() {
 
   const resetForm = () => {
     setStep("search"); setSearchQuery(""); setAiResults([]); setSelectedEvent(null);
-    setSavedEventId(null); setSavedTicketId(null); setTicketForm({ sector: "", row: "", seat: "", price: "" });
+    setSavedEventId(null); setSavedTicketId(null); setTicketForm({ sector: "", row: "", seat: "", price: "", originalPrice: "" });
     setTicketFile(null); setValidationStatus("pending_validation"); setValidationMessage("");
     setValidationChecks([]);
   };
