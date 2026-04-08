@@ -89,7 +89,12 @@ export default function SellPage() {
     finally { setSearching(false); }
   };
 
-  const handleSelectEvent = (event: AIEvent) => { setSelectedEvent(event); setEditedEvent({ ...event }); setStep("confirm"); };
+  const handleSelectEvent = (event: AIEvent) => {
+    setSelectedEvent(event);
+    setEditedEvent({ ...event });
+    setSelectedBanner(getBannerForCategory(event.category));
+    setStep("confirm");
+  };
 
   const handleConfirmEvent = async () => {
     if (!editedEvent || !user) return;
