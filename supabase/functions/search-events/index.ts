@@ -129,12 +129,13 @@ REGRAS:
 - Se um evento aparece em múltiplas fontes, combine as informações mais precisas.
 - Se a data exata não for clara, use a data mais provável. NUNCA use anos passados para eventos recorrentes futuros.
 - Categorias permitidas APENAS: ${MUSIC_CATEGORIES.join(", ")}.
-  - Shows: show individual de artista/banda
-  - Festivais: festival com múltiplos artistas
-  - Sertanejo: shows de artistas sertanejos
-  - Rock & Pop: shows de rock, pop, indie
-  - Pagode & Samba: shows de pagode, samba, axé
-  - Eletrônica: festas e shows de música eletrônica, DJs
+  - Sertanejo: shows de artistas sertanejos (sertanejo, sofrência, arrocha)
+  - Funk: shows de funk, baile funk, MC
+  - Rock: shows de rock, pop, indie, metal, punk, alternativo
+  - Pagode: shows de pagode, samba, axé, MPB
+  - Eletrônico: festas e shows de música eletrônica, DJs, raves
+  - Forró: shows de forró, piseiro, vaquejada, pé de serra
+  - Outro: festivais, shows que não se encaixam nas categorias acima
 - Ticketeiras reconhecidas: ${TICKETING_PLATFORMS}.
 - IMPORTANTE: Use SEMPRE acentos corretos em português.`;
 

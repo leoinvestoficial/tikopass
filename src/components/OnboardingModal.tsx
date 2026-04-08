@@ -144,7 +144,7 @@ export default function OnboardingModal() {
       }
 
       if (Object.keys(updates).length > 0) {
-        await supabase.from("profiles").update(updates).eq("user_id", user.id);
+        await supabase.from("profiles").update(updates as any).eq("user_id", user.id);
       }
 
       // Store genres in localStorage for now (could be a table later)

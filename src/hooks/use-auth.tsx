@@ -82,7 +82,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (extra?.address_city) updates.address_city = extra.address_city;
       if (extra?.address_state) updates.address_state = extra.address_state;
       if (Object.keys(updates).length > 0) {
-        await supabase.from("profiles").update(updates).eq("user_id", data.user.id);
+        await supabase.from("profiles").update(updates as any).eq("user_id", data.user.id);
       }
     }
     return { error: error ? new Error(error.message) : null };
