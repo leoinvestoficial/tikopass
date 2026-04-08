@@ -311,14 +311,29 @@ export default function SellPage() {
 
               {/* Event card preview with banner */}
               <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
-                <div className="relative h-40">
-                  <img src={selectedBanner} alt={editedEvent.name} className="w-full h-full object-cover" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-                  <div className="absolute bottom-4 left-5 right-5">
-                    <h3 className="text-xl font-bold text-white drop-shadow-md">{editedEvent.name}</h3>
-                    <p className="text-sm text-white/70">{editedEvent.venue} · {editedEvent.city}</p>
+                {selectedBanner ? (
+                  <div className="relative h-40">
+                    <img src={selectedBanner} alt={editedEvent.name} className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+                    <div className="absolute bottom-4 left-5 right-5">
+                      <h3 className="text-xl font-bold text-white drop-shadow-md">{editedEvent.name}</h3>
+                      <p className="text-sm text-white/70">{editedEvent.venue} · {editedEvent.city}</p>
+                    </div>
+                    <button
+                      onClick={() => { setSelectedBanner(""); setBannerFile(null); }}
+                      className="absolute top-3 right-3 w-8 h-8 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-black/70 transition-colors"
+                    >
+                      <X className="w-4 h-4 text-white" />
+                    </button>
                   </div>
-                </div>
+                ) : (
+                  <div className="h-40 bg-gradient-to-r from-primary/20 to-primary/5 flex items-end p-5">
+                    <div>
+                      <h3 className="text-xl font-bold text-foreground">{editedEvent.name}</h3>
+                      <p className="text-sm text-muted-foreground">{editedEvent.venue} · {editedEvent.city}</p>
+                    </div>
+                  </div>
+                )}
                 <div className="p-5 flex items-center gap-3">
                   <span className="text-xs px-2.5 py-1 rounded bg-muted text-muted-foreground font-medium uppercase">
                     {editedEvent.category}
@@ -329,34 +344,65 @@ export default function SellPage() {
                 </div>
               </div>
 
-              {/* Banner selection */}
+              {/* Banner upload - drag & drop */}
               <div className="space-y-3">
                 <h3 className="text-base font-bold text-foreground flex items-center gap-2">
-                  <ImageIcon className="w-4 h-4 text-primary" /> Escolha um banner
+                  <ImageIcon className="w-4 h-4 text-primary" /> Foto do anúncio
                 </h3>
-                <p className="text-sm text-muted-foreground">Selecione a imagem que aparecerá no card do seu anúncio</p>
-                <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
-                  {ALL_BANNERS.map((banner) => (
-                    <button
-                      key={banner.id}
-                      onClick={() => setSelectedBanner(banner.src)}
-                      className={`relative rounded-xl overflow-hidden aspect-video border-2 transition-all duration-200 active:scale-95 ${
-                        selectedBanner === banner.src
-                          ? "border-primary shadow-lg shadow-primary/20 ring-2 ring-primary/30"
-                          : "border-border hover:border-primary/40"
-                      }`}
-                    >
-                      <img src={banner.src} alt={banner.label} className="w-full h-full object-cover" loading="lazy" />
-                      <div className="absolute inset-0 bg-black/30 flex items-end p-1.5">
-                        <span className="text-[10px] font-semibold text-white drop-shadow">{banner.label}</span>
+                <p className="text-sm text-muted-foreground">Adicione uma imagem para destacar seu anúncio. Pode ser a arte do evento, foto do local, etc.</p>
+                <div
+                  onDragOver={(e) => { e.preventDefault(); setIsDraggingBanner(true); }}
+                  onDragLeave={() => setIsDraggingBanner(false)}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    setIsDraggingBanner(false);
+                    const file = e.dataTransfer.files?.[0];
+                    if (!file) return;
+                    if (!file.type.startsWith("image/")) { toast.error("Apenas imagens são aceitas"); return; }
+                    if (file.size > 10 * 1024 * 1024) { toast.error("Máximo 10MB"); return; }
+                    setBannerFile(file);
+                    setSelectedBanner(URL.createObjectURL(file));
+                  }}
+                  onClick={() => document.getElementById("banner-upload")?.click()}
+                  className={`relative border-2 border-dashed rounded-2xl p-8 text-center transition-all cursor-pointer ${
+                    isDraggingBanner
+                      ? "border-primary bg-primary/10 scale-[1.02]"
+                      : selectedBanner
+                        ? "border-primary bg-primary/5"
+                        : "border-border hover:border-primary/50 hover:bg-primary/5"
+                  }`}
+                >
+                  <input
+                    id="banner-upload"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      if (!file.type.startsWith("image/")) { toast.error("Apenas imagens são aceitas"); return; }
+                      if (file.size > 10 * 1024 * 1024) { toast.error("Máximo 10MB"); return; }
+                      setBannerFile(file);
+                      setSelectedBanner(URL.createObjectURL(file));
+                    }}
+                  />
+                  {selectedBanner ? (
+                    <div className="flex items-center justify-center gap-4">
+                      <img src={selectedBanner} alt="Preview" className="w-24 h-16 object-cover rounded-lg" />
+                      <div className="text-left">
+                        <p className="font-semibold text-foreground text-sm">{bannerFile?.name || "Imagem selecionada"}</p>
+                        <p className="text-xs text-muted-foreground">Clique ou arraste para trocar</p>
                       </div>
-                      {selectedBanner === banner.src && (
-                        <div className="absolute top-1.5 right-1.5 w-5 h-5 bg-primary rounded-full flex items-center justify-center">
-                          <CheckCircle2 className="w-3 h-3 text-primary-foreground" />
-                        </div>
-                      )}
-                    </button>
-                  ))}
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center mx-auto">
+                        <ImageIcon className="w-7 h-7 text-muted-foreground" />
+                      </div>
+                      <p className="text-muted-foreground font-medium">Arraste uma imagem ou clique para enviar</p>
+                      <p className="text-xs text-muted-foreground">JPG, PNG ou WEBP · Máx. 10MB</p>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -365,10 +411,7 @@ export default function SellPage() {
                 <h3 className="text-base font-bold text-foreground">Gênero musical</h3>
                 <CategoryGrid
                   selectedCategory={editedEvent.category}
-                  onCategoryChange={(cat) => {
-                    setEditedEvent({ ...editedEvent, category: cat });
-                    setSelectedBanner(getBannerForCategory(cat));
-                  }}
+                  onCategoryChange={(cat) => setEditedEvent({ ...editedEvent, category: cat })}
                   variant="sell"
                 />
               </div>
@@ -377,8 +420,9 @@ export default function SellPage() {
                 <Button variant="outline" onClick={() => setStep("search")} size="lg" className="rounded-xl gap-2">
                   <ArrowLeft className="w-4 h-4" /> Voltar
                 </Button>
-                <Button onClick={handleConfirmEvent} size="lg" className="flex-1 gap-2 rounded-xl">
-                  Confirmar <ArrowRight className="w-4 h-4" />
+                <Button onClick={handleConfirmEvent} disabled={bannerUploading} size="lg" className="flex-1 gap-2 rounded-xl">
+                  {bannerUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                  {bannerUploading ? "Enviando..." : "Confirmar"} <ArrowRight className="w-4 h-4" />
                 </Button>
               </div>
             </div>
