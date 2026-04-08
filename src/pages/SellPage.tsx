@@ -286,16 +286,55 @@ export default function SellPage() {
             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-300">
               <h2 className="text-2xl font-bold text-foreground">Confirmar evento</h2>
 
-              {/* Event card preview */}
-              <div className="bg-card border border-border rounded-2xl p-6 space-y-2 shadow-sm">
-                <span className="text-xs px-2.5 py-1 rounded bg-muted text-muted-foreground font-medium uppercase">
-                  {editedEvent.category}
-                </span>
-                <h3 className="text-xl font-bold text-foreground">{editedEvent.name}</h3>
-                <p className="text-sm text-muted-foreground">{editedEvent.venue} · {editedEvent.city}</p>
-                <p className="text-sm text-muted-foreground">
-                  {new Date(editedEvent.date + "T00:00:00").toLocaleDateString("pt-BR", { day: "numeric", month: "long", year: "numeric" })}
-                </p>
+              {/* Event card preview with banner */}
+              <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
+                <div className="relative h-40">
+                  <img src={selectedBanner} alt={editedEvent.name} className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+                  <div className="absolute bottom-4 left-5 right-5">
+                    <h3 className="text-xl font-bold text-white drop-shadow-md">{editedEvent.name}</h3>
+                    <p className="text-sm text-white/70">{editedEvent.venue} · {editedEvent.city}</p>
+                  </div>
+                </div>
+                <div className="p-5 flex items-center gap-3">
+                  <span className="text-xs px-2.5 py-1 rounded bg-muted text-muted-foreground font-medium uppercase">
+                    {editedEvent.category}
+                  </span>
+                  <span className="text-sm text-muted-foreground">
+                    {new Date(editedEvent.date + "T00:00:00").toLocaleDateString("pt-BR", { day: "numeric", month: "long", year: "numeric" })}
+                  </span>
+                </div>
+              </div>
+
+              {/* Banner selection */}
+              <div className="space-y-3">
+                <h3 className="text-base font-bold text-foreground flex items-center gap-2">
+                  <ImageIcon className="w-4 h-4 text-primary" /> Escolha um banner
+                </h3>
+                <p className="text-sm text-muted-foreground">Selecione a imagem que aparecerá no card do seu anúncio</p>
+                <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+                  {ALL_BANNERS.map((banner) => (
+                    <button
+                      key={banner.id}
+                      onClick={() => setSelectedBanner(banner.src)}
+                      className={`relative rounded-xl overflow-hidden aspect-video border-2 transition-all duration-200 active:scale-95 ${
+                        selectedBanner === banner.src
+                          ? "border-primary shadow-lg shadow-primary/20 ring-2 ring-primary/30"
+                          : "border-border hover:border-primary/40"
+                      }`}
+                    >
+                      <img src={banner.src} alt={banner.label} className="w-full h-full object-cover" loading="lazy" />
+                      <div className="absolute inset-0 bg-black/30 flex items-end p-1.5">
+                        <span className="text-[10px] font-semibold text-white drop-shadow">{banner.label}</span>
+                      </div>
+                      {selectedBanner === banner.src && (
+                        <div className="absolute top-1.5 right-1.5 w-5 h-5 bg-primary rounded-full flex items-center justify-center">
+                          <CheckCircle2 className="w-3 h-3 text-primary-foreground" />
+                        </div>
+                      )}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               {/* Genre selection */}
@@ -303,7 +342,10 @@ export default function SellPage() {
                 <h3 className="text-base font-bold text-foreground">Gênero musical</h3>
                 <CategoryGrid
                   selectedCategory={editedEvent.category}
-                  onCategoryChange={(cat) => setEditedEvent({ ...editedEvent, category: cat })}
+                  onCategoryChange={(cat) => {
+                    setEditedEvent({ ...editedEvent, category: cat });
+                    setSelectedBanner(getBannerForCategory(cat));
+                  }}
                   variant="sell"
                 />
               </div>
