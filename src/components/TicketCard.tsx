@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { MapPin, Calendar, Tag, TrendingDown, Star } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import SellerLevelBadge, { getSellerLevel } from "@/components/SellerLevelBadge";
+import { getBannerForCategory } from "@/lib/event-banners";
 
 interface TicketCardEvent {
   id: string;
@@ -11,6 +12,7 @@ interface TicketCardEvent {
   venue: string;
   city: string;
   category: string;
+  image_url?: string | null;
 }
 
 interface TicketCardProps {
@@ -43,6 +45,8 @@ export default function TicketCard({ ticket, index = 0 }: TicketCardProps) {
 
   if (!event) return null;
 
+  const bannerSrc = event.image_url || getBannerForCategory(event.category);
+
   return (
     <Link
       to={`/ticket/${ticket.id}`}
@@ -50,32 +54,43 @@ export default function TicketCard({ ticket, index = 0 }: TicketCardProps) {
       style={{ animationDelay: `${index * 80}ms` }}
     >
       <div className="bg-card rounded-xl border border-border overflow-hidden transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-1 active:scale-[0.98]">
-        <div className={`h-1.5 ${isPast ? "bg-muted" : "bg-gradient-to-r from-primary to-primary/60"}`} />
-        <div className="p-5 space-y-4">
-          <div className="space-y-2">
-            <div className="flex items-start justify-between gap-2">
-              <h3 className="font-display font-semibold text-foreground leading-tight line-clamp-2 group-hover:text-primary transition-colors">
-                {event.name}
-              </h3>
-              {isBelow && (
-                <Badge className="shrink-0 bg-success/10 text-success border-success/20 text-xs font-medium gap-1">
-                  <TrendingDown className="w-3 h-3" />
-                  -{discount}%
-                </Badge>
-              )}
-            </div>
-            {isPast ? (
-              <Badge variant="outline" className="text-xs font-medium text-muted-foreground border-muted">
-                Encerrado
-              </Badge>
-            ) : (
-              <Badge variant="secondary" className="text-xs font-medium">
-                {event.category}
-              </Badge>
-            )}
+        {/* Banner image */}
+        <div className="relative h-40 overflow-hidden">
+          <img
+            src={bannerSrc}
+            alt={event.name}
+            className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 ${isPast ? "grayscale" : ""}`}
+            loading="lazy"
+            width={400}
+            height={160}
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+          <div className="absolute bottom-3 left-3 right-3">
+            <h3 className="font-display font-semibold text-white leading-tight line-clamp-2 drop-shadow-md text-sm">
+              {event.name}
+            </h3>
+          </div>
+          {isBelow && (
+            <Badge className="absolute top-3 right-3 bg-success/90 text-white border-0 text-xs font-medium gap-1 backdrop-blur-sm">
+              <TrendingDown className="w-3 h-3" />
+              -{discount}%
+            </Badge>
+          )}
+          {isPast && (
+            <Badge className="absolute top-3 left-3 bg-black/60 text-white border-0 text-xs backdrop-blur-sm">
+              Encerrado
+            </Badge>
+          )}
+        </div>
+
+        <div className="p-4 space-y-3">
+          <div className="flex items-center gap-2">
+            <Badge variant="secondary" className="text-xs font-medium">
+              {event.category}
+            </Badge>
           </div>
 
-          <div className="space-y-1.5 text-sm text-muted-foreground">
+          <div className="space-y-1 text-sm text-muted-foreground">
             <div className="flex items-center gap-2">
               <Calendar className="w-3.5 h-3.5 shrink-0" />
               <span>
