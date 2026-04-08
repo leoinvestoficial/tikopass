@@ -4,7 +4,7 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Search, CheckCircle2, ArrowRight, Sparkles, MapPin, Calendar, Tag, Loader2, Upload, FileCheck, AlertCircle, Clock, Shield, Zap, DollarSign, XCircle, ArrowLeft, ImageIcon } from "lucide-react";
+import { Search, CheckCircle2, ArrowRight, Sparkles, MapPin, Calendar, Tag, Loader2, Upload, FileCheck, AlertCircle, Clock, Shield, Zap, DollarSign, XCircle, ArrowLeft, ImageIcon, X } from "lucide-react";
 import CategoryGrid from "@/components/CategoryGrid";
 import { useAuth } from "@/hooks/use-auth";
 import { searchEventsWithAI, createEvent, createTicket } from "@/lib/api";
@@ -12,7 +12,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import sellCtaBg from "@/assets/sell-cta.jpg";
-import { ALL_BANNERS, getBannerForCategory } from "@/lib/event-banners";
+import { getBannerForCategory } from "@/lib/event-banners";
+import imageCompression from "browser-image-compression";
 
 type AIEvent = {
   name: string; date: string; time: string; venue: string; city: string; category: string;
