@@ -39,6 +39,7 @@ export default function SellPage() {
   const [bannerFile, setBannerFile] = useState<File | null>(null);
   const [bannerUploading, setBannerUploading] = useState(false);
   const [isDraggingBanner, setIsDraggingBanner] = useState(false);
+  const [ticketFile, setTicketFile] = useState<File | null>(null);
   const [validationStatus, setValidationStatus] = useState<string>("pending_validation");
   const [validationMessage, setValidationMessage] = useState("");
   const [validationChecks, setValidationChecks] = useState<ValidationCheck[]>([]);
