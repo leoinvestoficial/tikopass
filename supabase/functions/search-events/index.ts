@@ -6,7 +6,7 @@ const corsHeaders = {
 };
 
 const TICKETING_PLATFORMS = "Ticketmaster, Eventim, Livepass, Sympla, Tickets For Fun, Clube do Ingresso, Guichê Web, Ticket Maker";
-const MUSIC_CATEGORIES = ["Shows", "Festivais", "Sertanejo", "Rock & Pop", "Pagode & Samba", "Eletrônica"];
+const MUSIC_CATEGORIES = ["Sertanejo", "Funk", "Rock", "Pagode", "Eletrônico", "Forró", "Outro"];
 
 type AIEvent = {
   name: string;
