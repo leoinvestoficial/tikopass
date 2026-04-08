@@ -96,7 +96,8 @@ export default function SellPage() {
   const handleSelectEvent = (event: AIEvent) => {
     setSelectedEvent(event);
     setEditedEvent({ ...event });
-    setSelectedBanner(getBannerForCategory(event.category));
+    setSelectedBanner("");
+    setBannerFile(null);
     setStep("confirm");
   };
 
