@@ -106,11 +106,29 @@ export default function SellPage() {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) { toast.error("Sua sessão expirou. Faça login novamente."); navigate("/auth"); return; }
     try {
+      // Upload banner if provided
+      let imageUrl: string | undefined;
+      if (bannerFile) {
+        setBannerUploading(true);
+        const ext = bannerFile.name.split(".").pop() || "jpg";
+        const path = `${user.id}/${Date.now()}.${ext}`;
+        const compressed = await imageCompression(bannerFile, { maxSizeMB: 0.5, maxWidthOrHeight: 1200 });
+        const { error: upErr } = await supabase.storage.from("event-banners").upload(path, compressed);
+        setBannerUploading(false);
+        if (upErr) throw upErr;
+        const { data: urlData } = supabase.storage.from("event-banners").getPublicUrl(path);
+        imageUrl = urlData.publicUrl;
+      }
       const created = await createEvent({ ...editedEvent, source: "ai_search" });
       setSavedEventId(created.id);
+      // Update event with image if uploaded
+      if (imageUrl) {
+        await supabase.from("events").update({ image_url: imageUrl } as any).eq("id", created.id);
+      }
       setSelectedEvent(editedEvent);
       setStep("details");
     } catch (err: any) {
+      setBannerUploading(false);
       if (err.message?.includes("row-level security")) { toast.error("Sessão expirada. Faça login novamente."); navigate("/auth"); }
       else { toast.error("Erro ao salvar evento: " + (err.message || "")); }
     }
