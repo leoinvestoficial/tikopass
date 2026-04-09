@@ -1,29 +1,41 @@
-## Plano de implementação
 
-### 1. Formulário /sell em 4 etapas (modelo VMI)
-- **Etapa 1**: Busca do evento pelo nome (autocomplete)
-- **Etapa 2**: Setor, fileira, assento e quantidade
-- **Etapa 3**: Preço livre (sem teto) + preço original para comparação
-- **Etapa 4**: Upload do ingresso + validação por IA com loading animado
-- Stepper visual com progresso entre etapas
-- Upload vai para o final (vendedor já está comprometido)
+## Análise Completa da Plataforma — Gaps para Lançamento
 
-### 2. Taxa 10% transparente no checkout
-- Antes do pagamento, exibir com destaque:
-  - "Ingresso: R$180 + Taxa Tiko Pass: R$18 = Total: R$198"
-- Taxa paga pelo comprador, 0% do vendedor
-- Conformidade com STJ
+### 🔴 Problemas Críticos Encontrados
+1. **Menu mobile incompleto** — Não tem link para Carteira, nem para perfil completo no menu mobile
+2. **Busca de eventos degradada** — O edge function `search-events` precisa ser testado/corrigido
+3. **Sem navegação inferior mobile** — Plataforma não tem bottom nav bar (padrão essencial para apps mobile)
+4. **Fluxo de transferência incompleto** — Após pagamento aceito, não há fluxo claro para transferir o ingresso
+5. **Sem notificações por email** — Nenhum email transacional implementado
+6. **Sem pagamento real integrado** — Stripe existe mas checkout não está finalizado para produção
 
-### 3. Comparação de preços nos cards de ingresso
-- Exibir "Preço original: R$120" vs "Preço de revenda: R$180" nos TicketCards
-- Usar campo `original_price` já existente na tabela tickets
+### 📋 Plano de Ação (neste ciclo)
 
-### 4. Histórico detalhado na carteira
-- Listar por transação: nome do evento, data da venda, valor bruto, taxa da plataforma, valor líquido, status (pendente/disponível/sacado), data prevista de liberação
-- Melhorar a WalletPage com tabela/cards detalhados
+#### 1. Corrigir Algoritmo de Busca
+- Testar edge function `search-events` com "Oboé Tour" e "Réveillon Destino 2027"
+- Verificar se Perplexity e Firecrawl estão retornando dados
+- Ajustar prompts se necessário para melhorar qualidade dos resultados
+- Garantir que a busca por categoria na home dispara busca IA
 
-### 5. Documentos legais (modelo base)
-- Gerar Termos de Uso adaptado ao modelo P2P
-- Gerar Política de Privacidade LGPD
-- Gerar Política de Contestação (24h pós-evento)
-- Implementar nas páginas /terms e /privacy existentes
+#### 2. Acesso ao Perfil do Vendedor pelo Comprador
+- O link já existe em `/ticket/:id` e em `/negotiations` — verificar se está funcionando
+- Garantir que na página de negociações, o comprador consiga clicar no nome/avatar do vendedor e ir para `/seller/:userId`
+
+#### 3. Carteira Mais Acessível
+- Adicionar link "Carteira" no menu mobile
+- Adicionar bottom navigation bar fixa no mobile com: Início, Vender, Negociações, Carteira
+
+#### 4. Redesign Mobile-First Completo
+- **Bottom Navigation Bar** — Barra fixa no rodapé com ícones para as 4 seções principais
+- **Hero da Home** — Reduzir altura, search bar mais compacta
+- **Cards de ingressos** — Grid 1 coluna no mobile, cards mais compactos
+- **Negociações** — Layout mobile com lista + chat em tela cheia (drawer)
+- **Navbar** — Simplificar para mobile
+- **SellPage** — Steps mais compactos no mobile
+- **WalletPage** — Cards de saldo empilhados
+
+#### 5. Itens NÃO incluídos neste ciclo (próximos passos)
+- Integração de pagamento real (Pagar.me)
+- Notificações por email
+- Fluxo completo de transferência de ingressos
+- Push notifications
