@@ -120,6 +120,30 @@
   .surface-dark {
     @apply bg-[hsl(var(--surface-dark))] text-[hsl(var(--surface-dark-foreground))];
   }
+
+  /* Bottom nav safe area */
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .pb-bottom-nav {
+    padding-bottom: 5rem;
+  }
+
+  @media (min-width: 768px) {
+    .pb-bottom-nav {
+      padding-bottom: 0;
+    }
+  }
+
+  /* Hide scrollbar */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 }
 
 /* Scroll reveal animations */

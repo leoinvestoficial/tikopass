@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/hooks/use-auth";
 import TikoChatWidget from "@/components/TikoChatWidget";
+import BottomNav from "@/components/BottomNav";
 import Index from "./pages/Index.tsx";
 import EventDetail from "./pages/EventDetail.tsx";
 import SellPage from "./pages/SellPage.tsx";
@@ -22,6 +23,7 @@ import TermsPage from "./pages/TermsPage.tsx";
 import FaqPage from "./pages/FaqPage.tsx";
 import AdminPage from "./pages/AdminPage.tsx";
 import NotFound from "./pages/NotFound.tsx";
+
 const TikoChatWidgetWrapper = () => {
   const location = useLocation();
   if (location.pathname === "/auth" || location.pathname === "/welcome") return null;
@@ -56,6 +58,7 @@ const App = () => (
             <Route path="/admin" element={<AdminPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
+          <BottomNav />
           <TikoChatWidgetWrapper />
         </AuthProvider>
       </BrowserRouter>

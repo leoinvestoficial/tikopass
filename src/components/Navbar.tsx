@@ -36,9 +36,9 @@ export default function Navbar() {
 
   return (
     <nav className="sticky top-0 z-50 bg-card/80 backdrop-blur-lg border-b border-border">
-      <div className="container flex items-center justify-between h-16">
+      <div className="container flex items-center justify-between h-14 md:h-16">
         <Link to="/" className="flex items-center group">
-          <img src={tikoLogo} alt="Tiko Pass" className="h-20 object-contain transition-transform duration-200 group-hover:scale-105 group-active:scale-95" />
+          <img src={tikoLogo} alt="Tiko Pass" className="h-16 md:h-20 object-contain transition-transform duration-200 group-hover:scale-105 group-active:scale-95" />
         </Link>
 
         <div className="hidden md:flex items-center gap-1">
@@ -113,36 +113,29 @@ export default function Navbar() {
           )}
         </div>
 
-        <button className="md:hidden p-2 rounded-lg hover:bg-muted transition-colors" onClick={() => setMobileOpen(!mobileOpen)}>
-          {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-        </button>
-      </div>
-
-      {mobileOpen && (
-        <div className="md:hidden border-t border-border bg-card p-4 space-y-2 animate-reveal-up">
-          {navLinks.map((link) => (
-            <Link key={link.to} to={link.to} onClick={() => setMobileOpen(false)}
-              className={`block px-4 py-3 rounded-lg text-sm font-medium transition-colors ${isActive(link.to) ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted"}`}>
-              {link.label}
-            </Link>
-          ))}
+        {/* Mobile: just show avatar or login button, no hamburger (bottom nav handles navigation) */}
+        <div className="md:hidden flex items-center gap-2">
           {user ? (
-            <>
-              <Link to="/profile" onClick={() => setMobileOpen(false)}
-                className="block px-4 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:bg-muted">
-                Meu Perfil
-              </Link>
-              <Button variant="outline" className="w-full mt-2 gap-2" onClick={() => { signOut(); setMobileOpen(false); }}>
-                <LogOut className="w-4 h-4" /> Sair
-              </Button>
-            </>
+            <Link to="/profile">
+              <Avatar className="w-8 h-8">
+                {profile?.avatar_url ? (
+                  <AvatarImage src={profile.avatar_url} alt={profile.display_name || "Avatar"} />
+                ) : null}
+                <AvatarFallback className="text-xs font-display font-bold bg-primary/10 text-primary">
+                  {initials}
+                </AvatarFallback>
+              </Avatar>
+            </Link>
           ) : (
-            <Link to="/auth" onClick={() => setMobileOpen(false)}>
-              <Button variant="outline" className="w-full mt-2 gap-2"><User className="w-4 h-4" /> Entrar</Button>
+            <Link to="/auth">
+              <Button variant="outline" size="sm" className="gap-1.5 text-xs h-8">
+                <User className="w-3.5 h-3.5" />
+                Entrar
+              </Button>
             </Link>
           )}
         </div>
-      )}
+      </div>
     </nav>
   );
 }

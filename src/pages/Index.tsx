@@ -22,7 +22,6 @@ import { toast } from "sonner";
 
 type DateFilter = "" | "today" | "tomorrow" | "weekend";
 
-// ─── Music genre category tabs ────────────────────────────────────────────────
 const CATEGORIES = [
   { label: "Sertanejo", icon: Guitar },
   { label: "Rock", icon: Disc3 },
@@ -33,12 +32,11 @@ const CATEGORIES = [
   { label: "Outro", icon: Sparkles },
 ];
 
-// ─── Skeleton card ─────────────────────────────────────────────────────────────
 function SkeletonCard() {
   return (
     <div className="rounded-2xl overflow-hidden bg-card border border-border animate-pulse">
-      <div className="h-44 bg-muted" />
-      <div className="p-4 space-y-3">
+      <div className="h-36 md:h-44 bg-muted" />
+      <div className="p-3 md:p-4 space-y-3">
         <div className="h-4 bg-muted rounded w-3/4" />
         <div className="h-3 bg-muted rounded w-1/2" />
         <div className="h-5 bg-muted rounded w-1/3" />
@@ -47,7 +45,6 @@ function SkeletonCard() {
   );
 }
 
-// ─── Main page ─────────────────────────────────────────────────────────────────
 export default function Index() {
   const { city: userCity } = useUserCity();
   const navigate = useNavigate();
@@ -126,13 +123,13 @@ export default function Index() {
   }, [tickets]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-background font-sans">
+    <div className="min-h-screen flex flex-col bg-background font-sans pb-bottom-nav">
       
       <Navbar />
       <OnboardingModal />
 
-      {/* ── HERO ─────────────────────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden min-h-[420px]">
+      {/* ── HERO ─────────────────────────────────────────────────────────── */}
+      <section className="relative overflow-hidden min-h-[280px] md:min-h-[420px]">
         <img
           src={heroBg}
           alt="Show de música ao vivo"
@@ -142,21 +139,21 @@ export default function Index() {
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70" />
 
-        <div className="relative container pt-20 pb-16 md:pt-28 md:pb-20">
-          <div className="max-w-xl mb-8 space-y-3">
-            <h1 className="text-4xl md:text-5xl font-bold text-white leading-tight tracking-tight drop-shadow">
-              Seu próximo show<br />começa aqui.
+        <div className="relative container pt-10 pb-8 md:pt-28 md:pb-20">
+          <div className="max-w-xl mb-5 md:mb-8 space-y-2 md:space-y-3">
+            <h1 className="text-2xl md:text-5xl font-bold text-white leading-tight tracking-tight drop-shadow">
+              Seu próximo show<br className="hidden md:block" /> começa aqui.
             </h1>
-            <p className="text-white/70 text-base md:text-lg">
-              Ingressos verificados por IA. Pagamento protegido. Shows e festivais.
+            <p className="text-white/70 text-sm md:text-lg">
+              Ingressos verificados por IA. Pagamento protegido.
             </p>
           </div>
 
           {/* ── Search bar ── */}
           <div className="bg-white dark:bg-card rounded-2xl shadow-2xl flex flex-col sm:flex-row sm:items-center divide-y sm:divide-y-0 sm:divide-x divide-border overflow-hidden max-w-2xl">
-            <div className="flex items-center gap-3 px-5 py-4 flex-1">
+            <div className="flex items-center gap-3 px-4 py-3 md:px-5 md:py-4 flex-1">
               <Search className="w-4 h-4 text-muted-foreground shrink-0" />
-              <div className="flex flex-col">
+              <div className="flex flex-col flex-1">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-foreground">Evento</span>
                 <input
                   className="text-sm bg-transparent outline-none placeholder:text-muted-foreground text-foreground w-full"
@@ -168,9 +165,9 @@ export default function Index() {
               </div>
             </div>
 
-            <div className="flex items-center gap-3 px-5 py-4 flex-1">
+            <div className="flex items-center gap-3 px-4 py-3 md:px-5 md:py-4 flex-1">
               <MapPin className="w-4 h-4 text-muted-foreground shrink-0" />
-              <div className="flex flex-col">
+              <div className="flex flex-col flex-1">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-foreground">Cidade</span>
                 <input
                   className="text-sm bg-transparent outline-none placeholder:text-muted-foreground text-foreground w-full"
@@ -181,10 +178,10 @@ export default function Index() {
               </div>
             </div>
 
-            <div className="px-3 py-3 flex justify-center sm:justify-start">
+            <div className="px-3 py-2 md:py-3 flex justify-center sm:justify-start">
               <button
                 onClick={loadTickets}
-                className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-sm px-6 py-3 rounded-xl transition-colors"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-sm px-6 py-2.5 md:py-3 rounded-xl transition-colors w-full sm:w-auto"
               >
                 Buscar
               </button>
@@ -193,37 +190,37 @@ export default function Index() {
         </div>
       </section>
 
-      {/* ── CATEGORY TABS ──────────────────────────────────────────────────────── */}
+      {/* ── CATEGORY TABS ──────────────────────────────────────────────── */}
       {!hasActiveSearch && (
-        <section className="border-b border-border sticky top-0 z-30 bg-background/95 backdrop-blur-sm">
+        <section className="border-b border-border sticky top-14 md:top-16 z-30 bg-background/95 backdrop-blur-sm">
           <div className="container">
             <div className="flex items-center gap-1">
-              <div className="flex items-center gap-8 overflow-x-auto no-scrollbar py-4 flex-1">
+              <div className="flex items-center gap-5 md:gap-8 overflow-x-auto no-scrollbar py-3 md:py-4 flex-1">
                 {CATEGORIES.map(({ label, icon: Icon }) => {
                   const isSelected = selectedCategory === label;
                   return (
                     <button
                       key={label}
                       onClick={() => setSelectedCategory(isSelected ? "" : label)}
-                      className={`flex flex-col items-center gap-1.5 min-w-fit pb-2 border-b-2 transition-all duration-200 ${
+                      className={`flex flex-col items-center gap-1 min-w-fit pb-1.5 md:pb-2 border-b-2 transition-all duration-200 ${
                         isSelected
                           ? "border-foreground text-foreground"
                           : "border-transparent text-muted-foreground hover:text-foreground hover:border-border"
                       }`}
                     >
-                      <Icon className="w-6 h-6" strokeWidth={isSelected ? 2 : 1.5} />
-                      <span className="text-xs font-medium whitespace-nowrap">{label}</span>
+                      <Icon className="w-5 h-5 md:w-6 md:h-6" strokeWidth={isSelected ? 2 : 1.5} />
+                      <span className="text-[10px] md:text-xs font-medium whitespace-nowrap">{label}</span>
                     </button>
                   );
                 })}
               </div>
 
               <button
-                className="flex items-center gap-2 text-xs font-medium border border-border rounded-xl px-4 py-2.5 ml-4 hover:shadow-md transition-shadow shrink-0"
+                className="flex items-center gap-2 text-xs font-medium border border-border rounded-xl px-3 py-2 md:px-4 md:py-2.5 ml-2 md:ml-4 hover:shadow-md transition-shadow shrink-0"
                 onClick={() => setShowFilters(!showFilters)}
               >
                 <SlidersHorizontal className="w-4 h-4" />
-                Filtros
+                <span className="hidden sm:inline">Filtros</span>
                 {hasFilters && (
                   <span className="bg-foreground text-background text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">!</span>
                 )}
@@ -231,15 +228,15 @@ export default function Index() {
             </div>
 
             {showFilters && (
-              <div className="pb-5 pt-2 space-y-4 animate-in fade-in slide-in-from-top-2 duration-200">
-                <div className="flex flex-wrap gap-6">
-                  <div className="flex-1 min-w-[200px]">
+              <div className="pb-4 pt-2 space-y-4 animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="flex flex-col sm:flex-row sm:flex-wrap gap-4 md:gap-6">
+                  <div className="flex-1 min-w-[180px]">
                     <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2 flex items-center gap-1.5">
                       <Calendar className="w-3.5 h-3.5" /> Quando?
                     </p>
                     <QuickDateFilters selected={dateFilter} onChange={setDateFilter} />
                   </div>
-                  <div className="flex-1 min-w-[200px]">
+                  <div className="flex-1 min-w-[180px]">
                     <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2 flex items-center gap-1.5">
                       <MapPin className="w-3.5 h-3.5" /> Localização
                     </p>
@@ -265,48 +262,48 @@ export default function Index() {
         </section>
       )}
 
-      {/* ── RECOMMENDED EVENTS (AI + geolocation) ───────────────────────────── */}
+      {/* ── RECOMMENDED EVENTS ───────────────────────────────────────── */}
       {!hasActiveSearch && userCity && <RecommendedEvents userCity={userCity} category={selectedCategory} />}
 
-      {/* ── POPULAR EVENTS ────────────────────────────────────────────────────── */}
+      {/* ── POPULAR EVENTS ───────────────────────────────────────────── */}
       {!hasActiveSearch && <PopularEvents events={popularEvents} />}
 
-      {/* ── TICKETS GRID ─────────────────────────────────────────────────────── */}
-      <section className="flex-1 container py-6 pb-16">
+      {/* ── TICKETS GRID ─────────────────────────────────────────────── */}
+      <section className="flex-1 container py-4 md:py-6 pb-8 md:pb-16">
         {hasActiveSearch && (
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between mb-4 md:mb-6">
             <div>
-              <h2 className="text-2xl font-bold text-foreground">
+              <h2 className="text-lg md:text-2xl font-bold text-foreground">
                 Resultados para <span className="text-primary">"{normalizedSearch}"</span>
               </h2>
-              <p className="text-sm text-muted-foreground mt-0.5">
+              <p className="text-xs md:text-sm text-muted-foreground mt-0.5">
                 {loading ? "Buscando..." : `${tickets.length} ingresso${tickets.length !== 1 ? "s" : ""} encontrado${tickets.length !== 1 ? "s" : ""}`}
               </p>
             </div>
-            <Button variant="outline" size="sm" className="rounded-full gap-1.5" onClick={() => setSearch("")}>
+            <Button variant="outline" size="sm" className="rounded-full gap-1.5 text-xs" onClick={() => setSearch("")}>
               <X className="w-3.5 h-3.5" /> Limpar
             </Button>
           </div>
         )}
 
         {!hasActiveSearch && (
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-foreground">
+          <div className="flex items-center justify-between mb-4 md:mb-6">
+            <h2 className="text-lg md:text-xl font-bold text-foreground">
               {selectedCategory ? selectedCategory : "Todos os ingressos"}
               {selectedCity && <span className="text-muted-foreground font-normal"> · {selectedCity}</span>}
             </h2>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-xs md:text-sm text-muted-foreground">
               {loading ? "" : `${tickets.length} disponíveis`}
             </p>
           </div>
         )}
 
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-            {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => <SkeletonCard key={i} />)}
+          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-5">
+            {[1, 2, 3, 4, 5, 6].map((i) => <SkeletonCard key={i} />)}
           </div>
         ) : tickets.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-5">
             {tickets.map((ticket: any, i) => (
               <TicketCard
                 key={ticket.id}
@@ -316,14 +313,14 @@ export default function Index() {
             ))}
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center py-16 space-y-4 text-center">
-            <div className="w-20 h-20 rounded-3xl bg-muted flex items-center justify-center text-4xl">
+          <div className="flex flex-col items-center justify-center py-12 md:py-16 space-y-4 text-center">
+            <div className="w-16 h-16 md:w-20 md:h-20 rounded-3xl bg-muted flex items-center justify-center text-3xl md:text-4xl">
               🎟️
             </div>
-            <h3 className="font-bold text-xl text-foreground">
-              {hasActiveSearch ? "Nenhum ingresso encontrado na plataforma" : dateFilter ? "Nenhum evento nesse período" : "Ainda sem ingressos"}
+            <h3 className="font-bold text-lg md:text-xl text-foreground">
+              {hasActiveSearch ? "Nenhum ingresso encontrado" : dateFilter ? "Nenhum evento nesse período" : "Ainda sem ingressos"}
             </h3>
-            <p className="text-muted-foreground text-sm max-w-sm">
+            <p className="text-muted-foreground text-xs md:text-sm max-w-sm">
               {hasActiveSearch
                 ? "Não encontramos ingressos à venda, mas podemos buscar se o evento existe."
                 : "Seja o primeiro a vender na plataforma!"}
@@ -331,20 +328,20 @@ export default function Index() {
             {hasActiveSearch ? (
               <div className="flex flex-col items-center gap-3">
                 <Button
-                  className="rounded-full gap-2 px-6"
+                  className="rounded-full gap-2 px-5 text-sm"
                   onClick={handleAISearch}
                   disabled={aiSearching}
                 >
                   {aiSearching ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-                  {aiSearching ? "Buscando eventos reais..." : "Buscar evento com IA"}
+                  {aiSearching ? "Buscando..." : "Buscar evento com IA"}
                 </Button>
-                <Button variant="outline" className="rounded-full gap-2" onClick={() => { setSearch(""); setAiEvents([]); }}>
+                <Button variant="outline" className="rounded-full gap-2 text-sm" onClick={() => { setSearch(""); setAiEvents([]); }}>
                   <X className="w-4 h-4" /> Limpar busca
                 </Button>
               </div>
             ) : (
               <Link to="/sell">
-                <Button className="rounded-full gap-2 px-6">
+                <Button className="rounded-full gap-2 px-5 text-sm">
                   Vender ingresso <ArrowRight className="w-4 h-4" />
                 </Button>
               </Link>
@@ -354,29 +351,29 @@ export default function Index() {
 
         {/* AI-discovered events */}
         {aiEvents.length > 0 && (
-          <div className="mt-8 space-y-4">
+          <div className="mt-6 md:mt-8 space-y-4">
             <div className="flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-primary" />
-              <h3 className="text-lg font-bold text-foreground">Eventos encontrados pela IA</h3>
+              <h3 className="text-base md:text-lg font-bold text-foreground">Eventos encontrados pela IA</h3>
             </div>
-            <p className="text-sm text-muted-foreground">
-              Estes eventos existem mas ainda não têm ingressos à venda na Tiko Pass. Conhece alguém vendendo?
+            <p className="text-xs md:text-sm text-muted-foreground">
+              Estes eventos existem mas ainda não têm ingressos à venda na Tiko Pass.
             </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
               {aiEvents.map((event, i) => (
-                <div key={i} className="bg-card rounded-2xl border border-border p-5 hover:border-primary/30 transition-colors space-y-3">
+                <div key={i} className="bg-card rounded-2xl border border-border p-4 md:p-5 hover:border-primary/30 transition-colors space-y-2 md:space-y-3">
                   <div>
-                    <h4 className="font-bold text-foreground">{event.name}</h4>
-                    <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
+                    <h4 className="font-bold text-foreground text-sm md:text-base">{event.name}</h4>
+                    <p className="text-xs md:text-sm text-muted-foreground flex items-center gap-1 mt-1">
                       <Calendar className="w-3.5 h-3.5" /> {event.date} · {event.time}
                     </p>
-                    <p className="text-sm text-muted-foreground flex items-center gap-1">
+                    <p className="text-xs md:text-sm text-muted-foreground flex items-center gap-1">
                       <MapPin className="w-3.5 h-3.5" /> {event.venue}, {event.city}
                     </p>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-xs bg-primary/10 text-primary px-2.5 py-1 rounded-full font-medium">{event.category}</span>
-                    <span className="text-xs text-muted-foreground">Sem ingressos à venda</span>
+                    <span className="text-[10px] md:text-xs text-muted-foreground">Sem ingressos à venda</span>
                   </div>
                 </div>
               ))}
@@ -385,10 +382,10 @@ export default function Index() {
         )}
       </section>
 
-      {/* ── SELL CTA ──────────────────────────────────────────────────────────── */}
+      {/* ── SELL CTA ──────────────────────────────────────────────────── */}
       {!hasActiveSearch && (
-        <section className="container pb-16">
-          <div className="relative overflow-hidden rounded-3xl text-white p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-8">
+        <section className="container pb-8 md:pb-16">
+          <div className="relative overflow-hidden rounded-2xl md:rounded-3xl text-white p-6 md:p-12 flex flex-col md:flex-row items-center justify-between gap-6 md:gap-8">
             <img
               src={sellCtaBg}
               alt="Ingressos em show"
@@ -399,18 +396,18 @@ export default function Index() {
             />
             <div className="absolute inset-0 bg-black/60" />
 
-            <div className="relative space-y-2 max-w-md">
-              <p className="text-sm font-semibold uppercase tracking-widest text-white/50">Para vendedores</p>
-              <h2 className="text-2xl md:text-3xl font-bold leading-tight">
+            <div className="relative space-y-2 max-w-md text-center md:text-left">
+              <p className="text-[10px] md:text-sm font-semibold uppercase tracking-widest text-white/50">Para vendedores</p>
+              <h2 className="text-xl md:text-3xl font-bold leading-tight">
                 Tem ingressos sobrando?
               </h2>
-              <p className="text-white/60 text-sm leading-relaxed">
+              <p className="text-white/60 text-xs md:text-sm leading-relaxed">
                 Cadastre em segundos com ajuda de IA. Receba com segurança após o evento.
               </p>
             </div>
 
             <Link to="/sell" className="relative shrink-0">
-              <button className="bg-white text-black font-bold text-sm px-8 py-4 rounded-2xl hover:bg-white/90 transition-colors flex items-center gap-2 shadow-lg">
+              <button className="bg-white text-black font-bold text-sm px-6 py-3 md:px-8 md:py-4 rounded-xl md:rounded-2xl hover:bg-white/90 transition-colors flex items-center gap-2 shadow-lg">
                 Vender ingresso <ArrowRight className="w-4 h-4" />
               </button>
             </Link>
