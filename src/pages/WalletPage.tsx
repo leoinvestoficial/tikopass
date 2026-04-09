@@ -68,7 +68,6 @@ export default function WalletPage() {
         .order("created_at", { ascending: false });
       if (error) throw error;
 
-      // Enrich transactions with negotiation/event data
       const txs = (data || []) as WalletTransaction[];
       const negIds = [...new Set(txs.filter(t => t.negotiation_id).map(t => t.negotiation_id!))];
       
@@ -88,7 +87,6 @@ export default function WalletPage() {
             tx.event_date = event?.date || undefined;
             tx.platform_fee = (neg as any).platform_fee || (neg as any).offer_price * 0.10;
             tx.net_amount = tx.amount;
-            // Estimate release: 24h after event date
             if (event?.date && tx.status === "pending") {
               const eventDate = new Date(event.date);
               eventDate.setHours(eventDate.getHours() + 24);
@@ -130,9 +128,9 @@ export default function WalletPage() {
     const c = configs[kycStatus];
     const Icon = c.icon;
     return (
-      <div className={`flex items-start gap-3 p-4 border rounded-xl mb-8 ${c.color}`}>
+      <div className={`flex items-start gap-3 p-3 md:p-4 border rounded-xl mb-6 md:mb-8 ${c.color}`}>
         <Icon className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-        <div className="text-sm">
+        <div className="text-xs md:text-sm">
           <p className="font-medium text-foreground">Verificação KYC</p>
           <p className="text-muted-foreground mt-0.5">{c.text}</p>
         </div>
@@ -141,22 +139,22 @@ export default function WalletPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="min-h-screen flex flex-col bg-background pb-bottom-nav">
       <Navbar />
       <div className="flex-1">
-        <div className="container py-8">
+        <div className="container py-4 md:py-8">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
-              <Wallet className="w-6 h-6 text-primary" />
+            <div className="w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
+              <Wallet className="w-5 h-5 md:w-6 md:h-6 text-primary" />
             </div>
             <div>
-              <h1 className="text-3xl font-display font-bold">Carteira</h1>
-              <p className="text-muted-foreground">Gerencie seus ganhos e saques via Pix.</p>
+              <h1 className="text-xl md:text-3xl font-display font-bold">Carteira</h1>
+              <p className="text-muted-foreground text-xs md:text-base">Gerencie seus ganhos e saques via Pix.</p>
             </div>
           </div>
         </div>
 
-        <div className="container pb-12">
+        <div className="container pb-8 md:pb-12">
           {loading ? (
             <div className="flex items-center justify-center py-20">
               <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -166,24 +164,24 @@ export default function WalletPage() {
               {kycBanner()}
 
               {/* Balance cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-                <div className="bg-card border border-border rounded-xl p-5 space-y-2">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4 mb-6 md:mb-8">
+                <div className="bg-card border border-border rounded-xl p-4 md:p-5 space-y-1.5 md:space-y-2">
+                  <div className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground">
                     <Clock className="w-4 h-4 text-warning" />
                     Saldo retido
                   </div>
-                  <p className="text-2xl font-display font-bold text-warning">
+                  <p className="text-xl md:text-2xl font-display font-bold text-warning">
                     R$ {pendingBalance.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
                   </p>
-                  <p className="text-xs text-muted-foreground">Liberado automaticamente após o evento</p>
+                  <p className="text-[10px] md:text-xs text-muted-foreground">Liberado após o evento</p>
                 </div>
 
-                <div className="bg-card border border-success/20 rounded-xl p-5 space-y-2">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <div className="bg-card border border-success/20 rounded-xl p-4 md:p-5 space-y-1.5 md:space-y-2">
+                  <div className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground">
                     <TrendingUp className="w-4 h-4 text-success" />
                     Disponível para saque
                   </div>
-                  <p className="text-2xl font-display font-bold text-success">
+                  <p className="text-xl md:text-2xl font-display font-bold text-success">
                     R$ {availableBalance.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
                   </p>
                   {availableBalance > 0 && (
@@ -193,37 +191,35 @@ export default function WalletPage() {
                   )}
                 </div>
 
-                <div className="bg-card border border-border rounded-xl p-5 space-y-2">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <div className="bg-card border border-border rounded-xl p-4 md:p-5 space-y-1.5 md:space-y-2">
+                  <div className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground">
                     <ArrowUpCircle className="w-4 h-4" />
                     Total sacado
                   </div>
-                  <p className="text-2xl font-display font-bold text-foreground">
+                  <p className="text-xl md:text-2xl font-display font-bold text-foreground">
                     R$ {totalWithdrawn.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
                   </p>
                 </div>
               </div>
 
               {/* Info banner */}
-              <div className="flex items-start gap-3 p-4 bg-primary/5 border border-primary/10 rounded-xl mb-8">
+              <div className="flex items-start gap-3 p-3 md:p-4 bg-primary/5 border border-primary/10 rounded-xl mb-6 md:mb-8">
                 <ShieldCheck className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                <div className="text-sm">
+                <div className="text-xs md:text-sm">
                   <p className="font-medium text-foreground">Como funciona?</p>
                   <p className="text-muted-foreground mt-0.5">
-                    Quando um comprador paga, o valor fica <strong>retido pela plataforma</strong> até que o evento aconteça.
-                    Após o evento, o pagamento é automaticamente liberado para saque.
-                    Você saca instantaneamente via <strong>Pix</strong> — o dinheiro cai na sua conta em segundos.
+                    Quando um comprador paga, o valor fica <strong>retido</strong> até o evento. Após, é liberado para saque instantâneo via <strong>Pix</strong>.
                   </p>
                 </div>
               </div>
 
               {/* Pix key info */}
               {profile?.pix_key && (
-                <div className="flex items-center gap-3 p-4 bg-card border border-border rounded-xl mb-8">
+                <div className="flex items-center gap-3 p-3 md:p-4 bg-card border border-border rounded-xl mb-6 md:mb-8">
                   <Smartphone className="w-5 h-5 text-primary shrink-0" />
                   <div className="flex-1">
-                    <p className="text-sm font-medium">Chave Pix cadastrada</p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs md:text-sm font-medium">Chave Pix cadastrada</p>
+                    <p className="text-[10px] md:text-xs text-muted-foreground">
                       {PIX_KEY_TYPES.find(t => t.value === profile.pix_key_type)?.label || "Chave"}: {profile.pix_key}
                     </p>
                   </div>
@@ -234,69 +230,66 @@ export default function WalletPage() {
               )}
 
               {/* Transaction history */}
-              <h2 className="text-lg font-display font-semibold mb-4">Histórico de transações</h2>
+              <h2 className="text-base md:text-lg font-display font-semibold mb-3 md:mb-4">Histórico de transações</h2>
               {transactions.length === 0 ? (
-                <div className="text-center py-16 space-y-4">
-                  <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mx-auto">
-                    <Wallet className="w-8 h-8 text-muted-foreground" />
+                <div className="text-center py-12 md:py-16 space-y-4">
+                  <div className="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-muted flex items-center justify-center mx-auto">
+                    <Wallet className="w-7 h-7 md:w-8 md:h-8 text-muted-foreground" />
                   </div>
-                  <h3 className="font-display font-semibold text-lg">Nenhuma transação</h3>
-                  <p className="text-sm text-muted-foreground">Quando você vender um ingresso, as transações aparecerão aqui.</p>
+                  <h3 className="font-display font-semibold text-base md:text-lg">Nenhuma transação</h3>
+                  <p className="text-xs md:text-sm text-muted-foreground">Quando você vender um ingresso, as transações aparecerão aqui.</p>
                 </div>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-2 md:space-y-3">
                   {transactions.map((tx) => {
                     const config = statusConfig[tx.status] || statusConfig.pending;
                     const StatusIcon = config.icon;
                     return (
-                      <div key={tx.id} className="bg-card border border-border rounded-xl p-4 space-y-3">
-                        <div className="flex items-center justify-between gap-4">
-                          <div className="flex items-center gap-3">
-                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${tx.type === "sale" ? "bg-success/10" : "bg-destructive/10"}`}>
+                      <div key={tx.id} className="bg-card border border-border rounded-xl p-3 md:p-4 space-y-2 md:space-y-3">
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="flex items-center gap-2 md:gap-3 min-w-0">
+                            <div className={`w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl flex items-center justify-center shrink-0 ${tx.type === "sale" ? "bg-success/10" : "bg-destructive/10"}`}>
                               {tx.type === "sale" ? (
-                                <ArrowDownCircle className="w-5 h-5 text-success" />
+                                <ArrowDownCircle className="w-4 h-4 md:w-5 md:h-5 text-success" />
                               ) : (
-                                <ArrowUpCircle className="w-5 h-5 text-destructive" />
+                                <ArrowUpCircle className="w-4 h-4 md:w-5 md:h-5 text-destructive" />
                               )}
                             </div>
-                            <div>
-                              <p className="text-sm font-medium text-foreground">{tx.event_name || tx.description || "Transação"}</p>
-                              <p className="text-xs text-muted-foreground">
+                            <div className="min-w-0">
+                              <p className="text-xs md:text-sm font-medium text-foreground truncate">{tx.event_name || tx.description || "Transação"}</p>
+                              <p className="text-[10px] md:text-xs text-muted-foreground">
                                 {new Date(tx.created_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" })}
                               </p>
                             </div>
                           </div>
-                          <div className="flex items-center gap-3">
-                            <Badge className={`text-xs gap-1 ${config.className}`}>
-                              <StatusIcon className="w-3 h-3" />
+                          <div className="flex items-center gap-2 md:gap-3 shrink-0">
+                            <Badge className={`text-[10px] md:text-xs gap-0.5 md:gap-1 ${config.className}`}>
+                              <StatusIcon className="w-2.5 h-2.5 md:w-3 md:h-3" />
                               {config.label}
                             </Badge>
-                            <span className={`font-display font-bold text-lg ${tx.type === "sale" ? "text-success" : "text-destructive"}`}>
+                            <span className={`font-display font-bold text-sm md:text-lg ${tx.type === "sale" ? "text-success" : "text-destructive"}`}>
                               {tx.type === "sale" ? "+" : "-"}R$ {tx.amount.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
                             </span>
                           </div>
                         </div>
 
-                        {/* Detailed breakdown for sale transactions */}
                         {tx.type === "sale" && (tx.platform_fee || tx.released_at || tx.estimated_release) && (
-                          <div className="bg-muted/30 rounded-lg px-3 py-2 text-xs text-muted-foreground space-y-1 ml-13">
+                          <div className="bg-muted/30 rounded-lg px-3 py-2 text-[10px] md:text-xs text-muted-foreground space-y-1 ml-10 md:ml-13">
                             {tx.platform_fee != null && (
-                              <div className="flex justify-between">
-                                <span>Valor bruto (comprador pagou)</span>
-                                <span>R$ {(tx.amount + tx.platform_fee).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
-                              </div>
-                            )}
-                            {tx.platform_fee != null && (
-                              <div className="flex justify-between">
-                                <span>Taxa Tiko Pass</span>
-                                <span>- R$ {tx.platform_fee.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
-                              </div>
-                            )}
-                            {tx.platform_fee != null && (
-                              <div className="flex justify-between font-medium text-foreground border-t border-border pt-1">
-                                <span>Valor líquido</span>
-                                <span>R$ {tx.amount.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
-                              </div>
+                              <>
+                                <div className="flex justify-between">
+                                  <span>Valor bruto</span>
+                                  <span>R$ {(tx.amount + tx.platform_fee).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span>Taxa Tiko Pass</span>
+                                  <span>- R$ {tx.platform_fee.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
+                                </div>
+                                <div className="flex justify-between font-medium text-foreground border-t border-border pt-1">
+                                  <span>Valor líquido</span>
+                                  <span>R$ {tx.amount.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
+                                </div>
+                              </>
                             )}
                             {tx.released_at && (
                               <div className="flex justify-between pt-1">
@@ -328,7 +321,6 @@ export default function WalletPage() {
         </div>
       </div>
 
-      {/* KYC + Withdrawal Flow */}
       {user && (
         <KycWithdrawalFlow
           open={withdrawDialog}
