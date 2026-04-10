@@ -363,6 +363,35 @@ export default function Index() {
           </div>
         )}
 
+        {/* Local DB events found (accent-insensitive) */}
+        {localEvents.length > 0 && filteredTickets.length === 0 && (
+          <div className="mt-6 md:mt-8 space-y-4">
+            <div className="flex items-center gap-2">
+              <Search className="w-5 h-5 text-primary" />
+              <h3 className="text-base md:text-lg font-bold text-foreground">Eventos cadastrados</h3>
+            </div>
+            <p className="text-xs md:text-sm text-muted-foreground">
+              Estes eventos existem na plataforma mas podem não ter ingressos à venda ainda.
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+              {localEvents.map((event) => (
+                <div key={event.id} className="bg-card rounded-2xl border border-border p-4 md:p-5 hover:border-primary/30 transition-colors space-y-2 md:space-y-3 cursor-pointer" onClick={() => navigate(`/event/${event.id}`)}>
+                  <div>
+                    <h4 className="font-bold text-foreground text-sm md:text-base">{event.name}</h4>
+                    <p className="text-xs md:text-sm text-muted-foreground flex items-center gap-1 mt-1">
+                      <Calendar className="w-3.5 h-3.5" /> {event.date} · {event.time}
+                    </p>
+                    <p className="text-xs md:text-sm text-muted-foreground flex items-center gap-1">
+                      <MapPin className="w-3.5 h-3.5" /> {event.venue}, {event.city}
+                    </p>
+                  </div>
+                  <span className="text-xs bg-primary/10 text-primary px-2.5 py-1 rounded-full font-medium">{event.category}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* AI-discovered events */}
         {aiEvents.length > 0 && (
           <div className="mt-6 md:mt-8 space-y-4">
