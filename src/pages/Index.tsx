@@ -364,7 +364,7 @@ export default function Index() {
         )}
 
         {/* Local DB events found (accent-insensitive) */}
-        {localEvents.length > 0 && filteredTickets.length === 0 && (
+        {localEvents.length > 0 && tickets.length === 0 && (
           <div className="mt-6 md:mt-8 space-y-4">
             <div className="flex items-center gap-2">
               <Search className="w-5 h-5 text-primary" />
