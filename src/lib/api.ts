@@ -14,6 +14,12 @@ export type NegotiationMessage = Tables<"negotiation_messages"> & {
 
 // Events
 export async function fetchEvents(city?: string, category?: string, search?: string) {
+  if (search) {
+    let events = await searchEventsLocal(search, city);
+    if (category) events = events.filter((event) => event.category === category);
+    return events.sort((a, b) => a.date.localeCompare(b.date));
+  }
+
   let query = supabase.from("events").select("*").order("date", { ascending: false });
   if (city) query = query.eq("city", city);
   if (category) query = query.eq("category", category);
@@ -69,6 +75,10 @@ export async function createEvent(event: {
 // Tickets
 export async function fetchTickets(filters?: { city?: string; category?: string; search?: string; dateFrom?: string; dateTo?: string }) {
   const today = new Date().toISOString().split("T")[0];
+  const matchingEventIds = filters?.search
+    ? (await searchEventsLocal(filters.search, filters.city)).map((event) => event.id)
+    : [];
+
   let query = supabase
     .from("tickets")
     .select("*, events(*)")
@@ -79,7 +89,8 @@ export async function fetchTickets(filters?: { city?: string; category?: string;
   if (filters?.dateTo) query = query.lte("events.date", filters.dateTo);
   if (filters?.city) query = query.eq("events.city", filters.city);
   if (filters?.category) query = query.eq("events.category", filters.category);
-  if (filters?.search) query = query.ilike("events.name", `%${filters.search}%`);
+  if (matchingEventIds.length > 0) query = query.in("event_id", matchingEventIds);
+  else if (filters?.search) query = query.ilike("events.name", `%${filters.search}%`);
 
   const { data, error } = await query;
   if (error) throw error;
