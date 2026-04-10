@@ -349,7 +349,7 @@ export default function Index() {
                   {aiSearching ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
                   {aiSearching ? "Buscando..." : "Buscar evento com IA"}
                 </Button>
-                <Button variant="outline" className="rounded-full gap-2 text-sm" onClick={() => { setSearch(""); setAiEvents([]); }}>
+                <Button variant="outline" className="rounded-full gap-2 text-sm" onClick={() => { setSearch(""); setAiEvents([]); setLocalEvents([]); }}>
                   <X className="w-4 h-4" /> Limpar busca
                 </Button>
               </div>
