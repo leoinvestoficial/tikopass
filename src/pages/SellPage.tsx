@@ -83,6 +83,19 @@ export default function SellPage() {
     return () => { isActive = false; clearInterval(interval); clearTimeout(timeout); };
   }, [step, savedTicketId]);
 
+  // Local-first search when typing
+  useEffect(() => {
+    if (searchQuery.length < 2) { setLocalResults([]); return; }
+    const timer = setTimeout(async () => {
+      try {
+        const results = await searchEventsLocal(searchQuery, searchCity || undefined);
+        setLocalResults(results);
+        setShowAiSearch(results.length === 0);
+      } catch (e) { console.error("Local search error:", e); }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery, searchCity]);
+
   const handleAISearch = async () => {
     if (!user) { toast.error("Faça login para vender ingressos"); navigate("/auth"); return; }
     if (searchQuery.length < 2) { toast.error("Digite pelo menos 2 caracteres"); return; }
