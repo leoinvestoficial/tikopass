@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Search, CheckCircle2, ArrowRight, Sparkles, MapPin, Calendar, Tag, Loader2, Upload, FileCheck, AlertCircle, Clock, Shield, Zap, DollarSign, XCircle, ArrowLeft, ImageIcon, X } from "lucide-react";
 import CategoryGrid from "@/components/CategoryGrid";
 import { useAuth } from "@/hooks/use-auth";
-import { searchEventsWithAI, createEvent, createTicket } from "@/lib/api";
+import { searchEventsWithAI, searchEventsLocal, createEvent, createTicket, findSimilarEvent } from "@/lib/api";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";

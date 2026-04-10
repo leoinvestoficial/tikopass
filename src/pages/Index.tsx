@@ -15,7 +15,7 @@ import TrustBanner from "@/components/TrustBanner";
 import RecommendedEvents from "@/components/RecommendedEvents";
 import SocialProof from "@/components/SocialProof";
 import QuickDateFilters, { getDateRange } from "@/components/QuickDateFilters";
-import { fetchTickets, searchEventsWithAI, type Ticket as TicketType } from "@/lib/api";
+import { fetchTickets, searchEventsWithAI, searchEventsLocal, type Ticket as TicketType } from "@/lib/api";
 import { Link, useNavigate } from "react-router-dom";
 import { useUserCity } from "@/hooks/use-user-city";
 import { toast } from "sonner";
@@ -56,11 +56,25 @@ export default function Index() {
   const [loading, setLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
   const [aiSearching, setAiSearching] = useState(false);
-  const [aiEvents, setAiEvents] = useState<any[]>([]);
+  const [localEvents, setLocalEvents] = useState<any[]>([]);
 
   const normalizedSearch = search.trim();
   const hasActiveSearch = normalizedSearch.length > 0;
   const hasFilters = selectedCity || selectedCategory || dateFilter;
+
+  const [aiEvents, setAiEvents] = useState<any[]>([]);
+
+  // Local-first search: check DB first (accent-insensitive)
+  useEffect(() => {
+    if (normalizedSearch.length < 2) { setLocalEvents([]); return; }
+    const timer = setTimeout(async () => {
+      try {
+        const results = await searchEventsLocal(normalizedSearch, selectedCity || userCity || "");
+        setLocalEvents(results);
+      } catch (e) { console.error("Local search error:", e); }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [normalizedSearch, selectedCity, userCity]);
 
   const handleAISearch = async () => {
     if (normalizedSearch.length < 2) return;
