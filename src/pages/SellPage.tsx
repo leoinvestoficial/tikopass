@@ -27,10 +27,12 @@ export default function SellPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchCity, setSearchCity] = useState("");
   const [aiResults, setAiResults] = useState<AIEvent[]>([]);
+  const [localResults, setLocalResults] = useState<any[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<AIEvent | null>(null);
   const [savedEventId, setSavedEventId] = useState<string | null>(null);
   const [savedTicketId, setSavedTicketId] = useState<string | null>(null);
   const [searching, setSearching] = useState(false);
+  const [showAiSearch, setShowAiSearch] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [ticketForm, setTicketForm] = useState({ sector: "", row: "", seat: "", price: "", originalPrice: "" });
