@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Search, CheckCircle2, ArrowRight, Sparkles, MapPin, Calendar, Tag, Loader2, Upload, FileCheck, AlertCircle, Clock, Shield, Zap, DollarSign, XCircle, ArrowLeft, ImageIcon, X } from "lucide-react";
 import CategoryGrid from "@/components/CategoryGrid";
 import { useAuth } from "@/hooks/use-auth";
-import { searchEventsWithAI, createEvent, createTicket } from "@/lib/api";
+import { searchEventsWithAI, searchEventsLocal, createEvent, createTicket, findSimilarEvent } from "@/lib/api";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
@@ -27,10 +27,12 @@ export default function SellPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchCity, setSearchCity] = useState("");
   const [aiResults, setAiResults] = useState<AIEvent[]>([]);
+  const [localResults, setLocalResults] = useState<any[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<AIEvent | null>(null);
   const [savedEventId, setSavedEventId] = useState<string | null>(null);
   const [savedTicketId, setSavedTicketId] = useState<string | null>(null);
   const [searching, setSearching] = useState(false);
+  const [showAiSearch, setShowAiSearch] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [ticketForm, setTicketForm] = useState({ sector: "", row: "", seat: "", price: "", originalPrice: "" });
@@ -80,6 +82,19 @@ export default function SellPage() {
     }, 60000);
     return () => { isActive = false; clearInterval(interval); clearTimeout(timeout); };
   }, [step, savedTicketId]);
+
+  // Local-first search when typing
+  useEffect(() => {
+    if (searchQuery.length < 2) { setLocalResults([]); return; }
+    const timer = setTimeout(async () => {
+      try {
+        const results = await searchEventsLocal(searchQuery, searchCity || undefined);
+        setLocalResults(results);
+        setShowAiSearch(results.length === 0);
+      } catch (e) { console.error("Local search error:", e); }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery, searchCity]);
 
   const handleAISearch = async () => {
     if (!user) { toast.error("Faça login para vender ingressos"); navigate("/auth"); return; }
@@ -270,11 +285,54 @@ export default function SellPage() {
                 </div>
               </div>
 
+              {/* Local results (from our DB, accent-insensitive) */}
+              {localResults.length > 0 && (
+                <div className="space-y-3">
+                  <p className="text-sm text-muted-foreground flex items-center gap-2">
+                    <Search className="w-3.5 h-3.5 text-primary" />
+                    {localResults.length} evento(s) já cadastrado(s)
+                  </p>
+                  {localResults.map((event) => {
+                    const isPast = new Date(event.date) < new Date(new Date().toISOString().split("T")[0]);
+                    return (
+                      <button
+                        key={event.id}
+                        onClick={() => {
+                          setSavedEventId(event.id);
+                          const mapped = { name: event.name, date: event.date, time: event.time, venue: event.venue, city: event.city, category: event.category };
+                          setSelectedEvent(mapped);
+                          setEditedEvent(mapped);
+                          setStep("details");
+                        }}
+                        className={`w-full text-left bg-card border border-border rounded-2xl p-5 hover:shadow-lg hover:border-primary/40 transition-all duration-200 active:scale-[0.98] space-y-3 group ${isPast ? "opacity-60" : ""}`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs px-2 py-0.5 rounded bg-primary/10 text-primary font-medium uppercase">{event.category}</span>
+                            <span className="font-bold text-foreground text-base group-hover:text-primary transition-colors">{event.name}</span>
+                          </div>
+                          <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                        </div>
+                        <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+                          <span className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5" />{event.venue} · {event.city}</span>
+                          <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" />{event.date}</span>
+                        </div>
+                        {isPast && <span className="text-xs px-2.5 py-1 rounded-full bg-muted text-muted-foreground font-medium">Encerrado</span>}
+                      </button>
+                    );
+                  })}
+                  <p className="text-xs text-muted-foreground text-center pt-2">
+                    Não encontrou? Use o botão "Buscar com IA" acima.
+                  </p>
+                </div>
+              )}
+
+              {/* AI results (only shown after explicit AI search) */}
               {aiResults.length > 0 && (
                 <div className="space-y-3">
                   <p className="text-sm text-muted-foreground flex items-center gap-2">
                     <Sparkles className="w-3.5 h-3.5 text-primary" />
-                    {aiResults.length} show(s) encontrado(s)
+                    {aiResults.length} show(s) encontrado(s) pela IA
                   </p>
                   {aiResults.map((event, i) => {
                     const isPast = new Date(event.date) < new Date(new Date().toISOString().split("T")[0]);

@@ -23,6 +23,27 @@ export async function fetchEvents(city?: string, category?: string, search?: str
   return data;
 }
 
+// Accent-insensitive local search for events
+export async function searchEventsLocal(searchTerm: string, city?: string) {
+  const { data, error } = await supabase.rpc("search_events_unaccent", {
+    search_term: searchTerm,
+    city_filter: city || null,
+  });
+  if (error) throw error;
+  return (data || []) as Event[];
+}
+
+// Find similar event to avoid duplicates
+export async function findSimilarEvent(name: string, date: string, city: string): Promise<string | null> {
+  const { data, error } = await supabase.rpc("find_similar_event", {
+    event_name: name,
+    event_date: date,
+    event_city: city,
+  });
+  if (error) throw error;
+  return data as string | null;
+}
+
 export async function fetchEventById(id: string) {
   const { data, error } = await supabase.from("events").select("*").eq("id", id).single();
   if (error) throw error;
@@ -32,6 +53,14 @@ export async function fetchEventById(id: string) {
 export async function createEvent(event: {
   name: string; date: string; time: string; venue: string; city: string; category: string; source?: string;
 }) {
+  // Check for existing similar event first
+  const existingId = await findSimilarEvent(event.name, event.date, event.city);
+  if (existingId) {
+    // Return existing event instead of creating duplicate
+    const { data, error } = await supabase.from("events").select("*").eq("id", existingId).single();
+    if (error) throw error;
+    return data;
+  }
   const { data, error } = await supabase.from("events").insert(event).select().single();
   if (error) throw error;
   return data;
