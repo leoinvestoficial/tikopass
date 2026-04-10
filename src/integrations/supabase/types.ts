@@ -699,7 +699,34 @@ export type Database = {
       }
     }
     Functions: {
-      [_ in never]: never
+      find_similar_event: {
+        Args: { event_city: string; event_date: string; event_name: string }
+        Returns: string
+      }
+      search_events_unaccent: {
+        Args: { city_filter?: string; search_term: string }
+        Returns: {
+          category: string
+          city: string
+          created_at: string
+          date: string
+          external_id: string | null
+          id: string
+          image_url: string | null
+          name: string
+          source: string | null
+          time: string
+          updated_at: string
+          venue: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "events"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      unaccent: { Args: { "": string }; Returns: string }
     }
     Enums: {
       [_ in never]: never
