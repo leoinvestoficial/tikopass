@@ -59,10 +59,14 @@ export async function fetchEventById(id: string) {
 export async function createEvent(event: {
   name: string; date: string; time: string; venue: string; city: string; category: string; source?: string;
 }) {
+  // Block past events
+  const today = new Date().toISOString().split("T")[0];
+  if (event.date < today) {
+    throw new Error("Não é possível publicar ingressos para eventos que já aconteceram.");
+  }
   // Check for existing similar event first
   const existingId = await findSimilarEvent(event.name, event.date, event.city);
   if (existingId) {
-    // Return existing event instead of creating duplicate
     const { data, error } = await supabase.from("events").select("*").eq("id", existingId).single();
     if (error) throw error;
     return data;
