@@ -19,13 +19,19 @@ const TICKETING_DOMAINS = [
   { label: "Uhuu", domain: "uhuu.com" },
   { label: "Articket", domain: "articket.com.br" },
   { label: "Ingresso Digital", domain: "ingressodigital.com" },
+  { label: "Zig Tickets", domain: "zigtickets.com.br" },
+  { label: "Lets Events", domain: "lets.events" },
+  { label: "Fever", domain: "ffrr.co" },
+  { label: "Shotgun", domain: "shotgun.live" },
 ];
-const TICKETING_PLATFORMS = TICKETING_DOMAINS.map((platform) => platform.label).join(", ");
+const TICKETING_PLATFORMS = TICKETING_DOMAINS.map((p) => p.label).join(", ");
+
 const SEARCH_STOP_WORDS = new Set([
   "a", "o", "e", "de", "da", "do", "das", "dos", "em", "na", "no", "nas", "nos",
   "para", "por", "com", "tour", "show", "shows", "evento", "eventos", "festival", "festa",
   "ingresso", "ingressos",
 ]);
+
 const MUSIC_CATEGORIES = ["Sertanejo", "Funk", "Rock", "Pagode", "Eletrônico", "Forró", "Outro"];
 
 type AIEvent = {
@@ -37,11 +43,13 @@ type AIEvent = {
   category: string;
 };
 
+// ── Text utilities ──
+
 function normalizeText(text: string): string {
-  let normalized = text.normalize("NFC");
-  normalized = normalized.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, "");
-  normalized = normalized.replace(/\uFFFD/g, "");
-  return normalized.trim();
+  let n = text.normalize("NFC");
+  n = n.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, "");
+  n = n.replace(/\uFFFD/g, "");
+  return n.trim();
 }
 
 function stripAccents(text: string): string {
@@ -49,22 +57,18 @@ function stripAccents(text: string): string {
 }
 
 function toSearchKey(text: string): string {
-  return stripAccents(text)
-    .toLowerCase()
-    .replace(/[^a-z0-9\s]/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
+  return stripAccents(text).toLowerCase().replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim();
 }
 
 function tokenize(text: string): string[] {
-  return toSearchKey(text)
-    .split(" ")
-    .filter((token) => token.length > 1 && !SEARCH_STOP_WORDS.has(token));
+  return toSearchKey(text).split(" ").filter((t) => t.length > 1 && !SEARCH_STOP_WORDS.has(t));
 }
 
 function uniqueStrings(values: string[]): string[] {
-  return [...new Set(values.map((value) => normalizeText(value)).filter(Boolean))];
+  return [...new Set(values.map((v) => normalizeText(v)).filter(Boolean))];
 }
+
+// ── Search helpers ──
 
 function buildSearchVariants(query: string, city: string): string[] {
   const exact = normalizeText(query);
@@ -75,6 +79,7 @@ function buildSearchVariants(query: string, city: string): string[] {
     exact,
     `${exact} ${city}`,
     `${exact} ingresso ${city}`,
+    `${exact} show ${city} 2026`,
     accentless !== exact ? accentless : "",
     accentless !== exact ? `${accentless} ${city}` : "",
     coreTokens,
@@ -82,34 +87,33 @@ function buildSearchVariants(query: string, city: string): string[] {
   ]);
 }
 
-function buildTicketingSearchQuery(term: string, city: string): string {
-  const domains = TICKETING_DOMAINS.map(({ domain }) => `site:${domain}`).join(" OR ");
-  return `${term} ${city} (show OR festival OR turnê OR concerto OR reveillon OR ingresso) (${domains})`;
-}
-
 function scoreEventMatch(event: AIEvent, query: string, city: string): number {
   const queryKey = toSearchKey(query);
   const cityKey = toSearchKey(city);
   const eventKey = toSearchKey(`${event.name} ${event.venue} ${event.city}`);
   const tokens = tokenize(query);
-  const matchedTokens = tokens.filter((token) => eventKey.includes(token)).length;
+  const matchedTokens = tokens.filter((t) => eventKey.includes(t)).length;
 
   let score = tokens.length > 0 ? matchedTokens / tokens.length : 0;
   if (queryKey && eventKey.includes(queryKey)) score += 0.6;
   if (cityKey && toSearchKey(event.city).includes(cityKey)) score += 0.25;
+
+  // Boost events whose name contains ALL query tokens
+  if (tokens.length > 0 && tokens.every((t) => toSearchKey(event.name).includes(t))) score += 0.3;
+
   return score;
 }
 
 function dedupeEvents(events: AIEvent[]): AIEvent[] {
   const deduped = new Map<string, AIEvent>();
-
   for (const event of events) {
     const key = `${toSearchKey(event.name)}|${event.date}|${toSearchKey(event.city)}`;
     if (!deduped.has(key)) deduped.set(key, event);
   }
-
   return [...deduped.values()];
 }
+
+// ── Perplexity search ──
 
 async function searchPerplexity(query: string, city: string): Promise<string> {
   const apiKey = Deno.env.get("PERPLEXITY_API_KEY");
@@ -117,50 +121,74 @@ async function searchPerplexity(query: string, city: string): Promise<string> {
 
   try {
     const domainFilter = TICKETING_DOMAINS.map(({ domain }) => domain);
-    const queries = buildSearchVariants(query, city).slice(0, 4);
+    const variants = buildSearchVariants(query, city).slice(0, 3);
 
-    const responses = await Promise.all(queries.map(async (variant) => {
-      const response = await fetch("https://api.perplexity.ai/chat/completions", {
+    // One broad web search + one ticketing-focused search
+    const searches = [
+      // Broad search without domain filter for maximum coverage
+      fetch("https://api.perplexity.ai/chat/completions", {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          "Content-Type": "application/json",
-        },
+        headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
         body: JSON.stringify({
           model: "sonar-pro",
           messages: [
             {
               role: "system",
-              content: `Você é um assistente especializado em shows e concertos musicais no Brasil. Busque APENAS eventos de música (shows, concertos, festivais musicais, turnês). Priorize páginas das ticketeiras ${TICKETING_PLATFORMS}. Considere variações com e sem acento como o mesmo evento. Ignore resultados irrelevantes ou pouco relacionados ao termo pesquisado.`,
+              content: `Você é um assistente que busca shows e eventos musicais no Brasil. Retorne informações detalhadas: nome COMPLETO do evento/artista, data exata (dia/mês/ano), horário, nome do LOCAL/CASA DE SHOW (NUNCA "A Definir" — busque o venue real), cidade. Busque nas ticketeiras: ${TICKETING_PLATFORMS}, e também em Google, redes sociais e sites oficiais dos artistas.`,
             },
             {
               role: "user",
-              content: `Encontre eventos musicais reais relacionados a "${query}" em ${city} e região. Rode uma busca ampla também pela variação "${variant}". Retorne nome principal do evento, data, horário, local exato, cidade e, se houver, produtora ou página oficial.`,
+              content: `Encontre TODOS os shows e eventos musicais de "${query}" em ${city} e região para 2025/2026. Inclua turnês, festivais e shows avulsos. Para cada evento, informe obrigatoriamente o local/casa de show real onde será realizado.`,
+            },
+          ],
+          search_recency_filter: "year",
+        }),
+      }),
+      // Ticketing domain focused search
+      fetch("https://api.perplexity.ai/chat/completions", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "sonar-pro",
+          messages: [
+            {
+              role: "system",
+              content: `Busque exclusivamente em ticketeiras brasileiras: ${TICKETING_PLATFORMS}. Retorne nome do evento, data, local exato e link de compra.`,
+            },
+            {
+              role: "user",
+              content: `Pesquise "${variants[0]}" nas ticketeiras. Variações: ${variants.slice(1).map(v => `"${v}"`).join(", ")}. Liste todos os resultados encontrados com nome, data, horário e venue.`,
             },
           ],
           search_recency_filter: "year",
           search_domain_filter: domainFilter,
         }),
-      });
+      }),
+    ];
 
+    const responses = await Promise.all(searches);
+    const results: string[] = [];
+
+    for (const response of responses) {
       if (!response.ok) {
         const text = await response.text();
         console.error("Perplexity error:", response.status, text);
-        return "";
+        continue;
       }
-
       const data = await response.json();
       const content = data.choices?.[0]?.message?.content || "";
       const citations = data.citations || [];
-      return normalizeText(content + "\n\nFontes: " + citations.join(", "));
-    }));
+      if (content) results.push(normalizeText(content + "\n\nFontes: " + citations.join(", ")));
+    }
 
-    return responses.filter(Boolean).join("\n\n---\n\n");
+    return results.join("\n\n---\n\n");
   } catch (e) {
     console.error("Perplexity search error:", e);
     return "";
   }
 }
+
+// ── Firecrawl scraping ──
 
 async function scrapeTicketPlatforms(query: string, city: string): Promise<string> {
   const apiKey = Deno.env.get("FIRECRAWL_API_KEY");
@@ -169,38 +197,46 @@ async function scrapeTicketPlatforms(query: string, city: string): Promise<strin
   const results: string[] = [];
 
   try {
-    const searchVariants = buildSearchVariants(query, city).slice(0, 4);
+    const variants = buildSearchVariants(query, city).slice(0, 3);
+    const domains = TICKETING_DOMAINS.map(({ domain }) => `site:${domain}`).join(" OR ");
 
-    const searches = await Promise.all(searchVariants.map(async (variant) => {
-      const response = await fetch("https://api.firecrawl.dev/v1/search", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          query: buildTicketingSearchQuery(variant, city),
-          limit: 6,
-          scrapeOptions: { formats: ["markdown"] },
-        }),
-      });
+    // Build diverse search queries
+    const searchQueries = [
+      // Ticketing-focused
+      ...variants.map((v) => `${v} (show OR festival OR turnê OR ingresso) (${domains})`),
+      // Google general search for broader coverage
+      `"${normalizeText(query)}" ${city} show ingresso 2026`,
+      `"${stripAccents(query)}" ${city} ingressos comprar`,
+    ];
 
-      if (!response.ok) {
-        const text = await response.text();
-        console.error("Firecrawl search error:", response.status, text);
-        return [];
-      }
+    const searches = await Promise.all(
+      searchQueries.slice(0, 5).map(async (q) => {
+        const response = await fetch("https://api.firecrawl.dev/v1/search", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            query: q,
+            limit: 5,
+            scrapeOptions: { formats: ["markdown"] },
+          }),
+        });
 
-      const data = await response.json();
-      return data.data || [];
-    }));
+        if (!response.ok) {
+          const text = await response.text();
+          console.error("Firecrawl error:", response.status, text);
+          return [];
+        }
+        const data = await response.json();
+        return data.data || [];
+      })
+    );
 
     const seenUrls = new Set<string>();
     for (const items of searches) {
       for (const item of items) {
         if (!item?.url || seenUrls.has(item.url)) continue;
         seenUrls.add(item.url);
-        const snippet = normalizeText((item.markdown || item.description || "").slice(0, 700));
+        const snippet = normalizeText((item.markdown || item.description || "").slice(0, 800));
         results.push(`[${normalizeText(item.title || "")}] ${item.url}\n${snippet}`);
       }
     }
@@ -213,11 +249,13 @@ async function scrapeTicketPlatforms(query: string, city: string): Promise<strin
   return results.join("\n\n---\n\n");
 }
 
+// ── AI structuring ──
+
 async function structureWithGemini(
   query: string,
   city: string,
   perplexityData: string,
-  firecrawlData: string
+  firecrawlData: string,
 ): Promise<AIEvent[]> {
   const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
   if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
@@ -226,35 +264,36 @@ async function structureWithGemini(
 
   const systemPrompt = `Você é um assistente especializado em shows e eventos musicais no Brasil.
 Hoje é ${today}. O ano atual é ${today.slice(0, 4)}.
-Com base nos dados de busca web e scraping de ticketeiras fornecidos, extraia APENAS eventos de MÚSICA (shows, concertos, festivais musicais, turnês de artistas/bandas).
-REGRAS:
-- Use APENAS informações encontradas nos dados fornecidos. NÃO invente eventos.
-- APENAS eventos musicais: shows, concertos, festivais de música, turnês. IGNORE eventos esportivos, teatro, conferências, etc.
-- Se um evento aparece em múltiplas fontes, combine as informações mais precisas.
-- Priorize eventos diretamente relacionados ao termo pesquisado. Se a busca for por "Oboé", NÃO retorne eventos sem relação clara com Oboé.
-- Considere nomes com e sem acento, abreviações e pequenas variações como o mesmo evento.
-- Se a data exata não for clara, use a data mais provável. NUNCA use anos passados para eventos recorrentes futuros.
-- Categorias permitidas APENAS: ${MUSIC_CATEGORIES.join(", ")}.
-  - Sertanejo: shows de artistas sertanejos (sertanejo, sofrência, arrocha)
-  - Funk: shows de funk, baile funk, MC
-  - Rock: shows de rock, pop, indie, metal, punk, alternativo
-  - Pagode: shows de pagode, samba, axé, MPB
-  - Eletrônico: festas e shows de música eletrônica, DJs, raves
-  - Forró: shows de forró, piseiro, vaquejada, pé de serra
-  - Outro: festivais, shows que não se encaixam nas categorias acima
-- Ticketeiras reconhecidas: ${TICKETING_PLATFORMS}.
-- IMPORTANTE: Use SEMPRE acentos corretos em português.`;
+REGRAS ESTRITAS:
+- Use APENAS informações dos dados fornecidos. NÃO invente eventos.
+- APENAS eventos musicais: shows, concertos, festivais de música, turnês.
+- IGNORE eventos esportivos, teatro, conferências, palestras religiosas.
+- Combine informações de múltiplas fontes para obter o dado mais preciso.
+- VENUE: Use o nome REAL da casa de show/local. NUNCA use "A Definir", "TBA", ou "Local a confirmar". Se não souber o venue exato, use o melhor dado disponível nos resultados.
+- Considere nomes com e sem acento como o MESMO evento (Oboé = Oboe).
+- Datas: use apenas datas futuras (>= ${today}). Para eventos recorrentes, use a próxima data.
+- Categorias: ${MUSIC_CATEGORIES.join(", ")}.
+  Sertanejo: sertanejo, sofrência, arrocha
+  Funk: funk, baile funk, MC
+  Rock: rock, pop, indie, metal, punk, alternativo
+  Pagode: pagode, samba, axé, MPB
+  Eletrônico: eletrônica, DJ, rave
+  Forró: forró, piseiro, vaquejada
+  Outro: festivais multi-gênero, outros
+- Ticketeiras: ${TICKETING_PLATFORMS}.
+- Use SEMPRE acentos corretos em português.`;
 
   const userPrompt = `Busca: "${query}" em ${city}.
 
-DADOS DA BUSCA WEB (Perplexity):
+DADOS WEB (Perplexity):
 ${perplexityData || "Nenhum resultado."}
 
-DADOS DE TICKETEIRAS (Firecrawl):
+DADOS TICKETEIRAS (Firecrawl):
 ${firecrawlData || "Nenhum resultado."}
 
-Extraia até 8 shows/eventos musicais reais encontrados nos dados acima.
-Se não houver correspondência forte com "${query}", retorne lista vazia.`;
+Extraia até 10 eventos musicais reais. Priorize eventos diretamente relacionados a "${query}".
+Para buscas genéricas (como "shows em Salvador"), retorne os principais eventos futuros da cidade.
+Se "${query}" é nome de artista/banda, retorne TODOS os shows encontrados desse artista.`;
 
   const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
@@ -282,15 +321,12 @@ Se não houver correspondência forte com "${query}", retorne lista vazia.`;
                   items: {
                     type: "object",
                     properties: {
-                      name: { type: "string", description: "Nome do show/artista" },
+                      name: { type: "string", description: "Nome completo do show/artista/evento" },
                       date: { type: "string", description: "YYYY-MM-DD" },
-                      time: { type: "string", description: "HH:MM" },
-                      venue: { type: "string", description: "Nome do local/venue" },
+                      time: { type: "string", description: "HH:MM ou 00:00 se desconhecido" },
+                      venue: { type: "string", description: "Nome real da casa de show ou local" },
                       city: { type: "string", description: "Cidade" },
-                      category: {
-                        type: "string",
-                        enum: MUSIC_CATEGORIES,
-                      },
+                      category: { type: "string", enum: MUSIC_CATEGORIES },
                     },
                     required: ["name", "date", "time", "venue", "city", "category"],
                     additionalProperties: false,
@@ -320,6 +356,13 @@ Se não houver correspondência forte com "${query}", retorne lista vazia.`;
   if (!toolCall?.function?.arguments) return [];
 
   const parsed = JSON.parse(toolCall.function.arguments);
+  const tokens = tokenize(query);
+  const isGenericSearch = tokens.length === 0 || 
+    ["shows", "eventos", "festas", "festival"].some((w) => toSearchKey(query).includes(w));
+
+  // Use relaxed threshold for generic searches, stricter for specific artist/event searches
+  const minScore = isGenericSearch ? 0.1 : tokens.length <= 1 ? 0.25 : 0.4;
+
   return dedupeEvents(
     (parsed.events || [])
       .map((e: AIEvent) => ({
@@ -328,10 +371,12 @@ Se não houver correspondência forte com "${query}", retorne lista vazia.`;
         venue: normalizeText(e.venue),
         city: normalizeText(e.city),
       }))
-      .filter((event: AIEvent) => scoreEventMatch(event, query, city) >= (tokenize(query).length <= 1 ? 0.35 : 0.5))
+      .filter((event: AIEvent) => scoreEventMatch(event, query, city) >= minScore)
       .sort((a: AIEvent, b: AIEvent) => scoreEventMatch(b, query, city) - scoreEventMatch(a, query, city))
-  ).slice(0, 8);
+  ).slice(0, 10);
 }
+
+// ── Handler ──
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -346,29 +391,29 @@ serve(async (req) => {
     }
 
     const cityFilter = city || "Salvador";
-    console.log(`Searching music events: "${query}" in ${cityFilter}`);
+    console.log(`Searching: "${query}" in ${cityFilter}`);
 
     let [perplexityData, firecrawlData] = await Promise.all([
       searchPerplexity(query, cityFilter),
       scrapeTicketPlatforms(query, cityFilter),
     ]);
 
+    // Fallback with accent-stripped query if no results
     if (!perplexityData && !firecrawlData) {
-      const relaxedQuery = stripAccents(query);
-      if (relaxedQuery && relaxedQuery !== query) {
-        const [fallbackPerplexity, fallbackFirecrawl] = await Promise.all([
-          searchPerplexity(relaxedQuery, cityFilter),
-          scrapeTicketPlatforms(relaxedQuery, cityFilter),
+      const relaxed = stripAccents(query);
+      if (relaxed !== query) {
+        console.log(`Retrying with accent-stripped query: "${relaxed}"`);
+        [perplexityData, firecrawlData] = await Promise.all([
+          searchPerplexity(relaxed, cityFilter),
+          scrapeTicketPlatforms(relaxed, cityFilter),
         ]);
-        perplexityData = fallbackPerplexity;
-        firecrawlData = fallbackFirecrawl;
       }
     }
 
-    console.log(`Data collected - Perplexity: ${perplexityData.length} chars, Firecrawl: ${firecrawlData.length} chars`);
+    console.log(`Data: Perplexity ${perplexityData.length}ch, Firecrawl ${firecrawlData.length}ch`);
 
     const events = await structureWithGemini(query, cityFilter, perplexityData, firecrawlData);
-    console.log("Final music events:", events.length);
+    console.log("Final events:", events.length);
 
     return new Response(JSON.stringify({ events }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
