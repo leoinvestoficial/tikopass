@@ -101,7 +101,9 @@ export default function SellPage() {
     if (searchQuery.length < 2) { toast.error("Digite pelo menos 2 caracteres"); return; }
     setSearching(true);
     try {
-      const events = await searchEventsWithAI(searchQuery, searchCity || undefined);
+      const today = new Date().toISOString().split("T")[0];
+      const events = (await searchEventsWithAI(searchQuery, searchCity || undefined))
+        .filter((e: any) => e.date >= today);
       setAiResults(events);
       if (events.length === 0) toast.info("Nenhum evento encontrado. Tente outros termos.");
     } catch (err: any) { toast.error(err.message || "Erro na busca com IA"); }
