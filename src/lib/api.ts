@@ -161,10 +161,11 @@ export async function fetchTicketsByEvent(eventId: string) {
 
 // Public seller profile
 export async function fetchSellerProfile(userId: string) {
-  const [profileRes, ratingsRes, ticketsRes] = await Promise.all([
+  const [profileRes, ratingsRes, ticketsRes, salesCountRes] = await Promise.all([
     supabase.from("profiles").select("*").eq("user_id", userId).single(),
     supabase.from("seller_ratings" as any).select("rating, comment, created_at, buyer_id").eq("seller_id", userId).order("created_at", { ascending: false }),
     supabase.from("tickets").select("id, price, status, created_at, event_id, events(id, name, date, city)").eq("seller_id", userId).order("created_at", { ascending: false }),
+    supabase.from("negotiations").select("id", { count: "exact", head: true }).eq("seller_id", userId).eq("payment_status", "paid"),
   ]);
   if (profileRes.error) throw profileRes.error;
 
@@ -181,13 +182,15 @@ export async function fetchSellerProfile(userId: string) {
     reviewsWithNames = ratings.map((r: any) => ({ ...r, buyer_name: nameMap.get(r.buyer_id) || "Comprador" }));
   }
 
+  const totalSales = salesCountRes.count || 0;
+
   return {
     profile: profileRes.data,
     ratings: reviewsWithNames,
     avgRating,
     ratingCount: ratings.length,
     tickets: ticketsRes.data || [],
-    totalSales: (ticketsRes.data || []).filter((t: any) => t.status === "sold").length,
+    totalSales,
   };
 }
 

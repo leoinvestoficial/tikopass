@@ -10,6 +10,8 @@ import {
   ShieldCheck, Clock, Award,
 } from "lucide-react";
 import { useScrollReveal } from "@/hooks/use-scroll-reveal";
+import SellerLevelBadge, { getSellerLevel } from "@/components/SellerLevelBadge";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 export default function SellerProfilePage() {
   const { userId } = useParams();
@@ -94,8 +96,10 @@ export default function SellerProfilePage() {
   const accountAge = getAccountAge(profile.created_at);
   const today = new Date().toISOString().split("T")[0];
   const activeTickets = tickets.filter((t: any) => t.events?.date >= today && t.status === "available");
+  const sellerLevel = getSellerLevel(totalSales, avgRating);
 
   return (
+    <TooltipProvider>
     <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
 
@@ -128,8 +132,9 @@ export default function SellerProfilePage() {
 
             <div className="space-y-3 min-w-0">
               <div>
-                <h1 className="text-2xl md:text-3xl font-display font-bold text-foreground">
+                <h1 className="text-2xl md:text-3xl font-display font-bold text-foreground flex items-center gap-2">
                   {profile.display_name || "Vendedor"}
+                  <SellerLevelBadge level={sellerLevel} />
                 </h1>
                 {profile.city && (
                   <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
@@ -312,5 +317,6 @@ export default function SellerProfilePage() {
 
       <Footer />
     </div>
+    </TooltipProvider>
   );
 }
