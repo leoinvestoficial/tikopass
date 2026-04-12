@@ -191,6 +191,7 @@ export default function WalletPage() {
                   )}
                 </div>
 
+
                 <div className="bg-card border border-border rounded-xl p-4 md:p-5 space-y-1.5 md:space-y-2">
                   <div className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground">
                     <ArrowUpCircle className="w-4 h-4" />
@@ -201,6 +202,22 @@ export default function WalletPage() {
                   </p>
                 </div>
               </div>
+
+              {/* KYC Button - always visible when not approved */}
+              {kycStatus !== "approved" && (
+                <div className="mb-6 md:mb-8">
+                  <Button
+                    onClick={() => setWithdrawDialog(true)}
+                    className="w-full rounded-xl gap-2 h-12"
+                    variant={kycStatus === "submitted" ? "outline" : "default"}
+                  >
+                    <ShieldCheck className="w-5 h-5" />
+                    {kycStatus === "pending" && "Verificar identidade (KYC)"}
+                    {kycStatus === "submitted" && "Verificação em análise"}
+                    {kycStatus === "rejected" && "Reenviar verificação"}
+                  </Button>
+                </div>
+              )}
 
               {/* Info banner */}
               <div className="flex items-start gap-3 p-3 md:p-4 bg-primary/5 border border-primary/10 rounded-xl mb-6 md:mb-8">
