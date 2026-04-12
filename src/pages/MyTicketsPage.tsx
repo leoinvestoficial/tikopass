@@ -98,7 +98,7 @@ function SellingTicketCard({ ticket, today, onDelete }: { ticket: any; today: st
         </div>
       )}
 
-      {(isRejected || ticket.status === "validated") && checks.length > 0 && (
+      {isRejected && checks.length > 0 && (
         <ValidationChecklist checks={checks} />
       )}
 

@@ -119,7 +119,7 @@ export default function TicketDetailPage() {
   }, [ticket]);
 
   const isOwner = user?.id === ticket?.seller_id;
-  const isAvailable = ticket?.status === "available" && !isPastEvent;
+  const isAvailable = (ticket?.status === "available" || ticket?.status === "validated") && !isPastEvent;
 
   const ensureSession = async () => {
     const { data: { session } } = await supabase.auth.getSession();

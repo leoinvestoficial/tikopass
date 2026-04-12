@@ -305,6 +305,44 @@ IMPORTANTE:
       checks.push({ id: "ocr_event_date", label: "Data do evento", passed: true, detail: extracted.event_date });
     }
 
+    // ========== CHECK: Expired event from OCR date ==========
+    if (extracted.event_date) {
+      const parsedDate = parseFlexibleDate(extracted.event_date);
+      if (parsedDate) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        if (parsedDate < today) {
+          const formattedDate = parsedDate.toLocaleDateString("pt-BR");
+          checks.push({
+            id: "event_expired",
+            label: "Evento expirado",
+            passed: false,
+            detail: `Data do evento no ingresso: ${formattedDate} — evento já ocorreu`,
+          });
+          const reason = `O ingresso é de um evento que já ocorreu (${formattedDate}). Não é possível vender ingressos de eventos encerrados.`;
+          await rejectTicket(supabaseAdmin, ticket_id, extracted.ticket_code, reason, checks);
+          return jsonResponse({ success: false, reason, checks });
+        }
+      }
+    }
+
+    // ========== CHECK: QR code "encerrado" detection ==========
+    const encerradoKeywords = ["evento encerrado", "expirado", "expired", "encerrado", "evento finalizado", "inválido"];
+    const fullTextLower = fullText.toLowerCase();
+    const qrContentLower = (extracted.qr_content || "").toLowerCase();
+    const hasEncerrado = encerradoKeywords.some(kw => fullTextLower.includes(kw) || qrContentLower.includes(kw));
+    if (hasEncerrado) {
+      checks.push({
+        id: "event_closed",
+        label: "Evento encerrado",
+        passed: false,
+        detail: "O documento contém indicação de evento encerrado/expirado",
+      });
+      const reason = "O ingresso indica que o evento já foi encerrado. Não é possível vender ingressos de eventos finalizados.";
+      await rejectTicket(supabaseAdmin, ticket_id, extracted.ticket_code, reason, checks);
+      return jsonResponse({ success: false, reason, checks });
+    }
+
     if (event_id && extracted.event_name) {
       const { data: event } = await supabaseAdmin
         .from("events").select("name, date").eq("id", event_id).single();
@@ -324,6 +362,26 @@ IMPORTANTE:
           const reason = `O ingresso parece ser do evento "${extracted.event_name}", mas você selecionou "${event.name}".`;
           await rejectTicket(supabaseAdmin, ticket_id, extracted.ticket_code, reason, checks);
           return jsonResponse({ success: false, reason, checks });
+        }
+
+        // ========== CHECK: Date mismatch with selected event ==========
+        if (extracted.event_date) {
+          const ocrDate = parseFlexibleDate(extracted.event_date);
+          const eventDate = new Date(event.date + "T00:00:00");
+          if (ocrDate && eventDate) {
+            const diffDays = Math.abs((ocrDate.getTime() - eventDate.getTime()) / (1000 * 60 * 60 * 24));
+            if (diffDays > 30) {
+              checks.push({
+                id: "date_mismatch",
+                label: "Data incompatível",
+                passed: false,
+                detail: `Data no ingresso: ${ocrDate.toLocaleDateString("pt-BR")} vs evento selecionado: ${eventDate.toLocaleDateString("pt-BR")}`,
+              });
+              const reason = `A data no ingresso (${ocrDate.toLocaleDateString("pt-BR")}) é muito diferente da data do evento selecionado (${eventDate.toLocaleDateString("pt-BR")}).`;
+              await rejectTicket(supabaseAdmin, ticket_id, extracted.ticket_code, reason, checks);
+              return jsonResponse({ success: false, reason, checks });
+            }
+          }
         }
       }
     }
@@ -506,4 +564,39 @@ function fuzzyEventMatch(extracted: string, selected: string): boolean {
   const normB = normalizeEventName(selected);
   if (normA.includes(normB) || normB.includes(normA)) return true;
   return false;
+}
+
+function parseFlexibleDate(dateStr: string): Date | null {
+  if (!dateStr) return null;
+  
+  // Try ISO format (YYYY-MM-DD)
+  const isoMatch = dateStr.match(/(\d{4})-(\d{2})-(\d{2})/);
+  if (isoMatch) return new Date(parseInt(isoMatch[1]), parseInt(isoMatch[2]) - 1, parseInt(isoMatch[3]));
+  
+  // Try DD/MM/YYYY
+  const brMatch = dateStr.match(/(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})/);
+  if (brMatch) return new Date(parseInt(brMatch[3]), parseInt(brMatch[2]) - 1, parseInt(brMatch[1]));
+  
+  // Try DD/MM/YY
+  const brShortMatch = dateStr.match(/(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2})(?!\d)/);
+  if (brShortMatch) {
+    const year = parseInt(brShortMatch[3]) + 2000;
+    return new Date(year, parseInt(brShortMatch[2]) - 1, parseInt(brShortMatch[1]));
+  }
+  
+  // Try natural language: "31 de dezembro de 2025" or "31/12/2025"
+  const months: Record<string, number> = {
+    janeiro: 0, fevereiro: 1, março: 2, marco: 2, abril: 3, maio: 4, junho: 5,
+    julho: 6, agosto: 7, setembro: 8, outubro: 9, novembro: 10, dezembro: 11,
+    jan: 0, fev: 1, mar: 2, abr: 3, mai: 4, jun: 5, jul: 6, ago: 7, set: 8, out: 9, nov: 10, dez: 11,
+  };
+  const nlMatch = dateStr.toLowerCase().match(/(\d{1,2})\s*(?:de\s+)?(\w+)\s*(?:de\s+)?(\d{4})/);
+  if (nlMatch) {
+    const monthNum = months[nlMatch[2]];
+    if (monthNum !== undefined) {
+      return new Date(parseInt(nlMatch[3]), monthNum, parseInt(nlMatch[1]));
+    }
+  }
+  
+  return null;
 }
