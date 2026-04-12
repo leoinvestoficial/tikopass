@@ -305,6 +305,44 @@ IMPORTANTE:
       checks.push({ id: "ocr_event_date", label: "Data do evento", passed: true, detail: extracted.event_date });
     }
 
+    // ========== CHECK: Expired event from OCR date ==========
+    if (extracted.event_date) {
+      const parsedDate = parseFlexibleDate(extracted.event_date);
+      if (parsedDate) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        if (parsedDate < today) {
+          const formattedDate = parsedDate.toLocaleDateString("pt-BR");
+          checks.push({
+            id: "event_expired",
+            label: "Evento expirado",
+            passed: false,
+            detail: `Data do evento no ingresso: ${formattedDate} — evento já ocorreu`,
+          });
+          const reason = `O ingresso é de um evento que já ocorreu (${formattedDate}). Não é possível vender ingressos de eventos encerrados.`;
+          await rejectTicket(supabaseAdmin, ticket_id, extracted.ticket_code, reason, checks);
+          return jsonResponse({ success: false, reason, checks });
+        }
+      }
+    }
+
+    // ========== CHECK: QR code "encerrado" detection ==========
+    const encerradoKeywords = ["evento encerrado", "expirado", "expired", "encerrado", "evento finalizado", "inválido"];
+    const fullTextLower = fullText.toLowerCase();
+    const qrContentLower = (extracted.qr_content || "").toLowerCase();
+    const hasEncerrado = encerradoKeywords.some(kw => fullTextLower.includes(kw) || qrContentLower.includes(kw));
+    if (hasEncerrado) {
+      checks.push({
+        id: "event_closed",
+        label: "Evento encerrado",
+        passed: false,
+        detail: "O documento contém indicação de evento encerrado/expirado",
+      });
+      const reason = "O ingresso indica que o evento já foi encerrado. Não é possível vender ingressos de eventos finalizados.";
+      await rejectTicket(supabaseAdmin, ticket_id, extracted.ticket_code, reason, checks);
+      return jsonResponse({ success: false, reason, checks });
+    }
+
     if (event_id && extracted.event_name) {
       const { data: event } = await supabaseAdmin
         .from("events").select("name, date").eq("id", event_id).single();
@@ -324,6 +362,26 @@ IMPORTANTE:
           const reason = `O ingresso parece ser do evento "${extracted.event_name}", mas você selecionou "${event.name}".`;
           await rejectTicket(supabaseAdmin, ticket_id, extracted.ticket_code, reason, checks);
           return jsonResponse({ success: false, reason, checks });
+        }
+
+        // ========== CHECK: Date mismatch with selected event ==========
+        if (extracted.event_date) {
+          const ocrDate = parseFlexibleDate(extracted.event_date);
+          const eventDate = new Date(event.date + "T00:00:00");
+          if (ocrDate && eventDate) {
+            const diffDays = Math.abs((ocrDate.getTime() - eventDate.getTime()) / (1000 * 60 * 60 * 24));
+            if (diffDays > 30) {
+              checks.push({
+                id: "date_mismatch",
+                label: "Data incompatível",
+                passed: false,
+                detail: `Data no ingresso: ${ocrDate.toLocaleDateString("pt-BR")} vs evento selecionado: ${eventDate.toLocaleDateString("pt-BR")}`,
+              });
+              const reason = `A data no ingresso (${ocrDate.toLocaleDateString("pt-BR")}) é muito diferente da data do evento selecionado (${eventDate.toLocaleDateString("pt-BR")}).`;
+              await rejectTicket(supabaseAdmin, ticket_id, extracted.ticket_code, reason, checks);
+              return jsonResponse({ success: false, reason, checks });
+            }
+          }
         }
       }
     }

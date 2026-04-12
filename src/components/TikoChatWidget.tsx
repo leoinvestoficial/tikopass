@@ -45,7 +45,7 @@ export default function TikoChatWidget() {
   return (
     <>
       {/* FAB with label */}
-      <div className="fixed bottom-6 right-6 z-50 flex flex-col items-center gap-1.5">
+      <div className="fixed bottom-20 md:bottom-6 right-4 md:right-6 z-40 flex flex-col items-center gap-1.5">
         {!open && (
           <span className="text-[11px] font-bold text-foreground bg-card border border-border rounded-full px-3 py-1 shadow-md whitespace-nowrap">
             Fale com o Tiko
@@ -63,8 +63,8 @@ export default function TikoChatWidget() {
 
       {/* Chat panel */}
       {open && (
-        <div className="fixed bottom-24 right-6 z-50 w-[360px] max-w-[calc(100vw-48px)] bg-card border border-border rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300"
-          style={{ height: "min(500px, calc(100vh - 140px))" }}
+        <div className="fixed bottom-36 md:bottom-24 right-4 md:right-6 z-40 w-[360px] max-w-[calc(100vw-32px)] md:max-w-[calc(100vw-48px)] bg-card border border-border rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300"
+          style={{ height: "min(500px, calc(100vh - 200px))" }}
         >
           {/* Header */}
           <div className="bg-primary px-5 py-4 flex items-center gap-3 shrink-0">
