@@ -1,6 +1,8 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { encode as base64Encode } from "https://deno.land/std@0.190.0/encoding/base64.ts";
+import jsQR from "https://esm.sh/jsqr@1.4.0";
+import { Image } from "https://deno.land/x/imagescript@1.3.0/mod.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -9,6 +11,7 @@ const corsHeaders = {
 };
 
 type Check = { id: string; label: string; passed: boolean; detail: string };
+type QrReadResult = { content: string; variant: string };
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -61,6 +64,7 @@ serve(async (req) => {
       webp: "image/webp",
     };
     const mimeType = mimeMap[ext] || "image/jpeg";
+    const qrReadResult = await decodeQrFromImage(uint8, mimeType);
 
     // ========== OCR via Lovable AI (Gemini Vision) ==========
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
@@ -166,6 +170,7 @@ IMPORTANTE:
     }
 
     const fullText = extracted.full_text || "";
+    const qrContent = qrReadResult?.content || null;
     console.log("OCR text length:", fullText.length, "Is ticket:", extracted.is_ticket, "Confidence:", extracted.confidence);
 
     // ========== CHECK: OCR Read ==========
@@ -203,6 +208,21 @@ IMPORTANTE:
         : fullText.length < 20
           ? "Não foi possível extrair texto do arquivo. Envie uma foto nítida ou PDF do ingresso."
           : "O arquivo enviado não parece ser um ingresso válido.";
+      await rejectTicket(supabaseAdmin, ticket_id, null, reason, checks);
+      return jsonResponse({ success: false, reason, checks });
+    }
+
+    checks.push({
+      id: "qr_code",
+      label: "QR code lido",
+      passed: Boolean(qrContent),
+      detail: qrContent
+        ? `QR decodificado (${qrReadResult?.variant}): ${truncateDetail(qrContent, 96)}`
+        : "Não foi possível decodificar o QR code real do arquivo",
+    });
+
+    if (!qrContent) {
+      const reason = "Não foi possível ler o QR code do ingresso. Envie uma imagem nítida com o QR completo e sem cortes.";
       await rejectTicket(supabaseAdmin, ticket_id, null, reason, checks);
       return jsonResponse({ success: false, reason, checks });
     }
@@ -329,7 +349,7 @@ IMPORTANTE:
     // ========== CHECK: QR code "encerrado" detection ==========
     const encerradoKeywords = ["evento encerrado", "expirado", "expired", "encerrado", "evento finalizado", "inválido"];
     const fullTextLower = fullText.toLowerCase();
-    const qrContentLower = (extracted.qr_content || "").toLowerCase();
+    const qrContentLower = qrContent.toLowerCase();
     const hasEncerrado = encerradoKeywords.some(kw => fullTextLower.includes(kw) || qrContentLower.includes(kw));
     if (hasEncerrado) {
       checks.push({
@@ -390,7 +410,7 @@ IMPORTANTE:
     // Collect all unique identifiers from the ticket
     const allIdentifiers: string[] = [];
     if (extracted.ticket_code) allIdentifiers.push(String(extracted.ticket_code).trim());
-    if (extracted.qr_content) allIdentifiers.push(String(extracted.qr_content).trim());
+    if (qrContent) allIdentifiers.push(qrContent);
     if (extracted.barcode) allIdentifiers.push(String(extracted.barcode).trim());
     if (extracted.unique_identifiers) {
       for (const uid of extracted.unique_identifiers) {
@@ -401,7 +421,7 @@ IMPORTANTE:
 
     // Filter out very short or generic identifiers
     const meaningfulIds = allIdentifiers.filter(id => id.length >= 4);
-    const primaryCode = extracted.qr_content || extracted.barcode || extracted.ticket_code;
+    const primaryCode = qrContent || extracted.barcode || extracted.ticket_code;
 
     if (meaningfulIds.length > 0) {
       // Hash EACH identifier individually and check for duplicates
@@ -476,7 +496,7 @@ IMPORTANTE:
         ticket_code: extracted.ticket_code,
         venue: extracted.venue,
         sector: extracted.sector,
-        qr_content: extracted.qr_content,
+        qr_content: qrContent,
         holder_name: extracted.holder_name,
       },
       checks,
@@ -599,4 +619,58 @@ function parseFlexibleDate(dateStr: string): Date | null {
   }
   
   return null;
+}
+
+async function decodeQrFromImage(fileBytes: Uint8Array, mimeType: string): Promise<QrReadResult | null> {
+  if (!mimeType.startsWith("image/")) return null;
+
+  try {
+    const sourceImage = await Image.decode(fileBytes);
+    const variants = buildQrVariants(sourceImage);
+
+    for (const variant of variants) {
+      const result = jsQR(new Uint8ClampedArray(variant.image.bitmap), variant.image.width, variant.image.height, {
+        inversionAttempts: "attemptBoth",
+      });
+
+      if (result?.data) {
+        return {
+          content: normalizeIdentifier(result.data),
+          variant: variant.name,
+        };
+      }
+    }
+  } catch (error) {
+    console.error("QR decode error:", error);
+  }
+
+  return null;
+}
+
+function buildQrVariants(sourceImage: Image): Array<{ image: Image; name: string }> {
+  const variants: Array<{ image: Image; name: string }> = [{ image: sourceImage.clone(), name: "original" }];
+
+  if (sourceImage.width < 1400 || sourceImage.height < 1400) {
+    variants.push({
+      image: sourceImage.clone().resize(sourceImage.width * 2, sourceImage.height * 2),
+      name: "ampliado-2x",
+    });
+  }
+
+  if (sourceImage.width > 1800 || sourceImage.height > 1800) {
+    variants.push({
+      image: sourceImage.clone().resize(Math.max(800, Math.round(sourceImage.width * 0.6)), Math.max(800, Math.round(sourceImage.height * 0.6))),
+      name: "reduzido-60%",
+    });
+  }
+
+  return variants;
+}
+
+function normalizeIdentifier(value: string): string {
+  return value.replace(/\u0000/g, "").trim();
+}
+
+function truncateDetail(value: string, maxLength = 80): string {
+  return value.length <= maxLength ? value : `${value.slice(0, maxLength)}…`;
 }
