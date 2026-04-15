@@ -97,8 +97,16 @@ export default function OnboardingModal() {
   useEffect(() => {
     if (user && profile) {
       const seen = localStorage.getItem(`onboarding_done_${user.id}`);
-      if (!seen) {
+      if (seen) return;
+
+      // Only show for accounts created in the last 10 minutes (new users)
+      const createdAt = profile.created_at ? new Date(profile.created_at).getTime() : 0;
+      const tenMinutesAgo = Date.now() - 10 * 60 * 1000;
+      if (createdAt > tenMinutesAgo) {
         setOpen(true);
+      } else {
+        // Mark as done for old accounts so we never check again
+        localStorage.setItem(`onboarding_done_${user.id}`, "true");
       }
     }
   }, [user, profile]);
