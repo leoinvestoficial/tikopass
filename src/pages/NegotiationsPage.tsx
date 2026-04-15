@@ -50,6 +50,27 @@ export default function NegotiationsPage() {
     if (selectedNeg) loadMessages(selectedNeg);
   }, [selectedNeg]);
 
+  // Realtime subscription for new messages
+  useEffect(() => {
+    if (!selectedNeg) return;
+    const channel = supabase
+      .channel(`messages-${selectedNeg}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "negotiation_messages",
+          filter: `negotiation_id=eq.${selectedNeg}`,
+        },
+        (payload) => {
+          setMessages((prev) => [...prev, payload.new as any]);
+        }
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [selectedNeg]);
+
   useEffect(() => {
     if (negotiations.length === 0) { setSelectedNeg(null); return; }
     if (requestedNegotiationId && negotiations.some((neg: any) => neg.id === requestedNegotiationId)) {

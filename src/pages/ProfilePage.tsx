@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
@@ -38,15 +38,17 @@ export default function ProfilePage() {
   const [initialized, setInitialized] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
-  // Sync state when profile loads
-  if (profile && !initialized) {
-    setDisplayName(profile.display_name || "");
-    setBio(profile.bio || "");
-    setCity(profile.city || "");
-    setPhone(profile.phone || "");
-    setAvatarPreview(profile.avatar_url || "");
-    setInitialized(true);
-  }
+  // Sync state when profile loads — moved to useEffect to avoid setState during render
+  useEffect(() => {
+    if (profile && !initialized) {
+      setDisplayName(profile.display_name || "");
+      setBio(profile.bio || "");
+      setCity(profile.city || "");
+      setPhone(profile.phone || "");
+      setAvatarPreview(profile.avatar_url || "");
+      setInitialized(true);
+    }
+  }, [profile, initialized]);
 
   if (loading) {
     return (

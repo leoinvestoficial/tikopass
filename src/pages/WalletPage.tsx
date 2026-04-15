@@ -108,13 +108,16 @@ export default function WalletPage() {
     .filter(t => t.status === "pending" && t.type === "sale")
     .reduce((sum, t) => sum + t.amount, 0);
 
-  const availableBalance = transactions
+  const totalSalesAvailable = transactions
     .filter(t => t.status === "available" && t.type === "sale")
     .reduce((sum, t) => sum + t.amount, 0);
 
   const totalWithdrawn = transactions
     .filter(t => t.status === "withdrawn")
     .reduce((sum, t) => sum + t.amount, 0);
+
+  // Available = sales marked available minus already withdrawn
+  const availableBalance = Math.max(0, totalSalesAvailable - totalWithdrawn);
 
   const kycStatus = ((profile as any)?.kyc_status || "pending") as "pending" | "submitted" | "approved" | "rejected";
 

@@ -299,14 +299,16 @@ export default function SellPage() {
                     return (
                       <button
                         key={event.id}
+                        disabled={isPast}
                         onClick={() => {
+                          if (isPast) { toast.error("Não é possível vender ingressos para eventos encerrados."); return; }
                           setSavedEventId(event.id);
                           const mapped = { name: event.name, date: event.date, time: event.time, venue: event.venue, city: event.city, category: event.category };
                           setSelectedEvent(mapped);
                           setEditedEvent(mapped);
                           setStep("details");
                         }}
-                        className={`w-full text-left bg-card border border-border rounded-2xl p-5 hover:shadow-lg hover:border-primary/40 transition-all duration-200 active:scale-[0.98] space-y-3 group ${isPast ? "opacity-60" : ""}`}
+                        className={`w-full text-left bg-card border border-border rounded-2xl p-5 transition-all duration-200 space-y-3 group ${isPast ? "opacity-40 cursor-not-allowed" : "hover:shadow-lg hover:border-primary/40 active:scale-[0.98]"}`}
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">

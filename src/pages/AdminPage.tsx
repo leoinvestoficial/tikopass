@@ -13,6 +13,7 @@ import AdminFinancialTab from "@/components/admin/AdminFinancialTab";
 import AdminWalletsTab from "@/components/admin/AdminWalletsTab";
 import AdminDisputesTab from "@/components/admin/AdminDisputesTab";
 
+// Fallback for client-side check; real auth uses user_roles table
 const ADMIN_EMAILS = ["matheus@tikopass.com", "admin@tikopass.com", "leonardo@bebaflow.com"];
 
 type TabType = "tickets" | "users" | "financial" | "wallets" | "disputes";
@@ -34,15 +35,34 @@ export default function AdminPage() {
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [userEmails, setUserEmails] = useState<Record<string, string>>({});
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
 
-  const isAdmin = user?.email && ADMIN_EMAILS.includes(user.email);
+  // Check admin role from database first, fallback to email list
+  useEffect(() => {
+    if (!user) { setIsAdmin(false); return; }
+    const checkRole = async () => {
+      const { data } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id)
+        .eq("role", "admin")
+        .maybeSingle();
+      if (data) {
+        setIsAdmin(true);
+      } else {
+        // Fallback to email list for backwards compat
+        setIsAdmin(ADMIN_EMAILS.includes(user.email || ""));
+      }
+    };
+    checkRole();
+  }, [user]);
 
   useEffect(() => {
-    if (user && !isAdmin) {
+    if (isAdmin === false) {
       navigate("/");
       toast.error("Acesso restrito");
     }
-  }, [user, isAdmin]);
+  }, [isAdmin]);
 
   useEffect(() => {
     if (isAdmin) {
