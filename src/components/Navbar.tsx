@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Menu, User, MessageSquare, LogOut, ShoppingBag, Wallet, Moon, Sun } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
-import tikoLogo from "@/assets/tiko-logo.png";
+import TikoLogo from "@/components/TikoLogo";
 
 function useTheme() {
   const [dark, setDark] = useState(() => {
@@ -58,7 +58,7 @@ export default function Navbar() {
     <nav className="sticky top-0 z-50 bg-card/80 backdrop-blur-lg border-b border-border">
       <div className="container flex items-center justify-between h-14 md:h-16">
         <Link to="/" className="flex items-center group">
-          <img src={tikoLogo} alt="Tiko Pass" className="h-16 md:h-20 object-contain transition-transform duration-200 group-hover:scale-105 group-active:scale-95" />
+          <TikoLogo className="h-16 md:h-20 object-contain transition-transform duration-200 group-hover:scale-105 group-active:scale-95" />
         </Link>
 
         <div className="hidden md:flex items-center gap-1">

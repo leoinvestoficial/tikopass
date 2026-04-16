@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { ShieldCheck } from "lucide-react";
-import tikoLogo from "@/assets/tiko-logo.png";
+import TikoLogo from "@/components/TikoLogo";
 
 export default function Footer() {
   return (
@@ -9,7 +9,7 @@ export default function Footer() {
         <div className="flex flex-col md:flex-row justify-between gap-8">
           <div className="space-y-3 max-w-xs">
             <Link to="/" className="flex items-center">
-              <img src={tikoLogo} alt="Tiko Pass" className="h-14 object-contain" />
+              <TikoLogo className="h-14" />
             </Link>
             <p className="text-sm text-muted-foreground">
               O marketplace de revenda de ingressos para shows e festivais mais seguro do Brasil.
