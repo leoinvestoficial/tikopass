@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Menu, User, MessageSquare, LogOut, ShoppingBag, Wallet, Moon, Sun } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
-import tikoLogo from "@/assets/tiko-logo.png";
+import TikoLogo from "@/components/TikoLogo";
 
 function useTheme() {
   const [dark, setDark] = useState(() => {
