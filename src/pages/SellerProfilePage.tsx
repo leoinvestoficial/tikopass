@@ -9,7 +9,6 @@ import {
   User, Star, Calendar, MapPin, Ticket, ArrowLeft, Loader2,
   ShieldCheck, Clock, Award,
 } from "lucide-react";
-import { useScrollReveal } from "@/hooks/use-scroll-reveal";
 import SellerLevelBadge, { getSellerLevel } from "@/components/SellerLevelBadge";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
@@ -17,9 +16,7 @@ export default function SellerProfilePage() {
   const { userId } = useParams();
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-
-  const headerReveal = useScrollReveal<HTMLDivElement>();
-  const contentReveal = useScrollReveal<HTMLDivElement>();
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (userId) loadProfile();
@@ -27,11 +24,13 @@ export default function SellerProfilePage() {
 
   const loadProfile = async () => {
     setLoading(true);
+    setError(null);
     try {
       const result = await fetchSellerProfile(userId!);
       setData(result);
-    } catch (err) {
-      console.error(err);
+    } catch (err: any) {
+      console.error("Erro ao carregar perfil:", err);
+      setError(err?.message || "Erro desconhecido");
     } finally {
       setLoading(false);
     }
@@ -83,7 +82,9 @@ export default function SellerProfilePage() {
         <Navbar />
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center space-y-4">
+            <User className="w-12 h-12 text-muted-foreground mx-auto" />
             <h2 className="text-2xl font-display font-bold">Perfil não encontrado</h2>
+            {error && <p className="text-sm text-destructive">{error}</p>}
             <Link to="/"><Button variant="outline">Voltar para a home</Button></Link>
           </div>
         </div>
@@ -95,7 +96,7 @@ export default function SellerProfilePage() {
   const { profile, ratings, avgRating, ratingCount, tickets, totalSales } = data;
   const accountAge = getAccountAge(profile.created_at);
   const today = new Date().toISOString().split("T")[0];
-  const activeTickets = tickets.filter((t: any) => t.events?.date >= today && t.status === "available");
+  const activeTickets = tickets.filter((t: any) => t.events?.date >= today && ["available", "validated"].includes(t.status));
   const sellerLevel = getSellerLevel(totalSales, avgRating);
 
   return (
@@ -105,10 +106,7 @@ export default function SellerProfilePage() {
 
       {/* Header */}
       <section className="border-b border-border bg-gradient-to-br from-primary/5 via-transparent to-transparent">
-        <div
-          ref={headerReveal.ref}
-          className={`container py-10 ${headerReveal.isVisible ? "animate-reveal-up" : "opacity-0"}`}
-        >
+        <div className="container py-10 animate-fade-in">
           <Link
             to="/"
             className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6"
@@ -118,7 +116,7 @@ export default function SellerProfilePage() {
 
           <div className="flex items-start gap-5">
             {/* Avatar */}
-            <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
+            <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0 overflow-hidden">
               {profile.avatar_url ? (
                 <img
                   src={profile.avatar_url}
@@ -132,7 +130,7 @@ export default function SellerProfilePage() {
 
             <div className="space-y-3 min-w-0">
               <div>
-                <h1 className="text-2xl md:text-3xl font-display font-bold text-foreground flex items-center gap-2">
+                <h1 className="text-2xl md:text-3xl font-display font-bold text-foreground flex items-center gap-2 flex-wrap">
                   {profile.display_name || "Vendedor"}
                   <SellerLevelBadge level={sellerLevel} />
                 </h1>
@@ -180,11 +178,7 @@ export default function SellerProfilePage() {
       </section>
 
       {/* Content */}
-      <div
-        ref={contentReveal.ref}
-        className={`container py-10 ${contentReveal.isVisible ? "animate-reveal-up" : "opacity-0"}`}
-        style={{ animationDelay: "150ms" }}
-      >
+      <div className="container py-10 animate-fade-in" style={{ animationDelay: "100ms" }}>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Active listings */}
           <div className="lg:col-span-2 space-y-6">
