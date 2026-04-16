@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -9,14 +9,34 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Menu, X, User, MessageSquare, LogOut, ShoppingBag, Wallet } from "lucide-react";
+import { Menu, User, MessageSquare, LogOut, ShoppingBag, Wallet, Moon, Sun } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import tikoLogo from "@/assets/tiko-logo.png";
 
+function useTheme() {
+  const [dark, setDark] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return localStorage.getItem("theme") === "dark";
+  });
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (dark) {
+      root.classList.add("dark");
+      localStorage.setItem("theme", "dark");
+    } else {
+      root.classList.remove("dark");
+      localStorage.setItem("theme", "light");
+    }
+  }, [dark]);
+
+  return { dark, toggle: () => setDark((d) => !d) };
+}
+
 export default function Navbar() {
-  const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
   const { user, profile, signOut } = useAuth();
+  const { dark, toggle } = useTheme();
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -98,23 +118,44 @@ export default function Navbar() {
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={toggle} className="flex items-center gap-2 cursor-pointer">
+                  {dark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                  {dark ? "Modo Claro" : "Modo Escuro"}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={signOut} className="flex items-center gap-2 cursor-pointer text-destructive">
                   <LogOut className="w-4 h-4" /> Sair
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <Link to="/auth">
-              <Button variant="outline" size="sm" className="gap-2">
-                <User className="w-4 h-4" />
-                Entrar
-              </Button>
-            </Link>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={toggle}
+                className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                title={dark ? "Modo Claro" : "Modo Escuro"}
+              >
+                {dark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+              </button>
+              <Link to="/auth">
+                <Button variant="outline" size="sm" className="gap-2">
+                  <User className="w-4 h-4" />
+                  Entrar
+                </Button>
+              </Link>
+            </div>
           )}
         </div>
 
-        {/* Mobile: just show avatar or login button, no hamburger (bottom nav handles navigation) */}
+        {/* Mobile: avatar or login + theme toggle */}
         <div className="md:hidden flex items-center gap-2">
+          <button
+            onClick={toggle}
+            className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+            title={dark ? "Modo Claro" : "Modo Escuro"}
+          >
+            {dark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+          </button>
           {user ? (
             <Link to="/profile">
               <Avatar className="w-8 h-8">
