@@ -12,7 +12,7 @@ import OnboardingModal from "@/components/OnboardingModal";
 import HowItWorks from "@/components/HowItWorks";
 import PopularEvents, { type PopularEventItem } from "@/components/PopularEvents";
 import TrustBanner from "@/components/TrustBanner";
-import RecommendedEvents from "@/components/RecommendedEvents";
+
 import SocialProof from "@/components/SocialProof";
 import QuickDateFilters, { getDateRange } from "@/components/QuickDateFilters";
 import { fetchTickets, searchEventsWithAI, searchEventsLocal, type Ticket as TicketType } from "@/lib/api";
@@ -275,9 +275,6 @@ export default function Index() {
           </div>
         </section>
       )}
-
-      {/* ── RECOMMENDED EVENTS ───────────────────────────────────────── */}
-      {!hasActiveSearch && userCity && <RecommendedEvents userCity={userCity} category={selectedCategory} />}
 
       {/* ── POPULAR EVENTS ───────────────────────────────────────────── */}
       {!hasActiveSearch && <PopularEvents events={popularEvents} />}
