@@ -2,6 +2,7 @@ import { Calendar, MapPin, ArrowRight, Ticket } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { getBannerForCategory } from "@/lib/event-banners";
+import HorizontalCarousel from "@/components/HorizontalCarousel";
 
 export type PopularEventItem = {
   id: string;
@@ -39,12 +40,12 @@ export default function PopularEvents({ events }: PopularEventsProps) {
         </div>
 
         {events.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-8">
+          <HorizontalCarousel className="-mx-4 px-4 pb-2">
             {events.map((event, i) => (
               <Link
                 key={event.id}
                 to={`/event/${event.id}`}
-                className="group block"
+                className="group block snap-start shrink-0 w-[70%] sm:w-[45%] md:w-[31%] lg:w-[23%]"
                 style={{ animationDelay: `${i * 60}ms` }}
               >
                 <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-muted">
@@ -73,7 +74,7 @@ export default function PopularEvents({ events }: PopularEventsProps) {
                 </div>
               </Link>
             ))}
-          </div>
+          </HorizontalCarousel>
         ) : (
           <div className="rounded-2xl border border-border bg-card p-8 text-center space-y-3">
             <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center mx-auto">
