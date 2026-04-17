@@ -208,3 +208,12 @@
   0%, 100% { box-shadow: 0 0 0 0 hsl(16 85% 55% / 0.3); }
   50% { box-shadow: 0 0 20px 4px hsl(16 85% 55% / 0.15); }
 }
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.4s ease-out both;
+}
