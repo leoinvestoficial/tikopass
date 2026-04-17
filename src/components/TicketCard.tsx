@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom";
-import { TrendingDown, Star } from "lucide-react";
+import { TrendingDown, Star, Heart } from "lucide-react";
 import SellerLevelBadge, { getSellerLevel } from "@/components/SellerLevelBadge";
 import { getBannerForCategory } from "@/lib/event-banners";
+import { useFavorite } from "@/hooks/use-favorite";
 
 interface TicketCardEvent {
   id: string;
