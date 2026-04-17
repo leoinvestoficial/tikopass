@@ -17,6 +17,7 @@ import AuthPage from "./pages/AuthPage.tsx";
 import ProfilePage from "./pages/ProfilePage.tsx";
 import PaymentSuccess from "./pages/PaymentSuccess.tsx";
 import WalletPage from "./pages/WalletPage.tsx";
+import FavoritesPage from "./pages/FavoritesPage.tsx";
 import WelcomePage from "./pages/WelcomePage.tsx";
 import PrivacyPage from "./pages/PrivacyPage.tsx";
 import TermsPage from "./pages/TermsPage.tsx";
@@ -51,6 +52,7 @@ const App = () => (
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/payment-success" element={<PaymentSuccess />} />
             <Route path="/wallet" element={<WalletPage />} />
+            <Route path="/favorites" element={<FavoritesPage />} />
             <Route path="/welcome" element={<WelcomePage />} />
             <Route path="/privacy" element={<PrivacyPage />} />
             <Route path="/terms" element={<TermsPage />} />
