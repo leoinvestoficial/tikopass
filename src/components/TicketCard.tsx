@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom";
-import { TrendingDown, Star } from "lucide-react";
+import { TrendingDown, Star, Heart } from "lucide-react";
 import SellerLevelBadge, { getSellerLevel } from "@/components/SellerLevelBadge";
 import { getBannerForCategory } from "@/lib/event-banners";
+import { useFavorite } from "@/hooks/use-favorite";
 
 interface TicketCardEvent {
   id: string;
@@ -37,6 +38,8 @@ interface TicketCardProps {
 
 export default function TicketCard({ ticket, index = 0 }: TicketCardProps) {
   const event = ticket.event || ticket.events;
+  const eventId = event?.id || ticket.event_id || ticket.eventId;
+  const { isFavorite, toggle, canFavorite } = useFavorite(eventId);
   const origPrice = ticket.original_price ?? ticket.originalPrice;
   const isBelow = origPrice && ticket.price < origPrice;
   const discount = origPrice ? Math.round(((origPrice - ticket.price) / origPrice) * 100) : 0;
@@ -71,7 +74,21 @@ export default function TicketCard({ ticket, index = 0 }: TicketCardProps) {
             Encerrado
           </span>
         )}
-        {ticket.seller_avg_rating != null && (ticket.seller_rating_count || 0) > 0 && (
+        {canFavorite && (
+          <button
+            onClick={toggle}
+            aria-label={isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos"}
+            className="absolute top-3 right-3 w-9 h-9 rounded-full flex items-center justify-center transition-transform active:scale-90 hover:scale-110"
+          >
+            <Heart
+              className={`w-6 h-6 transition-colors drop-shadow-md ${
+                isFavorite ? "fill-primary text-primary" : "fill-black/30 text-white"
+              }`}
+              strokeWidth={2}
+            />
+          </button>
+        )}
+        {ticket.seller_avg_rating != null && (ticket.seller_rating_count || 0) > 0 && !canFavorite && (
           <span className="absolute top-3 right-3 inline-flex items-center gap-1 rounded-full bg-card/95 backdrop-blur px-2.5 py-1 text-[11px] font-semibold text-foreground shadow-sm">
             <Star className="w-3 h-3 fill-foreground" /> {ticket.seller_avg_rating.toFixed(1)}
           </span>

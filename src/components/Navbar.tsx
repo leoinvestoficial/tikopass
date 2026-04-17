@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Menu, User, MessageSquare, LogOut, ShoppingBag, Wallet, Moon, Sun } from "lucide-react";
+import { Menu, User, MessageSquare, LogOut, ShoppingBag, Wallet, Moon, Sun, Heart } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import TikoLogo from "@/components/TikoLogo";
 
@@ -110,6 +110,11 @@ export default function Navbar() {
                 <DropdownMenuItem asChild>
                   <Link to="/negotiations" className="flex items-center gap-2 cursor-pointer">
                     <MessageSquare className="w-4 h-4" /> Negociações
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/favorites" className="flex items-center gap-2 cursor-pointer">
+                    <Heart className="w-4 h-4" /> Favoritos
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
