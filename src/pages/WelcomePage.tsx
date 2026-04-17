@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Ticket, Search, MessageSquare, Shield, Wallet, ArrowRight, Sparkles } from "lucide-react";
-import tikoLogo from "@/assets/tiko-logo.png";
+import TikoLogo from "@/components/TikoLogo";
 
 const STEPS = [
   {
@@ -63,7 +63,7 @@ export default function WelcomePage() {
       <div className="w-full max-w-lg space-y-8 relative z-10">
         {/* Logo */}
         <div className="flex justify-center">
-          <img src={tikoLogo} alt="Tiko Pass" className="h-16 object-contain" />
+          <TikoLogo className="h-16" />
         </div>
 
         {/* Progress dots */}

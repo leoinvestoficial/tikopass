@@ -12,7 +12,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import imageCompression from "browser-image-compression";
-import tikoLogo from "@/assets/tiko-logo.png";
+import TikoLogo from "@/components/TikoLogo";
 
 const TUTORIAL_STEPS = [
   {
@@ -288,7 +288,7 @@ export default function OnboardingModal() {
           <div className="p-6 space-y-6">
             {/* Logo */}
             <div className="flex justify-center">
-              <img src={tikoLogo} alt="Tiko Pass" className="h-12 object-contain" />
+              <TikoLogo className="h-12" />
             </div>
 
             {/* Progress dots */}
