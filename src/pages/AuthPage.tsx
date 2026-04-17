@@ -7,7 +7,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import tikoLogo from "@/assets/tiko-logo.png";
+import TikoLogo from "@/components/TikoLogo";
 
 
 function formatCpf(value: string): string {
@@ -184,7 +184,7 @@ export default function AuthPage() {
               transform: welcomeStep >= 0 ? "scale(1) translateY(0)" : "scale(0.3) translateY(40px)",
             }}
           >
-            <img src={tikoLogo} alt="Tiko Pass" className="h-20 object-contain mx-auto" />
+            <TikoLogo className="h-20 mx-auto" />
           </div>
 
           {/* Party icon */}
@@ -276,7 +276,7 @@ export default function AuthPage() {
 
           <div className="relative z-10 text-center px-10 space-y-8 max-w-sm">
             <Link to="/" className="inline-block">
-              <img src={tikoLogo} alt="Tiko Pass" className="h-20 object-contain brightness-0 invert mx-auto" />
+              <TikoLogo className="h-20 mx-auto brightness-0 invert" />
             </Link>
             <div className="space-y-3">
               <h2 className="text-2xl font-display font-bold text-background leading-tight">
@@ -311,7 +311,7 @@ export default function AuthPage() {
           {/* Mobile logo */}
           <div className="lg:hidden flex items-center justify-center mb-2">
             <Link to="/">
-              <img src={tikoLogo} alt="Tiko Pass" className="h-20 object-contain" />
+              <TikoLogo className="h-20" />
             </Link>
           </div>
 

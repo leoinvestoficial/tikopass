@@ -1,7 +1,7 @@
-import { Flame, Calendar, MapPin, ArrowRight, Ticket } from "lucide-react";
-import { useScrollReveal } from "@/hooks/use-scroll-reveal";
+import { Calendar, MapPin, ArrowRight, Ticket } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { getBannerForCategory } from "@/lib/event-banners";
 
 export type PopularEventItem = {
   id: string;
@@ -18,76 +18,58 @@ interface PopularEventsProps {
 }
 
 export default function PopularEvents({ events }: PopularEventsProps) {
-  const reveal = useScrollReveal<HTMLDivElement>();
-
   return (
-    <section className="py-16 md:py-20 border-t border-border">
-      <div
-        ref={reveal.ref}
-        className={`container ${reveal.isVisible ? "animate-reveal-up" : "opacity-0"}`}
-      >
-        <div className="flex items-end justify-between mb-8">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <Flame className="w-5 h-5 text-primary" />
-              <h2 className="text-2xl md:text-3xl font-display font-bold text-foreground">
-                Eventos mais procurados
-              </h2>
-            </div>
-            <p className="text-muted-foreground">
-              Abra a página do evento e veja todos os ingressos disponíveis
+    <section className="py-12 md:py-20">
+      <div className="container animate-fade-in">
+        <div className="flex items-end justify-between mb-6 md:mb-8">
+          <div className="space-y-1">
+            <h2 className="text-xl md:text-2xl font-semibold text-foreground tracking-tight">
+              Eventos em destaque
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Os shows com mais ingressos disponíveis agora
             </p>
           </div>
           <Link to="/sell" className="hidden sm:block">
-            <Button variant="ghost" className="gap-2 text-sm text-muted-foreground hover:text-foreground">
-              Não encontrou? Anuncie
+            <Button variant="ghost" className="gap-2 text-sm text-muted-foreground hover:text-foreground rounded-full">
+              Anunciar
               <ArrowRight className="w-4 h-4" />
             </Button>
           </Link>
         </div>
 
         {events.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-8">
             {events.map((event, i) => (
               <Link
                 key={event.id}
                 to={`/event/${event.id}`}
-                className="group relative block bg-card border border-border rounded-xl p-5 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5 active:scale-[0.98]"
+                className="group block"
                 style={{ animationDelay: `${i * 60}ms` }}
               >
-                <div className="absolute top-3 right-3 flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-semibold">
-                  <Ticket className="w-3 h-3" />
-                  {event.ticketCount} anúncio{event.ticketCount > 1 ? "s" : ""}
+                <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-muted">
+                  <img
+                    src={getBannerForCategory(event.category)}
+                    alt={event.name}
+                    loading="lazy"
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                  />
+                  <span className="absolute top-3 left-3 inline-flex items-center gap-1 rounded-full bg-card/95 backdrop-blur px-2.5 py-1 text-[11px] font-semibold text-foreground shadow-sm">
+                    <Ticket className="w-3 h-3" />
+                    {event.ticketCount} {event.ticketCount > 1 ? "ofertas" : "oferta"}
+                  </span>
                 </div>
-
-                <div className="mb-3 pr-20">
-                  <p className="text-xs font-medium text-primary mb-1">{event.category}</p>
-                  <h3 className="font-display font-semibold text-foreground group-hover:text-primary transition-colors">
+                <div className="pt-3 space-y-0.5">
+                  <h3 className="text-[15px] font-semibold text-foreground line-clamp-1">
                     {event.name}
                   </h3>
-                </div>
-
-                <div className="space-y-1.5 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-2">
-                    <MapPin className="w-3.5 h-3.5 shrink-0" />
-                    <span>{event.venue} · {event.city}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-3.5 h-3.5 shrink-0" />
-                    <span>
-                      {new Date(event.date).toLocaleDateString("pt-BR", {
-                        day: "2-digit",
-                        month: "short",
-                        year: "numeric",
-                      })}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="mt-3 pt-3 border-t border-border">
-                  <span className="text-xs font-medium text-primary group-hover:underline">
-                    Ver ingressos disponíveis →
-                  </span>
+                  <p className="text-[13px] text-muted-foreground line-clamp-1 flex items-center gap-1">
+                    <MapPin className="w-3 h-3 shrink-0" /> {event.venue} · {event.city}
+                  </p>
+                  <p className="text-[13px] text-muted-foreground flex items-center gap-1">
+                    <Calendar className="w-3 h-3 shrink-0" />
+                    {new Date(event.date).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" })}
+                  </p>
                 </div>
               </Link>
             ))}
