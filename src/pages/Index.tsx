@@ -143,7 +143,7 @@ export default function Index() {
       <OnboardingModal />
 
       {/* ── HERO ─────────────────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden min-h-[280px] md:min-h-[420px]">
+      <section className="relative overflow-hidden">
         <img
           src={heroBg}
           alt="Show de música ao vivo"
@@ -151,53 +151,61 @@ export default function Index() {
           width={1920}
           height={1080}
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/35 to-black/65" />
 
-        <div className="relative container pt-10 pb-8 md:pt-28 md:pb-20">
-          <div className="max-w-xl mb-5 md:mb-8 space-y-2 md:space-y-3">
-            <h1 className="text-2xl md:text-5xl font-bold text-white leading-tight tracking-tight drop-shadow">
-              Seu próximo show<br className="hidden md:block" /> começa aqui.
+        <div className="relative container pt-14 pb-16 md:pt-28 md:pb-24">
+          <div className="text-center max-w-2xl mx-auto mb-8 md:mb-10 space-y-3">
+            <h1 className="text-3xl md:text-5xl font-semibold text-white leading-tight tracking-tight">
+              Seu próximo show começa aqui
             </h1>
-            <p className="text-white/70 text-sm md:text-lg">
-              Ingressos verificados por IA. Pagamento protegido.
+            <p className="text-white/80 text-sm md:text-base">
+              Ingressos verificados. Pagamento protegido.
             </p>
           </div>
 
-          {/* ── Search bar ── */}
-          <div className="bg-white dark:bg-card rounded-2xl shadow-2xl flex flex-col sm:flex-row sm:items-center divide-y sm:divide-y-0 sm:divide-x divide-border overflow-hidden max-w-2xl">
-            <div className="flex items-center gap-3 px-4 py-3 md:px-5 md:py-4 flex-1">
-              <Search className="w-4 h-4 text-muted-foreground shrink-0" />
-              <div className="flex flex-col flex-1">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-foreground">Evento</span>
+          {/* ── Airbnb-style pill search ── */}
+          <div className="bg-card rounded-full shadow-2xl flex items-center divide-x divide-border max-w-3xl mx-auto px-2 py-2">
+            <div className="flex-1 px-5 py-2 cursor-text rounded-full hover:bg-muted/60 transition-colors">
+              <div className="text-[11px] font-semibold text-foreground">Onde</div>
+              <input
+                className="text-sm bg-transparent outline-none placeholder:text-muted-foreground text-foreground w-full"
+                placeholder="Buscar cidade"
+                value={selectedCity}
+                onChange={(e) => setSelectedCity(e.target.value)}
+              />
+            </div>
+
+            <div className="flex-1 px-5 py-2 cursor-text rounded-full hover:bg-muted/60 transition-colors">
+              <div className="text-[11px] font-semibold text-foreground">Quando</div>
+              <select
+                className="text-sm bg-transparent outline-none text-foreground w-full appearance-none cursor-pointer"
+                value={dateFilter}
+                onChange={(e) => setDateFilter(e.target.value as DateFilter)}
+              >
+                <option value="">Qualquer data</option>
+                <option value="today">Hoje</option>
+                <option value="tomorrow">Amanhã</option>
+                <option value="weekend">Este fim de semana</option>
+              </select>
+            </div>
+
+            <div className="flex-1 px-5 py-2 cursor-text rounded-full hover:bg-muted/60 transition-colors flex items-center justify-between gap-2">
+              <div className="flex-1 min-w-0">
+                <div className="text-[11px] font-semibold text-foreground">Evento</div>
                 <input
                   className="text-sm bg-transparent outline-none placeholder:text-muted-foreground text-foreground w-full"
-                  placeholder="Artista, show, festival..."
+                  placeholder="Artista, show..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && loadTickets()}
                 />
               </div>
-            </div>
-
-            <div className="flex items-center gap-3 px-4 py-3 md:px-5 md:py-4 flex-1">
-              <MapPin className="w-4 h-4 text-muted-foreground shrink-0" />
-              <div className="flex flex-col flex-1">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-foreground">Cidade</span>
-                <input
-                  className="text-sm bg-transparent outline-none placeholder:text-muted-foreground text-foreground w-full"
-                  placeholder="Onde?"
-                  value={selectedCity}
-                  onChange={(e) => setSelectedCity(e.target.value)}
-                />
-              </div>
-            </div>
-
-            <div className="px-3 py-2 md:py-3 flex justify-center sm:justify-start">
               <button
                 onClick={loadTickets}
-                className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-sm px-6 py-2.5 md:py-3 rounded-xl transition-colors w-full sm:w-auto"
+                aria-label="Buscar"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full w-11 h-11 flex items-center justify-center shrink-0 transition-colors shadow-md"
               >
-                Buscar
+                <Search className="w-4 h-4" />
               </button>
             </div>
           </div>
