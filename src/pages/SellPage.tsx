@@ -161,9 +161,25 @@ export default function SellPage() {
 
   const handleSubmitAndUpload = async () => {
     if (!savedEventId || !user || !ticketFile) return;
+    if (!accessType) { toast.error("Selecione o tipo de acesso do ingresso."); return; }
     setSubmitting(true);
     try {
-      const ticket = await createTicket({ event_id: savedEventId, seller_id: user.id, sector: ticketForm.sector, row: ticketForm.row || undefined, seat: ticketForm.seat || undefined, price: parseFloat(ticketForm.price), original_price: ticketForm.originalPrice ? parseFloat(ticketForm.originalPrice) : undefined });
+      const sanitizedDesc = sellerDescription.replace(/<[^>]*>/g, "").trim().slice(0, 500);
+      const ticket = await createTicket({
+        event_id: savedEventId,
+        seller_id: user.id,
+        sector: ticketForm.sector,
+        row: ticketForm.row || undefined,
+        seat: ticketForm.seat || undefined,
+        price: parseFloat(ticketForm.price),
+        original_price: ticketForm.originalPrice ? parseFloat(ticketForm.originalPrice) : undefined,
+        access_type: accessType,
+        event_days: (accessType === "passaporte" || accessType === "dia_unico") && eventDays.length > 0 ? eventDays : undefined,
+        includes_open_bar: includesOpenBar,
+        is_half_price: isHalfPrice,
+        seller_description: sanitizedDesc || undefined,
+        extra_tags: extraTags.length > 0 ? extraTags : undefined,
+      });
       setSavedTicketId(ticket.id);
       setUploading(true);
       const formData = new FormData();
