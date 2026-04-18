@@ -350,6 +350,22 @@ export default function TicketDetailPage() {
                 </article>
               </div>
 
+              {/* ── Sobre este ingresso (tags + descrição) ── */}
+              {(() => {
+                const t = ticket as any;
+                return (
+                  <TicketAttributes
+                    accessType={t.access_type}
+                    eventDays={t.event_days}
+                    includesOpenBar={t.includes_open_bar}
+                    isHalfPrice={t.is_half_price}
+                    extraTags={t.extra_tags}
+                    sellerDescription={t.seller_description}
+                    showDescription
+                  />
+                );
+              })()}
+
               <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
                 <div className="mb-5 flex items-start justify-between gap-4">
                   <div>
