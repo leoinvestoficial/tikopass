@@ -36,6 +36,14 @@ export default function SellPage() {
   const [submitting, setSubmitting] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [ticketForm, setTicketForm] = useState({ sector: "", row: "", seat: "", price: "", originalPrice: "" });
+  const [accessType, setAccessType] = useState<string>("");
+  const [eventDays, setEventDays] = useState<string[]>([]);
+  const [dayInput, setDayInput] = useState("");
+  const [includesOpenBar, setIncludesOpenBar] = useState(false);
+  const [isHalfPrice, setIsHalfPrice] = useState(false);
+  const [sellerDescription, setSellerDescription] = useState("");
+  const [extraTags, setExtraTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState("");
   const [editedEvent, setEditedEvent] = useState<AIEvent | null>(null);
   const [selectedBanner, setSelectedBanner] = useState<string>("");
   const [bannerFile, setBannerFile] = useState<File | null>(null);
