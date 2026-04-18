@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { TrendingDown, Star, Heart } from "lucide-react";
 import SellerLevelBadge, { getSellerLevel } from "@/components/SellerLevelBadge";
+import TicketAttributes from "@/components/TicketAttributes";
 import { getBannerForCategory } from "@/lib/event-banners";
 import { useFavorite } from "@/hooks/use-favorite";
 
@@ -32,6 +33,11 @@ interface TicketCardProps {
     seller_avg_rating?: number | null;
     seller_rating_count?: number;
     seller_sales_count?: number;
+    access_type?: string | null;
+    event_days?: string[] | null;
+    includes_open_bar?: boolean | null;
+    is_half_price?: boolean | null;
+    extra_tags?: string[] | null;
   };
   index?: number;
 }
