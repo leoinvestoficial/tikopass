@@ -237,6 +237,9 @@ export type Database = {
           created_at: string
           id: string
           offer_price: number
+          pagarme_charge_id: string | null
+          pagarme_order_id: string | null
+          pagarme_pix_qr_code: string | null
           payment_intent_id: string | null
           payment_status: string | null
           platform_fee: number | null
@@ -252,6 +255,9 @@ export type Database = {
           created_at?: string
           id?: string
           offer_price: number
+          pagarme_charge_id?: string | null
+          pagarme_order_id?: string | null
+          pagarme_pix_qr_code?: string | null
           payment_intent_id?: string | null
           payment_status?: string | null
           platform_fee?: number | null
@@ -267,6 +273,9 @@ export type Database = {
           created_at?: string
           id?: string
           offer_price?: number
+          pagarme_charge_id?: string | null
+          pagarme_order_id?: string | null
+          pagarme_pix_qr_code?: string | null
           payment_intent_id?: string | null
           payment_status?: string | null
           platform_fee?: number | null
@@ -529,6 +538,7 @@ export type Database = {
       tickets: {
         Row: {
           created_at: string
+          description: string | null
           event_id: string
           extracted_code: string | null
           id: string
@@ -549,6 +559,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          description?: string | null
           event_id: string
           extracted_code?: string | null
           id?: string
@@ -569,6 +580,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          description?: string | null
           event_id?: string
           extracted_code?: string | null
           id?: string
@@ -622,6 +634,7 @@ export type Database = {
           description: string | null
           id: string
           negotiation_id: string | null
+          pagarme_transfer_id: string | null
           released_at: string | null
           status: string
           type: string
@@ -634,6 +647,7 @@ export type Database = {
           description?: string | null
           id?: string
           negotiation_id?: string | null
+          pagarme_transfer_id?: string | null
           released_at?: string | null
           status?: string
           type: string
@@ -646,6 +660,7 @@ export type Database = {
           description?: string | null
           id?: string
           negotiation_id?: string | null
+          pagarme_transfer_id?: string | null
           released_at?: string | null
           status?: string
           type?: string
