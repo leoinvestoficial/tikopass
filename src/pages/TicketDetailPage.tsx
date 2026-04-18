@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/dialog";
 import { useAuth } from "@/hooks/use-auth";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import TicketAttributes from "@/components/TicketAttributes";
 
 import { createNegotiation, deleteTicket, sendMessage, updateTicket } from "@/lib/api";
 import { toast } from "sonner";
