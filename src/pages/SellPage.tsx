@@ -4,7 +4,9 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Search, CheckCircle2, ArrowRight, Sparkles, MapPin, Calendar, Tag, Loader2, Upload, FileCheck, AlertCircle, Clock, Shield, Zap, DollarSign, XCircle, ArrowLeft, ImageIcon, X } from "lucide-react";
+import { Search, CheckCircle2, ArrowRight, Sparkles, MapPin, Calendar, Tag, Loader2, Upload, FileCheck, AlertCircle, Clock, Shield, Zap, DollarSign, XCircle, ArrowLeft, ImageIcon, X, Info, Plus } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
 import CategoryGrid from "@/components/CategoryGrid";
 import { useAuth } from "@/hooks/use-auth";
 import { searchEventsWithAI, searchEventsLocal, createEvent, createTicket, findSimilarEvent } from "@/lib/api";
@@ -36,6 +38,14 @@ export default function SellPage() {
   const [submitting, setSubmitting] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [ticketForm, setTicketForm] = useState({ sector: "", row: "", seat: "", price: "", originalPrice: "" });
+  const [accessType, setAccessType] = useState<string>("");
+  const [eventDays, setEventDays] = useState<string[]>([]);
+  const [dayInput, setDayInput] = useState("");
+  const [includesOpenBar, setIncludesOpenBar] = useState(false);
+  const [isHalfPrice, setIsHalfPrice] = useState(false);
+  const [sellerDescription, setSellerDescription] = useState("");
+  const [extraTags, setExtraTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState("");
   const [editedEvent, setEditedEvent] = useState<AIEvent | null>(null);
   const [selectedBanner, setSelectedBanner] = useState<string>("");
   const [bannerFile, setBannerFile] = useState<File | null>(null);
@@ -153,9 +163,25 @@ export default function SellPage() {
 
   const handleSubmitAndUpload = async () => {
     if (!savedEventId || !user || !ticketFile) return;
+    if (!accessType) { toast.error("Selecione o tipo de acesso do ingresso."); return; }
     setSubmitting(true);
     try {
-      const ticket = await createTicket({ event_id: savedEventId, seller_id: user.id, sector: ticketForm.sector, row: ticketForm.row || undefined, seat: ticketForm.seat || undefined, price: parseFloat(ticketForm.price), original_price: ticketForm.originalPrice ? parseFloat(ticketForm.originalPrice) : undefined });
+      const sanitizedDesc = sellerDescription.replace(/<[^>]*>/g, "").trim().slice(0, 500);
+      const ticket = await createTicket({
+        event_id: savedEventId,
+        seller_id: user.id,
+        sector: ticketForm.sector,
+        row: ticketForm.row || undefined,
+        seat: ticketForm.seat || undefined,
+        price: parseFloat(ticketForm.price),
+        original_price: ticketForm.originalPrice ? parseFloat(ticketForm.originalPrice) : undefined,
+        access_type: accessType,
+        event_days: (accessType === "passaporte" || accessType === "dia_unico") && eventDays.length > 0 ? eventDays : undefined,
+        includes_open_bar: includesOpenBar,
+        is_half_price: isHalfPrice,
+        seller_description: sanitizedDesc || undefined,
+        extra_tags: extraTags.length > 0 ? extraTags : undefined,
+      });
       setSavedTicketId(ticket.id);
       setUploading(true);
       const formData = new FormData();
@@ -185,6 +211,8 @@ export default function SellPage() {
     setSavedEventId(null); setSavedTicketId(null); setTicketForm({ sector: "", row: "", seat: "", price: "", originalPrice: "" });
     setTicketFile(null); setValidationStatus("pending_validation"); setValidationMessage("");
     setValidationChecks([]); setSelectedBanner(""); setBannerFile(null);
+    setAccessType(""); setEventDays([]); setDayInput(""); setIncludesOpenBar(false);
+    setIsHalfPrice(false); setSellerDescription(""); setExtraTags([]); setTagInput("");
   };
 
   const stepsList = [
@@ -544,6 +572,212 @@ export default function SellPage() {
                 </div>
               </div>
 
+              {/* ── Detalhes do ingresso ── */}
+              <div className="bg-card border border-border rounded-2xl p-6 space-y-6 shadow-sm">
+                <div className="space-y-1">
+                  <h3 className="text-base font-bold text-foreground flex items-center gap-2">
+                    <Info className="w-4 h-4 text-primary" /> Detalhes do ingresso
+                  </h3>
+                  <p className="text-xs text-muted-foreground">
+                    Ajude o comprador a entender exatamente o que está comprando.
+                  </p>
+                </div>
+
+                {/* Tipo de acesso */}
+                <div className="space-y-2">
+                  <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Qual é o tipo deste ingresso? *
+                  </Label>
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      { v: "passaporte", l: "Passaporte (todos os dias)" },
+                      { v: "dia_unico", l: "Dia único" },
+                      { v: "vip", l: "VIP / Camarote" },
+                      { v: "open_bar", l: "Open Bar" },
+                      { v: "pista", l: "Pista" },
+                      { v: "meia_entrada", l: "Meia-entrada" },
+                      { v: "outro", l: "Outro" },
+                    ].map((opt) => {
+                      const active = accessType === opt.v;
+                      return (
+                        <button
+                          key={opt.v}
+                          type="button"
+                          onClick={() => {
+                            setAccessType(opt.v);
+                            if (opt.v !== "passaporte" && opt.v !== "dia_unico") setEventDays([]);
+                          }}
+                          className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
+                            active
+                              ? "bg-primary text-primary-foreground border-primary"
+                              : "bg-card text-foreground border-border hover:border-primary/40"
+                          }`}
+                        >
+                          {opt.l}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Dias do evento (condicional) */}
+                {(accessType === "passaporte" || accessType === "dia_unico") && (
+                  <div className="space-y-2">
+                    <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      {accessType === "passaporte" ? "Quais dias este ingresso dá acesso?" : "Para qual dia é o ingresso?"}
+                    </Label>
+                    <div className="flex flex-wrap gap-2">
+                      {eventDays.map((d, i) => (
+                        <span key={i} className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-muted text-foreground">
+                          {d}
+                          <button
+                            type="button"
+                            onClick={() => setEventDays(eventDays.filter((_, idx) => idx !== i))}
+                            className="hover:text-destructive"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                    <div className="flex gap-2">
+                      <Input
+                        placeholder="Ex: Sex 26/12 ou Sábado"
+                        value={dayInput}
+                        onChange={(e) => setDayInput(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            const v = dayInput.trim();
+                            if (!v) return;
+                            if (accessType === "dia_unico") setEventDays([v]);
+                            else if (!eventDays.includes(v)) setEventDays([...eventDays, v]);
+                            setDayInput("");
+                          }
+                        }}
+                        className="rounded-xl h-10"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="rounded-xl shrink-0"
+                        onClick={() => {
+                          const v = dayInput.trim();
+                          if (!v) return;
+                          if (accessType === "dia_unico") setEventDays([v]);
+                          else if (!eventDays.includes(v)) setEventDays([...eventDays, v]);
+                          setDayInput("");
+                        }}
+                      >
+                        <Plus className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Open bar */}
+                <div className="flex items-center justify-between gap-3">
+                  <div className="space-y-0.5">
+                    <Label className="text-sm font-medium text-foreground">Inclui open bar?</Label>
+                    <p className="text-xs text-muted-foreground">Bebidas inclusas no ingresso</p>
+                  </div>
+                  <Switch checked={includesOpenBar} onCheckedChange={setIncludesOpenBar} />
+                </div>
+
+                {/* Meia-entrada */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="space-y-0.5">
+                      <Label className="text-sm font-medium text-foreground">Este ingresso é meia-entrada?</Label>
+                      <p className="text-xs text-muted-foreground">Estudante, idoso, PCD, etc.</p>
+                    </div>
+                    <Switch checked={isHalfPrice} onCheckedChange={setIsHalfPrice} />
+                  </div>
+                  {isHalfPrice && (
+                    <p className="text-xs text-warning bg-warning/10 px-3 py-2 rounded-lg">
+                      ⚠️ O comprador precisará apresentar comprovante na portaria.
+                    </p>
+                  )}
+                </div>
+
+                {/* Descrição livre */}
+                <div className="space-y-2">
+                  <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Descrição adicional (opcional)
+                  </Label>
+                  <Textarea
+                    value={sellerDescription}
+                    onChange={(e) => setSellerDescription(e.target.value.slice(0, 500))}
+                    placeholder="Ex: Ingresso passaporte válido para os 3 dias. Setor open bar fica na lateral esquerda do palco. Comprei 2, vendo apenas 1."
+                    className="rounded-xl min-h-[100px] resize-none"
+                    maxLength={500}
+                  />
+                  <p className="text-[11px] text-muted-foreground text-right">
+                    {500 - sellerDescription.length} caracteres restantes
+                  </p>
+                </div>
+
+                {/* Tags extras */}
+                <div className="space-y-2">
+                  <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Tags extras (opcional)
+                  </Label>
+                  <div className="flex flex-wrap gap-2">
+                    {extraTags.map((t, i) => (
+                      <span key={i} className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-muted text-foreground">
+                        {t}
+                        <button
+                          type="button"
+                          onClick={() => setExtraTags(extraTags.filter((_, idx) => idx !== i))}
+                          className="hover:text-destructive"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Digite uma tag e pressione Enter"
+                      value={tagInput}
+                      onChange={(e) => setTagInput(e.target.value.slice(0, 30))}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          const v = tagInput.trim();
+                          if (!v || extraTags.length >= 5 || extraTags.includes(v)) return;
+                          setExtraTags([...extraTags, v]);
+                          setTagInput("");
+                        }
+                      }}
+                      disabled={extraTags.length >= 5}
+                      className="rounded-xl h-10"
+                    />
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {[
+                      "Inclui estacionamento",
+                      "Open food",
+                      "Área VIP com lounge",
+                      "Frente ao palco",
+                      "Camarote coberto",
+                      "Assento numerado",
+                    ].map((s) => (
+                      <button
+                        key={s}
+                        type="button"
+                        disabled={extraTags.length >= 5 || extraTags.includes(s)}
+                        onClick={() => extraTags.length < 5 && !extraTags.includes(s) && setExtraTags([...extraTags, s])}
+                        className="text-[11px] px-2 py-1 rounded-full border border-dashed border-border text-muted-foreground hover:border-primary/40 hover:text-foreground transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                      >
+                        + {s}
+                      </button>
+                    ))}
+                  </div>
+                  <p className="text-[11px] text-muted-foreground">Máx. 5 tags · 30 caracteres cada</p>
+                </div>
+              </div>
+
               {/* File upload */}
               <div className="space-y-3">
                 <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Arquivo do ingresso (PDF, JPG ou PNG) *</Label>
@@ -586,7 +820,7 @@ export default function SellPage() {
                 <Button variant="outline" onClick={() => setStep("confirm")} size="lg" className="flex-1 rounded-xl">Voltar</Button>
                 <Button
                   onClick={handleSubmitAndUpload}
-                  disabled={!ticketForm.sector || !ticketForm.price || !ticketFile || submitting}
+                  disabled={!ticketForm.sector || !ticketForm.price || !ticketFile || !accessType || submitting}
                   size="lg"
                   className="flex-1 gap-2 rounded-xl"
                 >

@@ -179,11 +179,18 @@ export async function fetchSellerProfile(userId: string) {
 }
 
 export async function createTicket(ticket: {
-  event_id: string; seller_id: string; sector: string; row?: string; seat?: string; price: number; original_price?: number;
+  event_id: string; seller_id: string; sector: string; row?: string; seat?: string;
+  price: number; original_price?: number;
+  access_type?: string;
+  event_days?: string[];
+  includes_open_bar?: boolean;
+  is_half_price?: boolean;
+  seller_description?: string;
+  extra_tags?: string[];
 }) {
   const { data, error } = await supabase
     .from("tickets")
-    .insert({ ...ticket, status: "pending_validation" })
+    .insert({ ...ticket, status: "pending_validation" } as any)
     .select()
     .single();
   if (error) throw error;
