@@ -209,6 +209,8 @@ export default function SellPage() {
     setSavedEventId(null); setSavedTicketId(null); setTicketForm({ sector: "", row: "", seat: "", price: "", originalPrice: "" });
     setTicketFile(null); setValidationStatus("pending_validation"); setValidationMessage("");
     setValidationChecks([]); setSelectedBanner(""); setBannerFile(null);
+    setAccessType(""); setEventDays([]); setDayInput(""); setIncludesOpenBar(false);
+    setIsHalfPrice(false); setSellerDescription(""); setExtraTags([]); setTagInput("");
   };
 
   const stepsList = [
