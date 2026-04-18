@@ -537,11 +537,16 @@ export type Database = {
       }
       tickets: {
         Row: {
+          access_type: string | null
           created_at: string
           description: string | null
+          event_days: string[] | null
           event_id: string
+          extra_tags: string[] | null
           extracted_code: string | null
           id: string
+          includes_open_bar: boolean
+          is_half_price: boolean
           order_id: string | null
           original_price: number | null
           price: number
@@ -549,6 +554,7 @@ export type Database = {
           row: string | null
           seat: string | null
           sector: string
+          seller_description: string | null
           seller_id: string
           source_platform: string | null
           status: string
@@ -558,11 +564,16 @@ export type Database = {
           validation_checks: Json | null
         }
         Insert: {
+          access_type?: string | null
           created_at?: string
           description?: string | null
+          event_days?: string[] | null
           event_id: string
+          extra_tags?: string[] | null
           extracted_code?: string | null
           id?: string
+          includes_open_bar?: boolean
+          is_half_price?: boolean
           order_id?: string | null
           original_price?: number | null
           price: number
@@ -570,6 +581,7 @@ export type Database = {
           row?: string | null
           seat?: string | null
           sector: string
+          seller_description?: string | null
           seller_id: string
           source_platform?: string | null
           status?: string
@@ -579,11 +591,16 @@ export type Database = {
           validation_checks?: Json | null
         }
         Update: {
+          access_type?: string | null
           created_at?: string
           description?: string | null
+          event_days?: string[] | null
           event_id?: string
+          extra_tags?: string[] | null
           extracted_code?: string | null
           id?: string
+          includes_open_bar?: boolean
+          is_half_price?: boolean
           order_id?: string | null
           original_price?: number | null
           price?: number
@@ -591,6 +608,7 @@ export type Database = {
           row?: string | null
           seat?: string | null
           sector?: string
+          seller_description?: string | null
           seller_id?: string
           source_platform?: string | null
           status?: string
