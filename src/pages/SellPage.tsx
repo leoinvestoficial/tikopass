@@ -820,7 +820,7 @@ export default function SellPage() {
                 <Button variant="outline" onClick={() => setStep("confirm")} size="lg" className="flex-1 rounded-xl">Voltar</Button>
                 <Button
                   onClick={handleSubmitAndUpload}
-                  disabled={!ticketForm.sector || !ticketForm.price || !ticketFile || submitting}
+                  disabled={!ticketForm.sector || !ticketForm.price || !ticketFile || !accessType || submitting}
                   size="lg"
                   className="flex-1 gap-2 rounded-xl"
                 >
