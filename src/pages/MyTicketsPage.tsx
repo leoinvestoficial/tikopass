@@ -229,9 +229,9 @@ function PurchasedTicketCard({
         }
         if (releaseRule === "post_event_24h") {
           return (
-            <div className="mt-3 bg-blue-500/10 border border-blue-500/20 rounded-xl px-4 py-3 text-xs">
+            <div className="mt-3 bg-primary/5 border border-primary/20 rounded-xl px-4 py-3 text-xs">
               <p className="font-semibold text-foreground mb-1 flex items-center gap-1.5">
-                <Shield className="w-3.5 h-3.5 text-blue-500" /> Ingresso em custódia segura
+                <Shield className="w-3.5 h-3.5 text-primary" /> Ingresso em custódia segura
               </p>
               <p className="text-muted-foreground">Seu ingresso ficou em custódia desde o anúncio. Clique em "Ver ingresso" para baixar. O pagamento ao vendedor é liberado 24h após o evento.</p>
             </div>
@@ -239,9 +239,9 @@ function PurchasedTicketCard({
         }
         if (releaseRule === "48h_buffer") {
           return (
-            <div className="mt-3 bg-orange-500/10 border border-orange-500/20 rounded-xl px-4 py-3 text-xs">
+            <div className="mt-3 bg-warning/10 border border-warning/20 rounded-xl px-4 py-3 text-xs">
               <p className="font-semibold text-foreground mb-1 flex items-center gap-1.5">
-                <Clock className="w-3.5 h-3.5 text-orange-500" /> Transferência via Ticket Maker
+                <Clock className="w-3.5 h-3.5 text-warning" /> Transferência via Ticket Maker
               </p>
               <p className="text-muted-foreground">O vendedor irá transferir seu ingresso no site da Ticket Maker. Verifique seu e-mail e confirme aqui quando o ingresso estiver na sua conta.</p>
             </div>
