@@ -16,6 +16,7 @@ import { useNavigate } from "react-router-dom";
 import sellCtaBg from "@/assets/sell-cta.jpg";
 import { getBannerForCategory } from "@/lib/event-banners";
 import imageCompression from "browser-image-compression";
+import ManualTicketeiraFallback from "@/components/ManualTicketeiraFallback";
 
 type AIEvent = {
   name: string; date: string; time: string; venue: string; city: string; category: string;
@@ -908,6 +909,7 @@ export default function SellPage() {
                   Seu ingresso foi validado e está disponível para compradores na vitrine.
                 </p>
               </div>
+              {savedTicketId && <ManualTicketeiraFallback ticketId={savedTicketId} />}
               <div className="flex gap-3 justify-center">
                 <Button variant="outline" onClick={resetForm} size="lg" className="rounded-xl">Vender outro</Button>
                 <Button onClick={() => navigate("/")} size="lg" className="rounded-xl gap-2">

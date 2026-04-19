@@ -210,15 +210,52 @@ function PurchasedTicketCard({
         </div>
       )}
 
-      {/* Transfer instructions for buyer */}
-      {transfer?.status === "pending_transfer" && transfer.guarantee_level !== "yellow" && (
-        <div className="mt-3 bg-primary/5 rounded-xl px-4 py-3 text-xs text-muted-foreground">
-          <p className="font-semibold text-foreground mb-1 flex items-center gap-1.5">
-            <Clock className="w-3.5 h-3.5 text-primary" /> Aguardando transferência do vendedor
-          </p>
-          <p>O vendedor foi notificado e precisa transferir o ingresso pela plataforma de origem. Você receberá uma atualização quando a transferência for realizada.</p>
-        </div>
-      )}
+      {/* Ticketeira-specific status banners */}
+      {transfer?.status === "pending_transfer" && (() => {
+        const slug = (ticket?.detected_ticketeira || "").toLowerCase();
+        const releaseRule = ticket?.transfer_level === "amarelo" ? "post_event_24h"
+          : slug === "ticket_maker" ? "48h_buffer"
+          : "immediate";
+
+        if (slug === "ticketmaster") {
+          return (
+            <div className="mt-3 bg-warning/10 border border-warning/20 rounded-xl px-4 py-3 text-xs">
+              <p className="font-semibold text-foreground mb-1 flex items-center gap-1.5">
+                <Clock className="w-3.5 h-3.5 text-warning" /> Ingresso da Ticketmaster (Quentro)
+              </p>
+              <p className="text-muted-foreground">Ingressos da Ticketmaster ficam disponíveis para transferência entre 7 e 30 dias antes do evento. Você receberá uma notificação quando o vendedor transferir pelo app Quentro.</p>
+            </div>
+          );
+        }
+        if (releaseRule === "post_event_24h") {
+          return (
+            <div className="mt-3 bg-primary/5 border border-primary/20 rounded-xl px-4 py-3 text-xs">
+              <p className="font-semibold text-foreground mb-1 flex items-center gap-1.5">
+                <Shield className="w-3.5 h-3.5 text-primary" /> Ingresso em custódia segura
+              </p>
+              <p className="text-muted-foreground">Seu ingresso ficou em custódia desde o anúncio. Clique em "Ver ingresso" para baixar. O pagamento ao vendedor é liberado 24h após o evento.</p>
+            </div>
+          );
+        }
+        if (releaseRule === "48h_buffer") {
+          return (
+            <div className="mt-3 bg-warning/10 border border-warning/20 rounded-xl px-4 py-3 text-xs">
+              <p className="font-semibold text-foreground mb-1 flex items-center gap-1.5">
+                <Clock className="w-3.5 h-3.5 text-warning" /> Transferência via Ticket Maker
+              </p>
+              <p className="text-muted-foreground">O vendedor irá transferir seu ingresso no site da Ticket Maker. Verifique seu e-mail e confirme aqui quando o ingresso estiver na sua conta.</p>
+            </div>
+          );
+        }
+        return (
+          <div className="mt-3 bg-success/10 border border-success/20 rounded-xl px-4 py-3 text-xs">
+            <p className="font-semibold text-foreground mb-1 flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5 text-success" /> Aguardando transferência
+            </p>
+            <p className="text-muted-foreground">O vendedor foi notificado e fará a transferência diretamente na plataforma de origem. Isso geralmente leva menos de 1 hora.</p>
+          </div>
+        );
+      })()}
 
       {transfer?.status === "transferred" && (
         <div className="mt-3 bg-success/5 rounded-xl px-4 py-3 text-xs text-muted-foreground">
