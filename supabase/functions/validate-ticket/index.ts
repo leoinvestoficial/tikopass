@@ -475,6 +475,45 @@ IMPORTANTE:
       });
     }
 
+    // ========== DETECT TICKETEIRA ==========
+    let detectedTicketeira: string | null = null;
+    let transferLevel: string = "amarelo"; // conservative default
+    try {
+      const { data: configs } = await supabaseAdmin
+        .from("ticketeira_config")
+        .select("slug, transfer_level, ocr_patterns");
+
+      if (configs) {
+        const textLower = fullText.toLowerCase();
+        for (const cfg of configs) {
+          const patterns: any = cfg.ocr_patterns || {};
+          const urlMatch = (patterns.urls || []).some((u: string) => textLower.includes(String(u).toLowerCase()));
+          const kwMatch = (patterns.keywords || []).some((k: string) => textLower.includes(String(k).toLowerCase()));
+          if (urlMatch || kwMatch) {
+            detectedTicketeira = cfg.slug;
+            transferLevel = cfg.transfer_level;
+            break;
+          }
+        }
+      }
+
+      // Special: if Eventim PDF (TicketDirect) detected, force amarelo
+      if (detectedTicketeira === "eventim" && (fullText.includes("TicketDirect") || !fullText.toLowerCase().includes("transfer"))) {
+        transferLevel = "amarelo";
+      }
+
+      checks.push({
+        id: "ticketeira_detected",
+        label: "Plataforma identificada",
+        passed: !!detectedTicketeira,
+        detail: detectedTicketeira
+          ? `${detectedTicketeira} (nível ${transferLevel})`
+          : "Plataforma não identificada — vendedor pode selecionar manualmente",
+      });
+    } catch (err) {
+      console.error("Ticketeira detection error:", err);
+    }
+
     // ========== APPROVED ==========
     await supabaseAdmin
       .from("tickets")
@@ -483,6 +522,9 @@ IMPORTANTE:
         validated_at: new Date().toISOString(),
         extracted_code: primaryCode || null,
         validation_checks: checks,
+        detected_ticketeira: detectedTicketeira,
+        transfer_level: transferLevel,
+        transfer_status: "pending",
       })
       .eq("id", ticket_id);
 
