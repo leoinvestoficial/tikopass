@@ -22,15 +22,15 @@ Deno.serve(async (req) => {
       });
     }
 
-    const supabaseAdmin = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-    );
+    const supabaseAdmin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
     const [profileRes, ratingsRes, ticketsRes, salesCountRes] = await Promise.all([
       supabaseAdmin
         .from("profiles")
-        .select("user_id, display_name, avatar_url, bio, city, created_at, kyc_status, avatar_status")
+        .select(
+          "user_id, display_name, avatar_url, bio, city, cover_url, manual_badges, " +
+            "created_at, kyc_status, asaas_kyc_status, avatar_status, preferences",
+        )
         .eq("user_id", userId)
         .maybeSingle(),
       supabaseAdmin
@@ -58,22 +58,24 @@ Deno.serve(async (req) => {
     if (salesCountRes.error) throw salesCountRes.error;
 
     if (!profileRes.data) {
-      return new Response(JSON.stringify({
-        profile: null,
-        ratings: [],
-        avgRating: null,
-        ratingCount: 0,
-        tickets: [],
-        totalSales: 0,
-      }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return new Response(
+        JSON.stringify({
+          profile: null,
+          ratings: [],
+          avgRating: null,
+          ratingCount: 0,
+          tickets: [],
+          totalSales: 0,
+        }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
+      );
     }
 
     const ratings = ratingsRes.data || [];
-    const avgRating = ratings.length > 0
-      ? ratings.reduce((sum, rating) => sum + rating.rating, 0) / ratings.length
-      : null;
+    const avgRating =
+      ratings.length > 0 ? ratings.reduce((sum, rating) => sum + rating.rating, 0) / ratings.length : null;
 
     let reviewsWithNames = ratings.map((rating) => ({ ...rating, buyer_name: "Comprador" }));
 
@@ -93,16 +95,28 @@ Deno.serve(async (req) => {
       }));
     }
 
-    return new Response(JSON.stringify({
-      profile: profileRes.data,
-      ratings: reviewsWithNames,
-      avgRating,
-      ratingCount: ratings.length,
-      tickets: ticketsRes.data || [],
-      totalSales: salesCountRes.count || 0,
-    }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    const rawProfile = profileRes.data as Record<string, unknown>;
+    const prefs = (rawProfile.preferences as Record<string, any> | null) ?? {};
+    const privacy = (prefs.privacy as Record<string, any> | undefined) ?? {};
+    const showLocation = privacy.show_location !== false;
+    const showStats = privacy.show_stats !== false;
+
+    const { preferences: _omit, ...publicProfile } = rawProfile;
+    if (!showLocation) (publicProfile as any).city = null;
+
+    return new Response(
+      JSON.stringify({
+        profile: publicProfile,
+        ratings: reviewsWithNames,
+        avgRating,
+        ratingCount: ratings.length,
+        tickets: ticketsRes.data || [],
+        totalSales: showStats ? salesCountRes.count || 0 : 0,
+      }),
+      {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      },
+    );
   } catch (error) {
     const message = error instanceof Error ? error.message : "Erro ao carregar perfil";
     return new Response(JSON.stringify({ error: message }), {
