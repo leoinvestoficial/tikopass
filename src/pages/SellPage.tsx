@@ -16,6 +16,7 @@ import { useNavigate } from "react-router-dom";
 import sellCtaBg from "@/assets/sell-cta.jpg";
 import { getBannerForCategory } from "@/lib/event-banners";
 import imageCompression from "browser-image-compression";
+import ManualTicketeiraFallback from "@/components/ManualTicketeiraFallback";
 
 type AIEvent = {
   name: string; date: string; time: string; venue: string; city: string; category: string;
