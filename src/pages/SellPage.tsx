@@ -908,6 +908,7 @@ export default function SellPage() {
                   Seu ingresso foi validado e está disponível para compradores na vitrine.
                 </p>
               </div>
+              {savedTicketId && <ManualTicketeiraFallback ticketId={savedTicketId} />}
               <div className="flex gap-3 justify-center">
                 <Button variant="outline" onClick={resetForm} size="lg" className="rounded-xl">Vender outro</Button>
                 <Button onClick={() => navigate("/")} size="lg" className="rounded-xl gap-2">
