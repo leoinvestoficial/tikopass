@@ -20,7 +20,7 @@ serve(async (req) => {
 
   const supabaseAdmin = createClient(
     Deno.env.get("SUPABASE_URL") ?? "",
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
   );
 
   let ticketId: string | null = null;
@@ -159,7 +159,10 @@ IMPORTANTE:
     let extracted: any;
     try {
       // Remove markdown code blocks if present
-      const cleanJson = rawContent.replace(/```json\s*/g, "").replace(/```\s*/g, "").trim();
+      const cleanJson = rawContent
+        .replace(/```json\s*/g, "")
+        .replace(/```\s*/g, "")
+        .trim();
       extracted = JSON.parse(cleanJson);
     } catch (parseErr) {
       console.error("Failed to parse AI response:", rawContent.substring(0, 500));
@@ -171,7 +174,14 @@ IMPORTANTE:
 
     const fullText = extracted.full_text || "";
     const qrContent = qrReadResult?.content || null;
-    console.log("OCR text length:", fullText.length, "Is ticket:", extracted.is_ticket, "Confidence:", extracted.confidence);
+    console.log(
+      "OCR text length:",
+      fullText.length,
+      "Is ticket:",
+      extracted.is_ticket,
+      "Confidence:",
+      extracted.confidence,
+    );
 
     // ========== CHECK: OCR Read ==========
     checks.push({
@@ -199,7 +209,12 @@ IMPORTANTE:
     // ========== CHECK: Platform ==========
     const detectedPlatform = extracted.platform?.toLowerCase() || null;
     if (detectedPlatform) {
-      checks.push({ id: "platform", label: "Plataforma detectada", passed: true, detail: capitalize(detectedPlatform) });
+      checks.push({
+        id: "platform",
+        label: "Plataforma detectada",
+        passed: true,
+        detail: capitalize(detectedPlatform),
+      });
     }
 
     if (!isTicket) {
@@ -222,7 +237,8 @@ IMPORTANTE:
     });
 
     if (!qrContent) {
-      const reason = "Não foi possível ler o QR code do ingresso. Envie uma imagem nítida com o QR completo e sem cortes.";
+      const reason =
+        "Não foi possível ler o QR code do ingresso. Envie uma imagem nítida com o QR completo e sem cortes.";
       await rejectTicket(supabaseAdmin, ticket_id, null, reason, checks);
       return jsonResponse({ success: false, reason, checks });
     }
@@ -236,7 +252,9 @@ IMPORTANTE:
       passed: !isCourtesy,
       detail: isCourtesy
         ? "Ingresso de cortesia — venda proibida"
-        : extracted.ticket_type ? `${capitalize(extracted.ticket_type)} ✓` : "Ingresso comercial ✓",
+        : extracted.ticket_type
+          ? `${capitalize(extracted.ticket_type)} ✓`
+          : "Ingresso comercial ✓",
     });
 
     // ========== CHECK: CPF validation ==========
@@ -246,12 +264,19 @@ IMPORTANTE:
 
     if (cpfMatches.length > 0) {
       const invalidCpfs = [
-        "000.000.000-00", "111.111.111-11", "222.222.222-22", "333.333.333-33",
-        "444.444.444-44", "555.555.555-55", "666.666.666-66", "777.777.777-77",
-        "888.888.888-88", "999.999.999-99",
+        "000.000.000-00",
+        "111.111.111-11",
+        "222.222.222-22",
+        "333.333.333-33",
+        "444.444.444-44",
+        "555.555.555-55",
+        "666.666.666-66",
+        "777.777.777-77",
+        "888.888.888-88",
+        "999.999.999-99",
       ];
-      const foundInvalid = cpfMatches.find((cpf: string) =>
-        invalidCpfs.includes(cpf) || invalidCpfs.includes(cpf.replace(/[\s.-]/g, ""))
+      const foundInvalid = cpfMatches.find(
+        (cpf: string) => invalidCpfs.includes(cpf) || invalidCpfs.includes(cpf.replace(/[\s.-]/g, "")),
       );
 
       if (foundInvalid) {
@@ -259,7 +284,10 @@ IMPORTANTE:
         cpfDetail = `CPF ${foundInvalid} é inválido`;
       } else if (seller_id) {
         const { data: sellerProfile } = await supabaseAdmin
-          .from("profiles").select("cpf").eq("user_id", seller_id).single();
+          .from("profiles")
+          .select("cpf")
+          .eq("user_id", seller_id)
+          .single();
 
         if (sellerProfile?.cpf) {
           const sellerCpfClean = sellerProfile.cpf.replace(/\D/g, "");
@@ -288,10 +316,15 @@ IMPORTANTE:
     // ========== CHECK: Holder name ==========
     const holderName = extracted.holder_name;
     const genericHolderPatterns = [
-      /comissários?/i, /staff/i, /organiza(dor|ção)/i, /imprensa/i,
-      /convidado/i, /promoter/i, /assessor/i,
+      /comissários?/i,
+      /staff/i,
+      /organiza(dor|ção)/i,
+      /imprensa/i,
+      /convidado/i,
+      /promoter/i,
+      /assessor/i,
     ];
-    const isGenericHolder = genericHolderPatterns.some(p => p.test(holderName || ""));
+    const isGenericHolder = genericHolderPatterns.some((p) => p.test(holderName || ""));
 
     checks.push({
       id: "holder_check",
@@ -299,19 +332,23 @@ IMPORTANTE:
       passed: !isGenericHolder,
       detail: isGenericHolder
         ? `Titular genérico: "${holderName}"`
-        : holderName ? `Titular: ${holderName} ✓` : "Titular não detectado",
+        : holderName
+          ? `Titular: ${holderName} ✓`
+          : "Titular não detectado",
     });
 
     // ========== Block courtesy ==========
     if (isCourtesy) {
-      const reason = "Ingresso de cortesia com venda proibida. Este tipo de ingresso não pode ser comercializado na plataforma.";
+      const reason =
+        "Ingresso de cortesia com venda proibida. Este tipo de ingresso não pode ser comercializado na plataforma.";
       await rejectTicket(supabaseAdmin, ticket_id, null, reason, checks);
       return jsonResponse({ success: false, reason, checks });
     }
 
     // ========== CHECK: SafeTix / Ticketmaster ==========
     if (detectedPlatform === "ticketmaster" || detectedPlatform === "quentro") {
-      const reason = "Ingressos da Ticketmaster usam SafeTix (QR rotativo). O vendedor deve transferir pelo app Quentro.";
+      const reason =
+        "Ingressos da Ticketmaster usam SafeTix (QR rotativo). O vendedor deve transferir pelo app Quentro.";
       checks.push({ id: "safetix", label: "SafeTix", passed: false, detail: reason });
       await rejectTicket(supabaseAdmin, ticket_id, null, reason, checks);
       return jsonResponse({ success: false, reason, checks, platform: "ticketmaster", requires_transfer: true });
@@ -350,7 +387,7 @@ IMPORTANTE:
     const encerradoKeywords = ["evento encerrado", "expirado", "expired", "encerrado", "evento finalizado", "inválido"];
     const fullTextLower = fullText.toLowerCase();
     const qrContentLower = qrContent.toLowerCase();
-    const hasEncerrado = encerradoKeywords.some(kw => fullTextLower.includes(kw) || qrContentLower.includes(kw));
+    const hasEncerrado = encerradoKeywords.some((kw) => fullTextLower.includes(kw) || qrContentLower.includes(kw));
     if (hasEncerrado) {
       checks.push({
         id: "event_closed",
@@ -358,17 +395,17 @@ IMPORTANTE:
         passed: false,
         detail: "O documento contém indicação de evento encerrado/expirado",
       });
-      const reason = "O ingresso indica que o evento já foi encerrado. Não é possível vender ingressos de eventos finalizados.";
+      const reason =
+        "O ingresso indica que o evento já foi encerrado. Não é possível vender ingressos de eventos finalizados.";
       await rejectTicket(supabaseAdmin, ticket_id, extracted.ticket_code, reason, checks);
       return jsonResponse({ success: false, reason, checks });
     }
 
     if (event_id && extracted.event_name) {
-      const { data: event } = await supabaseAdmin
-        .from("events").select("name, date").eq("id", event_id).single();
+      const { data: event } = await supabaseAdmin.from("events").select("name, date").eq("id", event_id).single();
 
       if (event) {
-        const matched = fuzzyEventMatch(extracted.event_name, event.name);
+        const matched = fuzzyEventMatch(extracted.event_name, event.name, extracted.event_date, event.date);
         console.log(`Event match: "${extracted.event_name}" vs "${event.name}" = ${matched}`);
         checks.push({
           id: "event_match",
@@ -420,7 +457,7 @@ IMPORTANTE:
     }
 
     // Filter out very short or generic identifiers
-    const meaningfulIds = allIdentifiers.filter(id => id.length >= 4);
+    const meaningfulIds = allIdentifiers.filter((id) => id.length >= 4);
     const primaryCode = qrContent || extracted.barcode || extracted.ticket_code;
 
     if (meaningfulIds.length > 0) {
@@ -445,7 +482,7 @@ IMPORTANTE:
         .eq("status", "active");
 
       // Filter out hashes that belong to the current ticket (re-validation)
-      const duplicates = (existingHashes || []).filter(h => h.ticket_id !== ticket_id);
+      const duplicates = (existingHashes || []).filter((h) => h.ticket_id !== ticket_id);
       const isDuplicate = duplicates.length > 0;
 
       checks.push({
@@ -464,7 +501,7 @@ IMPORTANTE:
       }
 
       // Insert ALL hashes for this ticket
-      const hashInserts = hashesToCheck.map(h => ({ hash: h, ticket_id, status: "active" }));
+      const hashInserts = hashesToCheck.map((h) => ({ hash: h, ticket_id, status: "active" }));
       await supabaseAdmin.from("ticket_hashes").insert(hashInserts);
     } else {
       checks.push({
@@ -498,7 +535,10 @@ IMPORTANTE:
       }
 
       // Special: if Eventim PDF (TicketDirect) detected, force amarelo
-      if (detectedTicketeira === "eventim" && (fullText.includes("TicketDirect") || !fullText.toLowerCase().includes("transfer"))) {
+      if (
+        detectedTicketeira === "eventim" &&
+        (fullText.includes("TicketDirect") || !fullText.toLowerCase().includes("transfer"))
+      ) {
         transferLevel = "amarelo";
       }
 
@@ -543,15 +583,16 @@ IMPORTANTE:
       },
       checks,
     });
-
   } catch (error) {
     console.error("validate-ticket error:", error);
     if (ticketId) {
-      try { await rejectTicket(supabaseAdmin, ticketId, null, "Erro interno na validação.", []); } catch {}
+      try {
+        await rejectTicket(supabaseAdmin, ticketId, null, "Erro interno na validação.", []);
+      } catch {}
     }
     return new Response(
       JSON.stringify({ success: false, reason: "Erro na validação do ingresso. Tente novamente.", checks: [] }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 }
+      { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 },
     );
   }
 });
@@ -599,58 +640,179 @@ function levenshteinSimilarity(a: string, b: string): number {
 function normalizeEventName(name: string): string {
   return name
     .toLowerCase()
-    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
     .replace(/[^a-z0-9\s]/g, " ")
     .replace(/\s+/g, " ")
     .trim();
 }
 
+// Stopwords pt-BR — palavras sem carga semântica que inflacionam falsos negativos
+// em títulos curtos tipo "AUGEBOYS NO SÃO JOÃO" vs "Arraiá dos Augeboys".
+// Removê-las deixa só os tokens realmente identificadores do evento.
+const STOPWORDS_PT = new Set([
+  "no",
+  "na",
+  "nos",
+  "nas",
+  "o",
+  "a",
+  "os",
+  "as",
+  "de",
+  "do",
+  "da",
+  "dos",
+  "das",
+  "e",
+  "em",
+  "para",
+  "por",
+  "com",
+  "ao",
+  "aos",
+  "um",
+  "uma",
+  "uns",
+  "umas",
+  "sao",
+  "santo",
+  "santa", // "São João" é um nome MUITO comum em festa junina — descartar
+]);
+
+function significantTokens(name: string): string[] {
+  return normalizeEventName(name)
+    .split(" ")
+    .filter((t) => t.length >= 3 && !STOPWORDS_PT.has(t));
+}
+
 function tokenSetSimilarity(a: string, b: string): number {
-  const tokensA = new Set(normalizeEventName(a).split(" ").filter(t => t.length > 1));
-  const tokensB = new Set(normalizeEventName(b).split(" ").filter(t => t.length > 1));
+  // Usa tokens significativos (sem stopwords), pois "NO" e "DOS" diluem o score.
+  const tokensA = new Set(significantTokens(a));
+  const tokensB = new Set(significantTokens(b));
   if (tokensA.size === 0 || tokensB.size === 0) return 0;
   let intersection = 0;
   for (const t of tokensA) if (tokensB.has(t)) intersection++;
   return intersection / Math.max(tokensA.size, tokensB.size);
 }
 
-function fuzzyEventMatch(extracted: string, selected: string): boolean {
-  // Direct levenshtein
+// Tokens "raros" — palavras longas (>=5 chars) que não estão em stopwords.
+// São provavelmente nomes próprios / identificadores do evento ("augeboys",
+// "rosalia", "coldplay"). Um match aqui vale muito mais que um match em "festa".
+function rareTokens(name: string): Set<string> {
+  return new Set(
+    normalizeEventName(name)
+      .split(" ")
+      .filter((t) => t.length >= 5 && !STOPWORDS_PT.has(t)),
+  );
+}
+
+function sharedRareTokens(a: string, b: string): number {
+  const rA = rareTokens(a);
+  const rB = rareTokens(b);
+  let shared = 0;
+  for (const t of rA) if (rB.has(t)) shared++;
+  return shared;
+}
+
+function datesAreClose(extractedDate: string | null | undefined, selectedDate: string | null | undefined): boolean {
+  if (!extractedDate || !selectedDate) return false;
+  const a = parseFlexibleDate(extractedDate);
+  const b = new Date(selectedDate + "T00:00:00");
+  if (!a || isNaN(a.getTime()) || isNaN(b.getTime())) return false;
+  const diffDays = Math.abs((a.getTime() - b.getTime()) / (1000 * 60 * 60 * 24));
+  return diffDays <= 2;
+}
+
+/**
+ * Heurística em camadas — cada uma resolve um caso diferente:
+ *   1. Levenshtein 0.4      → textos quase idênticos (diferença de pontuação/caps)
+ *   2. Token-set sem stop   → "AUGEBOYS NO SÃO JOÃO" ≈ "Arraiá dos AUGEBOYS"
+ *   3. Containment          → "Show Coldplay" contém "Coldplay"
+ *   4. 1 token raro + data  → confiança extra quando datas batem
+ *   5. 2+ tokens raros      → nomes próprios suficientes pra ser o mesmo evento
+ *
+ * As camadas 4 e 5 foram adicionadas pra resolver o caso real do Leo:
+ *   extraído  = "AUGEBOYS NO SÃO JOÃO"
+ *   cadastrado = "Arraiá dos Augeboys"
+ * Tokens significativos:
+ *   A: {augeboys, joao}          (são/santo removidos como stopwords)
+ *   B: {arraia, augeboys}
+ * Interseção = 1, max = 2 → tokenSim = 0.5 (≥ 0.5) ✓
+ * E ainda cai no rareTokens: "augeboys" (7 chars) está nos 2 → shared = 1.
+ */
+function fuzzyEventMatch(
+  extracted: string,
+  selected: string,
+  extractedDate?: string | null,
+  selectedDate?: string | null,
+): boolean {
+  // 1. Levenshtein direto
   const lev = levenshteinSimilarity(extracted.toLowerCase(), selected.toLowerCase());
   if (lev >= 0.4) return true;
-  // Token-set similarity (handles "A - B" vs "B - A")
+
+  // 2. Token-set (agora tolerante a stopwords)
   const tokenSim = tokenSetSimilarity(extracted, selected);
-  if (tokenSim >= 0.6) return true;
-  // Containment check
+  if (tokenSim >= 0.5) return true;
+
+  // 3. Containment
   const normA = normalizeEventName(extracted);
   const normB = normalizeEventName(selected);
   if (normA.includes(normB) || normB.includes(normA)) return true;
+
+  // 4. & 5. Tokens raros (nomes próprios)
+  const shared = sharedRareTokens(extracted, selected);
+  if (shared >= 2) return true;
+  if (shared >= 1 && datesAreClose(extractedDate, selectedDate)) return true;
+
   return false;
 }
 
 function parseFlexibleDate(dateStr: string): Date | null {
   if (!dateStr) return null;
-  
+
   // Try ISO format (YYYY-MM-DD)
   const isoMatch = dateStr.match(/(\d{4})-(\d{2})-(\d{2})/);
   if (isoMatch) return new Date(parseInt(isoMatch[1]), parseInt(isoMatch[2]) - 1, parseInt(isoMatch[3]));
-  
+
   // Try DD/MM/YYYY
   const brMatch = dateStr.match(/(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})/);
   if (brMatch) return new Date(parseInt(brMatch[3]), parseInt(brMatch[2]) - 1, parseInt(brMatch[1]));
-  
+
   // Try DD/MM/YY
   const brShortMatch = dateStr.match(/(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2})(?!\d)/);
   if (brShortMatch) {
     const year = parseInt(brShortMatch[3]) + 2000;
     return new Date(year, parseInt(brShortMatch[2]) - 1, parseInt(brShortMatch[1]));
   }
-  
+
   // Try natural language: "31 de dezembro de 2025" or "31/12/2025"
   const months: Record<string, number> = {
-    janeiro: 0, fevereiro: 1, março: 2, marco: 2, abril: 3, maio: 4, junho: 5,
-    julho: 6, agosto: 7, setembro: 8, outubro: 9, novembro: 10, dezembro: 11,
-    jan: 0, fev: 1, mar: 2, abr: 3, mai: 4, jun: 5, jul: 6, ago: 7, set: 8, out: 9, nov: 10, dez: 11,
+    janeiro: 0,
+    fevereiro: 1,
+    março: 2,
+    marco: 2,
+    abril: 3,
+    maio: 4,
+    junho: 5,
+    julho: 6,
+    agosto: 7,
+    setembro: 8,
+    outubro: 9,
+    novembro: 10,
+    dezembro: 11,
+    jan: 0,
+    fev: 1,
+    mar: 2,
+    abr: 3,
+    mai: 4,
+    jun: 5,
+    jul: 6,
+    ago: 7,
+    set: 8,
+    out: 9,
+    nov: 10,
+    dez: 11,
   };
   const nlMatch = dateStr.toLowerCase().match(/(\d{1,2})\s*(?:de\s+)?(\w+)\s*(?:de\s+)?(\d{4})/);
   if (nlMatch) {
@@ -659,7 +821,7 @@ function parseFlexibleDate(dateStr: string): Date | null {
       return new Date(parseInt(nlMatch[3]), monthNum, parseInt(nlMatch[1]));
     }
   }
-  
+
   return null;
 }
 
@@ -701,7 +863,12 @@ function buildQrVariants(sourceImage: Image): Array<{ image: Image; name: string
 
   if (sourceImage.width > 1800 || sourceImage.height > 1800) {
     variants.push({
-      image: sourceImage.clone().resize(Math.max(800, Math.round(sourceImage.width * 0.6)), Math.max(800, Math.round(sourceImage.height * 0.6))),
+      image: sourceImage
+        .clone()
+        .resize(
+          Math.max(800, Math.round(sourceImage.width * 0.6)),
+          Math.max(800, Math.round(sourceImage.height * 0.6)),
+        ),
       name: "reduzido-60%",
     });
   }
