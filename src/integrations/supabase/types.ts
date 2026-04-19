@@ -301,6 +301,67 @@ export type Database = {
           },
         ]
       }
+      orders: {
+        Row: {
+          amount: number
+          buyer_id: string
+          created_at: string
+          id: string
+          negotiation_id: string
+          payment_released_at: string | null
+          seller_id: string
+          status: string
+          ticket_id: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          buyer_id: string
+          created_at?: string
+          id?: string
+          negotiation_id: string
+          payment_released_at?: string | null
+          seller_id: string
+          status?: string
+          ticket_id: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          buyer_id?: string
+          created_at?: string
+          id?: string
+          negotiation_id?: string
+          payment_released_at?: string | null
+          seller_id?: string
+          status?: string
+          ticket_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_negotiation_id_fkey"
+            columns: ["negotiation_id"]
+            isOneToOne: true
+            referencedRelation: "negotiations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "tickets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "tickets_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           address_cep: string | null
@@ -535,11 +596,61 @@ export type Database = {
           },
         ]
       }
+      ticketeira_config: {
+        Row: {
+          buyer_message_after: string
+          buyer_message_before: string
+          created_at: string
+          display_name: string
+          id: string
+          max_transfer_hours_before_event: number | null
+          ocr_patterns: Json
+          release_rule: string
+          requires_buyer_account: boolean | null
+          seller_instructions: Json
+          slug: string
+          transfer_level: string
+          transfer_type: string
+        }
+        Insert: {
+          buyer_message_after: string
+          buyer_message_before: string
+          created_at?: string
+          display_name: string
+          id?: string
+          max_transfer_hours_before_event?: number | null
+          ocr_patterns?: Json
+          release_rule: string
+          requires_buyer_account?: boolean | null
+          seller_instructions?: Json
+          slug: string
+          transfer_level: string
+          transfer_type: string
+        }
+        Update: {
+          buyer_message_after?: string
+          buyer_message_before?: string
+          created_at?: string
+          display_name?: string
+          id?: string
+          max_transfer_hours_before_event?: number | null
+          ocr_patterns?: Json
+          release_rule?: string
+          requires_buyer_account?: boolean | null
+          seller_instructions?: Json
+          slug?: string
+          transfer_level?: string
+          transfer_type?: string
+        }
+        Relationships: []
+      }
       tickets: {
         Row: {
           access_type: string | null
+          buyer_email_for_transfer: string | null
           created_at: string
           description: string | null
+          detected_ticketeira: string | null
           event_days: string[] | null
           event_id: string
           extra_tags: string[] | null
@@ -559,14 +670,20 @@ export type Database = {
           source_platform: string | null
           status: string
           storage_path: string | null
+          transfer_confirmed_at: string | null
+          transfer_level: string | null
+          transfer_proof_url: string | null
+          transfer_status: string | null
           updated_at: string
           validated_at: string | null
           validation_checks: Json | null
         }
         Insert: {
           access_type?: string | null
+          buyer_email_for_transfer?: string | null
           created_at?: string
           description?: string | null
+          detected_ticketeira?: string | null
           event_days?: string[] | null
           event_id: string
           extra_tags?: string[] | null
@@ -586,14 +703,20 @@ export type Database = {
           source_platform?: string | null
           status?: string
           storage_path?: string | null
+          transfer_confirmed_at?: string | null
+          transfer_level?: string | null
+          transfer_proof_url?: string | null
+          transfer_status?: string | null
           updated_at?: string
           validated_at?: string | null
           validation_checks?: Json | null
         }
         Update: {
           access_type?: string | null
+          buyer_email_for_transfer?: string | null
           created_at?: string
           description?: string | null
+          detected_ticketeira?: string | null
           event_days?: string[] | null
           event_id?: string
           extra_tags?: string[] | null
@@ -613,6 +736,10 @@ export type Database = {
           source_platform?: string | null
           status?: string
           storage_path?: string | null
+          transfer_confirmed_at?: string | null
+          transfer_level?: string | null
+          transfer_proof_url?: string | null
+          transfer_status?: string | null
           updated_at?: string
           validated_at?: string | null
           validation_checks?: Json | null
@@ -623,6 +750,128 @@ export type Database = {
             columns: ["event_id"]
             isOneToOne: false
             referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transfer_notifications: {
+        Row: {
+          channel: string
+          created_at: string
+          id: string
+          message_text: string | null
+          order_id: string | null
+          read_at: string | null
+          recipient_id: string
+          recipient_type: string
+          sent_at: string | null
+          status: string
+          ticket_id: string | null
+        }
+        Insert: {
+          channel: string
+          created_at?: string
+          id?: string
+          message_text?: string | null
+          order_id?: string | null
+          read_at?: string | null
+          recipient_id: string
+          recipient_type: string
+          sent_at?: string | null
+          status?: string
+          ticket_id?: string | null
+        }
+        Update: {
+          channel?: string
+          created_at?: string
+          id?: string
+          message_text?: string | null
+          order_id?: string | null
+          read_at?: string | null
+          recipient_id?: string
+          recipient_type?: string
+          sent_at?: string | null
+          status?: string
+          ticket_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transfer_notifications_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transfer_notifications_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "tickets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transfer_notifications_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "tickets_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transfer_status_log: {
+        Row: {
+          changed_by: string | null
+          changed_by_user: string | null
+          created_at: string
+          id: string
+          new_status: string | null
+          notes: string | null
+          old_status: string | null
+          order_id: string | null
+          ticket_id: string | null
+        }
+        Insert: {
+          changed_by?: string | null
+          changed_by_user?: string | null
+          created_at?: string
+          id?: string
+          new_status?: string | null
+          notes?: string | null
+          old_status?: string | null
+          order_id?: string | null
+          ticket_id?: string | null
+        }
+        Update: {
+          changed_by?: string | null
+          changed_by_user?: string | null
+          created_at?: string
+          id?: string
+          new_status?: string | null
+          notes?: string | null
+          old_status?: string | null
+          order_id?: string | null
+          ticket_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transfer_status_log_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transfer_status_log_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "tickets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transfer_status_log_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "tickets_public"
             referencedColumns: ["id"]
           },
         ]
