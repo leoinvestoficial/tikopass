@@ -133,9 +133,33 @@ serve(async (req) => {
             platform: ticketData?.source_platform || "unknown",
             guarantee_level: guaranteeLevel,
             transfer_instructions: transferInstructions,
-            // Yellow level = custody, auto-delivered, so mark as transferred
             transferred_at: guaranteeLevel === "yellow" ? new Date().toISOString() : null,
           });
+
+        // Create order record (idempotent on negotiation_id)
+        const { data: orderRow } = await supabaseAdmin
+          .from("orders")
+          .upsert({
+            negotiation_id: negotiation_id,
+            ticket_id: neg.ticket_id,
+            seller_id: neg.seller_id,
+            buyer_id: neg.buyer_id,
+            amount: neg.offer_price,
+            status: "paid",
+          }, { onConflict: "negotiation_id" })
+          .select("id")
+          .single();
+
+        // Trigger on-sale-confirmed for ticketeira-aware notifications/instructions
+        if (orderRow?.id) {
+          try {
+            await supabaseAdmin.functions.invoke("on-sale-confirmed", {
+              body: { order_id: orderRow.id },
+            });
+          } catch (e) {
+            console.error("on-sale-confirmed invoke failed:", e);
+          }
+        }
       }
 
       return new Response(
